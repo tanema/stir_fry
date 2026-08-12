@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "nextrb"
+
+if ARGV.length == 0 then
+  puts "run requires a script path argument"
+  exit(1)
+end
+require ARGV[0]

@@ -4,10 +4,13 @@ require "rack"
 require "mustermann"
 
 module Nextrb
+  # Request wraps Rack::Request with an addition of args that come from the url path
   class Request < Rack::Request
     attr_accessor :args
   end
 
+  # App is the root of your Nextrb app that makes it runnable and ready for use
+  # on any rack server
   class App
     DEFAULT_MIDDLEWARE = [
       [Rack::Head],
@@ -20,7 +23,7 @@ module Nextrb
     ].freeze
 
     class << self
-      def use(middleware, *args, &block) = middleware.<<([middleware, args, block])
+      def use(middleware, *args, &block) = middleware << [middleware, args, block]
       def get(pattern, options = {}, &block) = route("GET", pattern, options, block)
       def head(pattern, options = {}, &block) = route("HEAD", pattern, options, block)
       def options(pattern, options = {}, &block) = route("OPTIONS", pattern, options, block)
@@ -47,14 +50,14 @@ module Nextrb
 
     def call(env)
       request = Request.new(env)
-      routes = self.class.routes[request.request_method]
-      route = routes&.find { |route| route[0].match(request.path_info) }
+      route = find_route(request)
       raise NotFound if route.nil?
 
-      action = Action.new(request, route[0].params(request.path_info))
-      action_res = action.call(route[2])
-      action.response.body = [action_res] unless action_res.nil?
-      action.response.to_a
+      Action.new(request, route[0].params(request.path_info)).call(route[2])
+    end
+
+    def find_route(req)
+      self.class.routes[req.request_method]&.find { |route| route[0].match(req.path_info) }
     end
 
     def builder

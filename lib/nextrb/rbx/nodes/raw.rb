@@ -3,20 +3,18 @@
 module Nextrb
   module RBX
     module Nodes
-      class Raw < AbstractNode
+      # Raw is usually some content that has been escaped
+      class Raw < Base
         attr_reader :content, :template
 
-        OUTPUT = "@output_buffer.safe_concat('%s'.freeze);"
-        EXPR_STRING = "'%s'.html_safe.freeze"
-
-        def initialize(content, template: OUTPUT)
-          super
-          @content = content
+        def initialize(content, template: OUTPUT_RAW)
+          super()
+          @content = content.dup
           @template = template
         end
 
         def compile
-          template % content
+          template % content.delete("\n").squeeze(" ").strip
         end
 
         def merge(other_raw)

@@ -1,0 +1,330 @@
+# frozen_string_literal: true
+
+require "timeout"
+
+RSpec.describe Nextrb::RBX::Parser do
+  it "handles :TEXT" do
+    subject = described_class.new([[:TEXT, "Hello world"]])
+    result = subject.parse.children
+    expect(result.first).to be_a Nextrb::RBX::Nodes::Raw
+    expect(result.first.content).to eq "Hello world"
+  end
+
+  it "parses declarations" do
+    subject = described_class.new([[:DECLARATION, "<!DOCTYPE html>"]])
+    result = subject.parse.children
+    expect(result.first).to be_a Nextrb::RBX::Nodes::Raw
+    expect(result.first.content).to eq "<!DOCTYPE html>"
+  end
+
+  it "parses expressions" do
+    subject = described_class.new([
+                                    [:OPEN_EXPRESSION],
+                                    [:EXPRESSION_BODY, "thing = 'bar'"],
+                                    [:CLOSE_EXPRESSION]
+                                  ])
+    result = subject.parse.children
+    expect(result.first).to be_a Nextrb::RBX::Nodes::ExpressionGroup
+    group = result.first
+    expect(group.members.first).to be_a Nextrb::RBX::Nodes::Expression
+    expect(group.members.first.content).to eq "thing = 'bar'"
+  end
+
+  it "parses tags within expressions" do
+    subject = described_class.new([
+                                    [:OPEN_EXPRESSION],
+                                    [:EXPRESSION_BODY, "true && "],
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "h1", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:TEXT, "Is "],
+                                    [:OPEN_EXPRESSION],
+                                    [:EXPRESSION_BODY, "'hello'.upcase"],
+                                    [:CLOSE_EXPRESSION],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "h1"],
+                                    [:CLOSE_TAG_END],
+                                    [:EXPRESSION_BODY, ""],
+                                    [:CLOSE_EXPRESSION]
+                                  ])
+    result = subject.parse.children
+
+    expect(result.first).to be_a Nextrb::RBX::Nodes::ExpressionGroup
+    group = result.first
+
+    expect(group.members[0]).to be_a Nextrb::RBX::Nodes::Expression
+    expect(group.members[0].content).to eq "true && "
+
+    expect(group.members[1]).to be_a Nextrb::RBX::Nodes::HTMLElement
+    expect(group.members[1].name).to eq "h1"
+    expect(group.members[1].children[0]).to be_a Nextrb::RBX::Nodes::Raw
+    expect(group.members[1].children[0].content).to eq "Is "
+    expect(group.members[1].children[1]).to be_a Nextrb::RBX::Nodes::ExpressionGroup
+    expect(group.members[1].children[1].members[0].content).to eq "'hello'.upcase"
+
+    expect(group.members[2]).to be_a Nextrb::RBX::Nodes::Expression
+    expect(group.members[2].content).to eq ""
+  end
+
+  it "parses named tags" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:CLOSE_TAG_END]
+                                  ])
+    result = subject.parse.children
+    expect(result.first).to be_a Nextrb::RBX::Nodes::HTMLElement
+    expect(result.first.name).to eq "div"
+  end
+
+  it "raises if tag is missing a name" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:CLOSE_TAG_END]
+                                  ])
+    expect { subject.parse }.to raise_error Nextrb::RBX::Parser::ParseError
+  end
+
+  it "raises if tag is missing an end" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF]
+                                  ])
+    expect { subject.parse }.to raise_error Nextrb::RBX::Parser::ParseError
+  end
+
+  it "parses tag attributes" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:OPEN_ATTRS],
+                                    [:ATTR_NAME, "foo"],
+                                    [:ATTR_NAME, "bar"],
+                                    [:OPEN_ATTR_VALUE],
+                                    [:TEXT, "baz"],
+                                    [:CLOSE_ATTR_VALUE],
+                                    [:ATTR_NAME, "thing"],
+                                    [:OPEN_ATTR_VALUE],
+                                    [:OPEN_EXPRESSION],
+                                    [:EXPRESSION_BODY, "exprValue"],
+                                    [:CLOSE_EXPRESSION],
+                                    [:CLOSE_ATTR_VALUE],
+                                    [:CLOSE_ATTRS],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    div = subject.parse.children.first
+    expect(div).to be_a Nextrb::RBX::Nodes::HTMLElement
+    expect(div.members.length).to eq 3
+
+    attr_foo = div.members[0]
+    expect(attr_foo).to be_a Nextrb::RBX::Nodes::HTMLAttr
+    expect(attr_foo.name).to eq "foo"
+    expect(attr_foo.value).to be_a Nextrb::RBX::Nodes::Raw
+    expect(attr_foo.value.content).to eq ""
+
+    attr_bar = div.members[1]
+    expect(attr_bar).to be_a Nextrb::RBX::Nodes::HTMLAttr
+    expect(attr_bar.name).to eq "bar"
+    expect(attr_bar.value).to be_a Nextrb::RBX::Nodes::Raw
+    expect(attr_bar.value.content).to eq "baz"
+
+    attr_thing = div.members[2]
+    expect(attr_thing).to be_a Nextrb::RBX::Nodes::HTMLAttr
+    expect(attr_thing.name).to eq "thing"
+    expect(attr_thing.value).to be_a Nextrb::RBX::Nodes::ExpressionGroup
+    expect(attr_thing.value.members.first.content).to eq "exprValue"
+  end
+
+  it "parses splat attributes" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:OPEN_ATTRS],
+                                    [:OPEN_ATTR_SPLAT],
+                                    [:OPEN_EXPRESSION],
+                                    [:EXPRESSION_BODY, "{ attr1: 'val1', attr2: 'val2' }"],
+                                    [:CLOSE_EXPRESSION],
+                                    [:CLOSE_ATTR_SPLAT],
+                                    [:CLOSE_ATTRS],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    div = subject.parse.children.first
+    expect(div).to be_a Nextrb::RBX::Nodes::HTMLElement
+    expect(div.members.length).to eq 1
+
+    attr_foo = div.members[0]
+    expect(attr_foo).to be_a Nextrb::RBX::Nodes::ExpressionGroup
+    expect(attr_foo.members.first.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
+  end
+
+  it "finds no children for self-closing tags" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "input", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    input = subject.parse.children.first
+    expect(input).to be_a Nextrb::RBX::Nodes::HTMLElement
+    expect(input.children.length).to eq 0
+  end
+
+  it "parses children" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "h1", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "h1"],
+                                    [:CLOSE_TAG_END],
+
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "p", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "span", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "span"],
+                                    [:CLOSE_TAG_END],
+
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "p"],
+                                    [:CLOSE_TAG_END],
+
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "div"],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    div = subject.parse.children.first
+    expect(div).to be_a Nextrb::RBX::Nodes::HTMLElement
+    expect(div.name).to eq "div"
+    expect(div.children.length).to eq 2
+
+    h1 = div.children[0]
+    expect(h1.name).to eq "h1"
+    expect(h1.children.length).to eq 0
+
+    p = div.children[1]
+    expect(p.name).to eq "p"
+    expect(p.children.length).to eq 1
+
+    span = p.children[0]
+    expect(span.name).to eq "span"
+    expect(span.children.length).to eq 0
+  end
+
+  it "parses multiple things at the root" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "div"],
+                                    [:CLOSE_TAG_END],
+
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "h1", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "h1"],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    template = subject.parse
+
+    div = template.children[0]
+    expect(div.name).to eq "div"
+
+    h1 = template.children[1]
+    expect(h1.name).to eq "h1"
+  end
+
+  it "parses text within a tag into Nextrb::RBX::Nodes::Text" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:TEXT, "Hello world"],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "div"],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    div = subject.parse.children.first
+    text = div.children.first
+    expect(text).to be_a Nextrb::RBX::Nodes::Raw
+    expect(text.content).to eq "Hello world"
+  end
+
+  it "parses expression within a tag into Nextrb::RBX::Nodes::Expression" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_EXPRESSION],
+                                    [:EXPRESSION_BODY, "thing = 'foo'"],
+                                    [:CLOSE_EXPRESSION],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "div"],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    div = subject.parse.children.first
+    expr = div.children.first
+    expect(expr).to be_a Nextrb::RBX::Nodes::ExpressionGroup
+    expect(expr.members.first.content).to eq "thing = 'foo'"
+  end
+
+  it "raises an error when encountering tag that opens but never closes" do
+    subject = described_class.new([
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "div", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "h1", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:TEXT, "Hello world"],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "h1"],
+                                    [:CLOSE_TAG_END],
+                                    [:OPEN_TAG_DEF],
+                                    [:TAG_DETAILS, { name: "br", type: :html }],
+                                    [:CLOSE_TAG_DEF],
+                                    [:OPEN_TAG_END],
+                                    [:TAG_NAME, "div"],
+                                    [:CLOSE_TAG_END]
+                                  ])
+
+    expect { Timeout.timeout(1) { subject.parse } }
+      .to raise_error(Nextrb::RBX::Parser::ParseError)
+  end
+
+  it "raises an error when encountering expression that opens but never closes" do
+    subject = described_class.new([
+                                    [:OPEN_EXPRESSION]
+                                  ])
+
+    expect { Timeout.timeout(1) { subject.parse } }
+      .to raise_error(Nextrb::RBX::Parser::ParseError)
+  end
+end

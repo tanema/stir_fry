@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.description = "Small simple ruby web framework that feels familiar."
   spec.homepage = "https://github.com/tanema/nextrb"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.0"
+  spec.required_ruby_version = ">= 3.1"
   spec.require_paths = ["lib"]
   spec.metadata = {
     allowed_push_host: "TODO: Set to your gem server 'https://example.com'",
@@ -19,7 +19,8 @@ Gem::Specification.new do |spec|
     changelog_uri: "https://github.com/tanema/nextrb/blob/main/CHANGELOG.md",
     homepage_uri: spec.homepage,
     bug_tracker_uri: "https://github.com/tanema/nextrb/issues",
-    documentation_uri: "https://github.com/tanema/nextrb"
+    documentation_uri: "https://github.com/tanema/nextrb",
+    rubygems_mfa_required: "true"
   }
   spec.files = Dir["lib/**/*"] + [
     "README.md",

@@ -1,14 +1,19 @@
+# frozen_string_literal: true
+
 require "strscan"
 
 module Nextrb
   module RBX
+    # Lexer splits a string up into tokens that are usable by the parser
     class Lexer
+      # Lexer::SyntaxError is raised when there is a problem splitting up the source
+      # because it is poorly formatted.
       class SyntaxError < StandardError
         def initialize(lexer)
           super(
-            "Invalid syntax: `#{lexer.scanner.peek(20)}`\n" +
-              "Stack: #{lexer.stack}\n" +
-              "Tokens: #{lexer.tokens}"
+            "Invalid syntax: `#{lexer.scanner.peek(20)}`\n" \
+            "Stack: #{lexer.stack}\n" \
+            "Tokens: #{lexer.tokens}"
           )
         end
       end
@@ -38,10 +43,14 @@ module Nextrb
       attr_accessor :curr_expr, :curr_default_text,
                     :curr_quoted_text
 
-      def initialize(template, element_resolver)
+      def self.tokenize(template, resolver = ComponentResolver.new)
+        new(template, resolver).tokenize
+      end
+
+      def initialize(template, resolver = ComponentResolver.new)
         @template = template
         @scanner = StringScanner.new(template)
-        @element_resolver = element_resolver
+        @element_resolver = resolver
         @stack = [:default]
         @curr_expr = ""
         @curr_default_text = ""
@@ -49,6 +58,7 @@ module Nextrb
         @tokens = []
       end
 
+      # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def tokenize
         until scanner.eos?
           case stack.last
@@ -85,22 +95,17 @@ module Nextrb
             raise SyntaxError, self unless scanner.scan(TEXT_CONTENT)
 
             self.curr_default_text += scanner.matched
-            if scanner.matched.end_with?("\\") && scanner.peek(1) == "{"
-              self.curr_default_text += scanner.getch
-            elsif scanner.matched.end_with?("\\") && scanner.peek(1) == "#"
+            if scanner.matched.end_with?("\\") && ["{", "#"].include?(scanner.peek(1))
               self.curr_default_text += scanner.getch
             else
-              if scanner.peek(1) == "#"
-                # If the next token is a comment, trim trailing whitespace from
-                # the text value so we don't add to the indentation of the next
-                # value that is output after the comment
-                self.curr_default_text = curr_default_text.gsub(/^\p{Blank}*\z/, "")
-              end
+              # If the next token is a comment, trim trailing whitespace from
+              # the text value so we don't add to the indentation of the next
+              # value that is output after the comment
+              self.curr_default_text = curr_default_text.gsub(/^\p{Blank}*\z/, "") if scanner.peek(1) == "#"
               tokens << [:TEXT, curr_default_text]
               self.curr_default_text = ""
               stack.pop
             end
-
           when :expression
             if scanner.scan(CLOSE_EXPRESSION)
               tokens << [:EXPRESSION_BODY, curr_expr]
@@ -233,6 +238,7 @@ module Nextrb
 
         tokens
       end
+      # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       def potential_expression_inner_tag
         if curr_expr =~ EXPRESSION_INTERNAL_TAG_PREFIXES
@@ -286,9 +292,9 @@ module Nextrb
       end
 
       def tag_details(name)
-        type = element_resolver.component?(name, template) ? :component : :html
+        type = element_resolver.component?(name) ? :component : :html
         details = { name: scanner.matched, type: type }
-        details[:component_class] = element_resolver.component_class(name, template) if type == :component
+        details[:component_class] = element_resolver.component_class(name) if type == :component
         details
       end
     end

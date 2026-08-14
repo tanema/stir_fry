@@ -3,13 +3,22 @@
 module Nextrb
   module RBX
     module Nodes
-      class ComponentProp < AbstractAttr
+      # ComponentProp captures arguments passed to a component element
+      class ComponentProp < Base
+        attr_accessor :name, :value
+
+        def initialize(name, value)
+          super()
+          @name = name
+          @value = value
+        end
+
         def precompile
           [ComponentProp.new(name, precompile_value)]
         end
 
         def compile
-          key = name.gsub(/::/, "/").gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+          key = name.gsub("::", "/").gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
                     .gsub(/([a-z\d])([A-Z])/, '\1_\2')
                     .tr("-", "_")
                     .downcase
@@ -20,24 +29,17 @@ module Nextrb
 
         def precompile_value
           case node = value.precompile.first
-          when Raw then raw_node(node)
+          when Raw then Raw.new(node.content, template: EXPR_STRING)
           when ExpressionGroup then group_node(node)
           else node
           end
         end
 
-        def raw_node(node)
-          Raw.new(
-            node.content,
-            template: Raw::EXPR_STRING
-          )
-        end
-
         def group_node(node)
           ExpressionGroup.new(
-            node.members,
-            outer_template: ExpressionGroup::SUB_EXPR,
-            inner_template: node.inner_template
+            members: node.members,
+            inner_template: node.inner_template,
+            outer_template: RAW
           )
         end
       end

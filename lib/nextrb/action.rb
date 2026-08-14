@@ -8,6 +8,12 @@ module Nextrb
   class Action
     attr_reader :request, :response, :params
 
+    CONTENT_TYPE = {
+      json: "application/json",
+      text: "text/plain",
+      html: "text/html"
+    }.freeze
+
     def initialize(request, args)
       @request = request
       @path = request.path_info
@@ -57,21 +63,12 @@ module Nextrb
     end
 
     def content_type(kind)
-      response["Content-Type"] = case kind
-                                 when :json
-                                   "application/json"
-                                 when :text, :txt
-                                   "text/plain"
-                                 when :html
-                                   "text/html"
-                                 else
-                                   "text/html"
-                                 end
-      response["Content-Type"]
+      response["Content-Type"] = CONTENT_TYPE[kind] || "text/html"
     end
 
     def call(block)
       instance_eval(&block)
+      response.to_a
     end
   end
 end

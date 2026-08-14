@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
 module Nextrb
   module RBX
+    # ComponentResolver is a registry that contains custom components that may be
+    # embedded in the html. It will resolve the name to the class that has been defined.
     class ComponentResolver
       KNOWN_HTML_ELEMENTS = %w[
         a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
@@ -18,40 +22,26 @@ module Nextrb
         tspan tt u ul unknown use var video view wbr xmp
       ].to_set
 
-      def self.try_constantize
-        yield
-      rescue NameError => e
-        raise e unless e.message =~ /wrong constant name/ || e.message =~ /uninitialized constant/
-
-        nil
-      end
-
-      attr_reader :component_namespaces
+      attr_reader :components
 
       def initialize
-        self.component_namespaces = {}
+        @components = {}
       end
 
-      def component_namespaces=(hash)
-        @component_namespaces = hash.transform_keys(&:to_s)
+      def register(klass)
+        name = klass.name.split("::").join(".").delete_suffix("Component")
+        components[name] = klass
       end
 
-      def component?(name, template)
+      def component?(name)
         return false if KNOWN_HTML_ELEMENTS.include?(name)
-        return true if component_class(name, template)
+        return true if component_class(name)
 
         false
       end
 
-      def component_class(name, template)
-        possible_names = component_namespaces.select do |path, ns|
-          template.identifier.start_with?(path)
-        end.values.flatten.uniq
-        possible_names = possible_names.map { |ns| "#{ns}.#{name}" } << name
-        possible_names = possible_names.lazy.map do |name|
-          self.class.try_constantize { Object.const_get("#{name.gsub(".", "::")}Component") }
-        end
-        possible_names.select { |v| v }.first
+      def component_class(name)
+        components[name]
       end
     end
   end

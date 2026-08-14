@@ -3,9 +3,19 @@
 module Nextrb
   module RBX
     module Nodes
-      class HTMLElement < AbstractElement
+      # HTMLElement is an HTML tag
+      class HTMLElement < Base
         # Referenced from https://html.spec.whatwg.org/#void-elements
         HTML_VOID_ELEMENTS = %w[area base br col embed hr img input link meta source track wbr].freeze
+
+        attr_accessor :name, :members, :children
+
+        def initialize(name:, members:, children:)
+          super()
+          @name = name
+          @members = members || []
+          @children = children
+        end
 
         def precompile
           nodes = precompile_open_tag
@@ -23,22 +33,19 @@ module Nextrb
         end
 
         def precompile_open_tag
-          nodes = [Raw.new("<#{name}")]
-          nodes.concat(precompile_members)
-          nodes << Raw.new(">")
-          nodes
+          [Raw.new("<#{name}")] + precompile_attributes + [Raw.new(">")]
         end
 
-        def precompile_members
-          members.map { |node| node.is_a? ExpressionGroup ? grou_node(node) : node }
+        def precompile_attributes
+          members.map { |node| node.is_a?(ExpressionGroup) ? attribute_node(node) : node }
                  .map(&:precompile).flatten
         end
 
-        def group_node(node)
+        def attribute_node(node)
           ExpressionGroup.new(
-            node.members,
-            inner_template: "Rbexy::Runtime.splat_attrs(%s)",
-            outer_template: ExpressionGroup::OUTPUT_SAFE
+            members: node.members,
+            inner_template: "tag_kwarg(%s)",
+            outer_template: OUTPUT_EXPR
           )
         end
       end

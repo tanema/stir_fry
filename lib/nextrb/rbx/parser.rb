@@ -1,10 +1,19 @@
+# frozen_string_literal: true
+
 module Nextrb
   module RBX
+    # Parser takes in a tokenized stream and build semantic reasoning from it for
+    # rebuilding the html output with enriched components.
     class Parser
       class ParseError < StandardError; end
 
       attr_reader :tokens
       attr_accessor :position
+
+      def self.parse(tokens)
+        root = new(tokens).parse
+        root.precompile.compile
+      end
 
       def initialize(tokens)
         @tokens = tokens
@@ -19,7 +28,7 @@ module Nextrb
       def parse_tokens
         results = []
 
-        while result = parse_token
+        while (result = parse_token)
           results << result
         end
 
@@ -31,9 +40,9 @@ module Nextrb
       end
 
       def parse_text
-        return unless token = take(:TEXT)
+        return unless (token = take(:TEXT))
 
-        Nodes::Text.new(token[1])
+        Nodes::Raw.new(token[1].gsub('"', '\\"').gsub("'", "\\\\'"))
       end
 
       def parse_expression
@@ -44,7 +53,7 @@ module Nextrb
         eventually!(:CLOSE_EXPRESSION)
         members << (parse_expression_body || parse_tag) until take(:CLOSE_EXPRESSION)
 
-        Nodes::ExpressionGroup.new(members)
+        Nodes::ExpressionGroup.new(members: members)
       end
 
       def parse_expression!
@@ -53,7 +62,7 @@ module Nextrb
       end
 
       def parse_expression_body
-        return unless token = take(:EXPRESSION_BODY)
+        return unless (token = take(:EXPRESSION_BODY))
 
         Nodes::Expression.new(token[1])
       end
@@ -63,19 +72,12 @@ module Nextrb
 
         details = take!(:TAG_DETAILS)[1]
         attr_class = details[:type] == :component ? Nodes::ComponentProp : Nodes::HTMLAttr
-
-        members = []
-        members.concat(take_all(:NEWLINE).map { Nodes::Newline.new })
-        members.concat(parse_attrs(attr_class))
-
+        members = take_all(:NEWLINE).map { Nodes::Newline.new }.concat(parse_attrs(attr_class))
         take!(:CLOSE_TAG_DEF)
-
-        children = parse_children
-
         if details[:type] == :component
-          Nodes::ComponentElement.new(details[:component_class], members, children)
+          Nodes::ComponentElement.new(name: details[:component_class], members: members, children: parse_children)
         else
-          Nodes::HTMLElement.new(details[:name], members, children)
+          Nodes::HTMLElement.new(name: details[:name], members: members, children: parse_children)
         end
       end
 
@@ -102,7 +104,7 @@ module Nextrb
       def parse_newline
         return unless take(:NEWLINE)
 
-        Nodes::Newline.new
+        Nodes::Raw.new("\n")
       end
 
       def parse_attr(attr_class)
@@ -136,13 +138,13 @@ module Nextrb
       private
 
       def parse_declaration
-        return unless token = take(:DECLARATION)
+        return unless (token = take(:DECLARATION))
 
-        Nodes::Declaration.new(token[1])
+        Nodes::Raw.new(token[1].gsub('"', '\\"').gsub("'", "\\\\'"))
       end
 
       def take(token_name)
-        return unless token = peek(token_name)
+        return unless (token = peek(token_name))
 
         self.position += 1
         token
@@ -150,7 +152,7 @@ module Nextrb
 
       def take_all(token_name)
         result = []
-        while token = take(token_name)
+        while (token = take(token_name))
           result << token
         end
         result
@@ -171,23 +173,23 @@ module Nextrb
       end
 
       def eventually!(token_name)
-        tokens[position..-1].first { |t| t[0] == token_name } ||
+        tokens[position..].first { |t| t[0] == token_name } ||
           raise(ParseError, "Expected to find a #{token_name} but never did")
       end
 
       def default_empty_attr_value
-        Nodes::Text.new("")
+        Nodes::Raw.new("")
       end
 
       def error_window
-        window_start = position - 2
-        window_start = 0 if window_start < 0
-        window_end = position + 2
-        window_end = tokens.length - 1 if window_end >= tokens.length
+        window_start = [position - 2, 0].max
+        window_end = [position + 2, tokens.length - 1].min
+        err_token_window(window_start, window_end)
+      end
 
-        tokens[window_start..window_end].map.with_index do |token, i|
-          prefix = window_start + i == position ? "=>" : "  "
-          "#{prefix} #{token}"
+      def err_token_window(wstart, wend)
+        tokens[wstart..wend].map.with_index do |token, i|
+          "#{wstart + i == position ? "=>" : "  "} #{token}"
         end.join("\n")
       end
 
@@ -205,7 +207,8 @@ module Nextrb
         return unless open_count != close_count
 
         raise(ParseError,
-              "#{open_count - close_count} tags fail to close. All tags must close, either <NAME></NAME> or self-closing <NAME />")
+              %(#{open_count - close_count} tags fail to close. All tags must close,
+              either <NAME></NAME> or self-closing <NAME />))
       end
     end
   end

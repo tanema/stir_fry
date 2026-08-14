@@ -3,11 +3,12 @@
 module Nextrb
   module RBX
     module Nodes
-      class Expression < AbstractNode
+      # Expression is a single value inside of {} brackets express a ruby value.
+      class Expression < Base
         attr_accessor :content
 
         def initialize(content)
-          super
+          super()
           @content = content
         end
 

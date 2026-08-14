@@ -3,11 +3,12 @@
 module Nextrb
   module RBX
     module Nodes
-      class Root < AbstractNode
+      # Root is the main node returned by parse that contains everything
+      class Root < Base
         attr_accessor :children
 
         def initialize(children)
-          super
+          super()
           @children = children
         end
 
@@ -16,7 +17,7 @@ module Nextrb
         end
 
         def compile
-          "#{children.map(&:compile).join}@output_buffer.to_s"
+          "#{children.map(&:compile).join}\n@output_buffer.to_s"
         end
       end
     end

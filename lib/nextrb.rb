@@ -8,11 +8,13 @@ module Nextrb
   class NotFound < Error; end
 
   autoload :Version, "nextrb/version"
-  autoload :Action, "nextrb/action"
   autoload :App, "nextrb/app"
   autoload :Server, "nextrb/server"
   autoload :Component, "nextrb/component"
+  autoload :Components, "nextrb/components"
   autoload :RBX, "nextrb/rbx"
+  autoload :Request, "nextrb/request"
+  autoload :Response, "nextrb/response"
 
   @server = Server.new
   class << self

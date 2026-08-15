@@ -12,8 +12,10 @@ module Nextrb
     class << self
       attr_reader :resolver
 
-      def parse(template, rsvl = resolver)
+      def parse(template_name, template, rsvl = resolver)
         Parser.parse(Lexer.tokenize(template, rsvl))
+      rescue StandardError => e
+        raise "Error in #{template_name}: #{e}"
       end
 
       def register_component(klass)

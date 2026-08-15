@@ -4,11 +4,6 @@ require "rack"
 require "mustermann"
 
 module Nextrb
-  # Request wraps Rack::Request with an addition of args that come from the url path
-  class Request < Rack::Request
-    attr_accessor :args
-  end
-
   # App is the root of your Nextrb app that makes it runnable and ready for use
   # on any rack server
   class App
@@ -24,13 +19,13 @@ module Nextrb
 
     class << self
       def use(middleware_class, *args, &block) = middleware << [middleware_class, args, block]
-      def get(pattern, options = nil, klass = nil, &block) = route("GET", pattern, options, klass, &block)
-      def head(pattern, options = nil, klass = nil, &block) = route("HEAD", pattern, options, klass, &block)
-      def options(pattern, options = nil, klass = nil, &block) = route("OPTIONS", pattern, options, klass, &block)
-      def post(pattern, options = nil, klass = nil, &block) = route("POST", pattern, options, klass, &block)
-      def put(pattern, options = nil, klass = nil, &block) = route("PUT", pattern, options, klass, &block)
-      def patch(pattern, options = nil, klass = nil, &block) = route("PATCH", pattern, options, klass, &block)
-      def delete(pattern, options = nil, klass = nil, &block) = route("DELETE", pattern, options, klass, &block)
+      def get(pattern, options = nil, klass = nil, &) = route("GET", pattern, options, klass, &)
+      def head(pattern, options = nil, klass = nil, &) = route("HEAD", pattern, options, klass, &)
+      def options(pattern, options = nil, klass = nil, &) = route("OPTIONS", pattern, options, klass, &)
+      def post(pattern, options = nil, klass = nil, &) = route("POST", pattern, options, klass, &)
+      def put(pattern, options = nil, klass = nil, &) = route("PUT", pattern, options, klass, &)
+      def patch(pattern, options = nil, klass = nil, &) = route("PATCH", pattern, options, klass, &)
+      def delete(pattern, options = nil, klass = nil, &) = route("DELETE", pattern, options, klass, &)
 
       # valid uses:
       # route("GET", "/") {}
@@ -58,17 +53,12 @@ module Nextrb
 
     def call(env)
       request = Request.new(env)
-      route, args = find_route(request)
+      response = Response.new(env)
+      route, request.args = find_route(request)
       raise NotFound if route.nil?
 
-      callable = route[2]
-      result = if callable.is_a?(Proc)
-                 Action.new(request, args).call(callable)
-               else
-                 callable.new(**args).call
-               end
-      puts "got result"
-      result
+      route[2].call(request, response)
+      response.finish
     end
 
     def find_route(req)

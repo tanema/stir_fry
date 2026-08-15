@@ -1,53 +1,27 @@
 # frozen_string_literal: true
 
 require "nextrb"
-
-class Banner < Nextrb::Component # :nodoc:
-  def initialize(name:)
-    @name = name
-  end
-end
-
-class Page < Nextrb::Component # :nodoc:
-  def about_path
-    "/home/about"
-  end
-
-  def click_title
-    "Click me"
-  end
-
-  def link_to(_path, &)
-    yield
-  end
-end
+require_relative "./app/root"
 
 class App < Nextrb::App
-  get "/", Page
+  @todos = [
+    { "id" => 0, "text" => "make this app" },
+    { "id" => 1, "text" => "don't go crazy" }
+  ]
+
+  class << self
+    attr_accessor :todos
+  end
+
+  get "/", Root
+  post "/todo" do |req, resp|
+    ::App.todos << { "id" => ::App.todos.count, "text" => req.params["text"] }
+    resp.redirect_back
+  end
+  delete "/todo/:id" do |req, resp|
+    ::App.todos.delete_at(req.args["id"].to_i)
+    resp.redirect_back
+  end
 end
 
 Nextrb.run!(App.new)
-
-__END__
-@@Page
-<!DOCTYPE html>
-<html>
-  <body>
-    <Banner name="bobby">
-      <p>Welcome to nextrb, marrying the nice parts of nextjs with minimal ruby.</p>
-      <Button to={ about_path }>Learn more</Button>
-    </Banner>
-    <ul>
-      {[1, 2, 3].map { |n| <li>{n}</li> }}
-    </ul>
-    {link_to about_path do
-      <span>{click_title}</span>
-    end}
-  </body>
-</html>
-
-@@Banner
-<div>
-  <h1>Hello { @name }</h1>
-  { yield }
-</div>

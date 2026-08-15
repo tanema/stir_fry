@@ -72,7 +72,7 @@ module Nextrb
 
         details = take!(:TAG_DETAILS)[1]
         attr_class = details[:type] == :component ? Nodes::ComponentProp : Nodes::HTMLAttr
-        members = take_all(:NEWLINE).map { Nodes::Newline.new }.concat(parse_attrs(attr_class))
+        members = take_all(:NEWLINE).map { Nodes::Raw.new("\n") }.concat(parse_attrs(attr_class))
         take!(:CLOSE_TAG_DEF)
         if details[:type] == :component
           Nodes::ComponentElement.new(name: details[:component_class], members: members, children: parse_children)
@@ -207,8 +207,8 @@ module Nextrb
         return unless open_count != close_count
 
         raise(ParseError,
-              %(#{open_count - close_count} tags fail to close. All tags must close,
-              either <NAME></NAME> or self-closing <NAME />))
+              %(#{open_count - close_count} tags fail to close.
+              All tags must close, either <NAME></NAME> or self-closing <NAME />))
       end
     end
   end

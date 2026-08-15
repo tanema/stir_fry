@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Nextrb::Component::Options do
-  subject(:component) { Class.new { include Nextrb::Component::Options }.new }
+RSpec.describe Nextrb::Components::Options do
+  subject(:component) { Class.new { include Nextrb::Components::Options }.new }
 
   it "sets regular tag arguments" do
     expect(component.tag_kwargs({ width: 10 })).to eq 'width="10"'

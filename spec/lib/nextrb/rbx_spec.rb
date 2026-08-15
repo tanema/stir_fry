@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class FakeComponent
-  include Nextrb::Component::Options
+  include Nextrb::Components::Options
 
   class << self
     attr_accessor :template
@@ -42,7 +42,7 @@ class FakeComponent
 end
 
 class OtherComponent < FakeComponent
-  @template = Nextrb::RBX.parse("<h1>{yield}</h1>")
+  @template = Nextrb::RBX.parse("spec_template", "<h1>{yield}</h1>")
 end
 
 RSpec.describe Nextrb::RBX do
@@ -55,7 +55,7 @@ RSpec.describe Nextrb::RBX do
     end
 
     def render(template)
-      FakeComponent.template = described_class.parse(template)
+      FakeComponent.template = described_class.parse("spec_template", template)
       FakeComponent.new.render
     end
 
@@ -91,7 +91,7 @@ RSpec.describe Nextrb::RBX do
 
     it "can use components" do
       template = %(<Banner>{@name}</Banner>)
-      FakeComponent.template = described_class.parse(template, resolver)
+      FakeComponent.template = described_class.parse("spec_template", template, resolver)
       result = FakeComponent.new.render
       expect(result).to eq %(<h1>bobby</h1>)
     end

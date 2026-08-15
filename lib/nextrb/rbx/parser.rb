@@ -42,7 +42,7 @@ module Nextrb
       def parse_text
         return unless (token = take(:TEXT))
 
-        Nodes::Raw.new(token[1].gsub('"', '\\"').gsub("'", "\\\\'"))
+        Nodes::Raw.new(token[1].gsub("'", "\\\\'"))
       end
 
       def parse_expression
@@ -140,7 +140,7 @@ module Nextrb
       def parse_declaration
         return unless (token = take(:DECLARATION))
 
-        Nodes::Raw.new(token[1].gsub('"', '\\"').gsub("'", "\\\\'"))
+        Nodes::Raw.new(token[1].gsub("'", "\\\\'"))
       end
 
       def take(token_name)

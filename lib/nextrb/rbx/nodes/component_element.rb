@@ -26,24 +26,19 @@ module Nextrb
         end
 
         def compile
-          template % "::#{name}.new(#{compile_members}).render #{children_block}"
+          template % "::#{name}.new(#{compile_members})#{children_block}.render"
         end
 
         def children_block
           return "" unless children.any?
 
-          "{#{children.map(&:compile).join}}"
+          ".capture do |_nextrbout|\n#{children.map(&:compile).join}end"
         end
 
         def compile_members
           members.map do |member|
-            case member
-            when ExpressionGroup
-              "**#{member.compile}.transform_keys { |k| ActiveSupport::Inflector.underscore(k).to_sym },"
-            else
-              "#{member.compile},"
-            end
-          end.join.gsub(/,\z/, "")
+            member.is_a?(ExpressionGroup) ? "**#{member.compile}" : member.compile
+          end.join(",")
         end
 
         private

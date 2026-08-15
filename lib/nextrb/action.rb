@@ -62,6 +62,11 @@ module Nextrb
       response.body = [JSON.dump(obj)]
     end
 
+    def html(body)
+      content_type(:html)
+      response.body = [body]
+    end
+
     def content_type(kind)
       response["Content-Type"] = CONTENT_TYPE[kind] || "text/html"
     end

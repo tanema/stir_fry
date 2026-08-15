@@ -12,8 +12,8 @@ module Nextrb
     class << self
       attr_reader :resolver
 
-      def parse(template)
-        Parser.parse(Lexer.tokenize(template, resolver))
+      def parse(template, rsvl = resolver)
+        Parser.parse(Lexer.tokenize(template, rsvl))
       end
 
       def register_component(klass)

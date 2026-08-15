@@ -14,11 +14,20 @@ module Nextrb
         end
 
         def compile
-          template % content.delete("\n").squeeze(" ").strip
+          template % squeezed_content
         end
 
         def merge(other_raw)
           content << other_raw.content
+        end
+
+        private
+
+        def squeezed_content
+          squeezed = content.delete("\n").squeeze(" ")
+          squeezed = squeezed.delete_prefix(" ") if content.match?(/\A[ \t]*\n/)
+          squeezed = squeezed.delete_suffix(" ") if content.match?(/\n[ \t]*\z/)
+          squeezed
         end
       end
     end

@@ -29,15 +29,11 @@ module Nextrb
       end
 
       def register(klass)
-        name = klass.name.split("::").join(".").delete_suffix("Component")
-        components[name] = klass
+        components[klass.name.split("::").join(".")] = klass
       end
 
       def component?(name)
-        return false if KNOWN_HTML_ELEMENTS.include?(name)
-        return true if component_class(name)
-
-        false
+        !KNOWN_HTML_ELEMENTS.include?(name) && component_class(name)
       end
 
       def component_class(name)

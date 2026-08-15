@@ -2,34 +2,31 @@
 
 require "nextrb"
 
-class Banner < Nextrb::Component
+class Banner < Nextrb::Component # :nodoc:
   def initialize(name:)
     @name = name
   end
 end
 
-class Page < Nextrb::Component
+class Page < Nextrb::Component # :nodoc:
   def about_path
     "/home/about"
   end
-end
 
-puts Banner.compiled_template
-# puts Page.new.render
+  def click_title
+    "Click me"
+  end
 
-puts Banner.new(name: "bobby").render do
-  @output_buffer.safe_concat('<p>Welcome to nextrb, marrying the nice parts of nextjs with minimal ruby.</p> <Button to="')
-  @output_buffer.concat("test")
-  @output_buffer.safe_concat('">Learn more</Button>')
-end
-
-class Test
-  def try_it
-    instance_eval("puts yield", __FILE__, __LINE__)
+  def link_to(_path, &)
+    yield
   end
 end
 
-# Test.new.try_it { puts "got it" }
+class App < Nextrb::App
+  get "/", Page
+end
+
+Nextrb.run!(App.new)
 
 __END__
 @@Page
@@ -38,13 +35,19 @@ __END__
   <body>
     <Banner name="bobby">
       <p>Welcome to nextrb, marrying the nice parts of nextjs with minimal ruby.</p>
-      <Button to={about_path}>Learn more</Button>
+      <Button to={ about_path }>Learn more</Button>
     </Banner>
+    <ul>
+      {[1, 2, 3].map { |n| <li>{n}</li> }}
+    </ul>
+    {link_to about_path do
+      <span>{click_title}</span>
+    end}
   </body>
 </html>
 
 @@Banner
 <div>
-  <h1>Hello {@name}</h1>
-  {yield}
+  <h1>Hello { @name }</h1>
+  { yield }
 </div>

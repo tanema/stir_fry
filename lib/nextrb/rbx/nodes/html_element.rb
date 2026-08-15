@@ -44,7 +44,7 @@ module Nextrb
         def attribute_node(node)
           ExpressionGroup.new(
             members: node.members,
-            inner_template: "tag_kwarg(%s)",
+            inner_template: '" " + tag_kwargs(%s)',
             outer_template: OUTPUT_EXPR
           )
         end

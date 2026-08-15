@@ -3,7 +3,7 @@
 require "json"
 
 module Nextrb
-  class Component
+  module Components
     # Options is largely just taken from ActionView::TagHelper::TagBuilder#tag_options
     # and simplified for my own purposes.
     module Options
@@ -30,13 +30,16 @@ module Nextrb
               when "aria" then aria_attribute(value)
               when "data" then data_attribute(value)
               when "class" then class_attribute(value)
-              else
-                BOOLEAN_ATTRIBUTES.include?(key) ? key : tag_option(key, value)
+              else boolean_or_option(key, value)
               end
             end.flatten.compact.join(" ")
           end
 
           private
+
+          def boolean_or_option(key, value)
+            BOOLEAN_ATTRIBUTES.include?(key) ? (key if value) : tag_option(key, value)
+          end
 
           def aria_attribute(value)
             value.map { |k, v| %(aria-#{k}="#{v.to_s.gsub('"', "&quot;")}") }
@@ -54,7 +57,7 @@ module Nextrb
                       else
                         value.is_a?(Array) ? value.join(" ") : value.to_s
                       end
-            %(class="#{classes}")
+            %(class="#{classes.gsub('"', "&quot;")}")
           end
 
           def tag_option(key, value)

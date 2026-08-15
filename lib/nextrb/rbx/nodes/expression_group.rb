@@ -26,10 +26,25 @@ module Nextrb
         end
 
         def compile
-          outer_template % (inner_template % members.map(&:compile).join)
+          outer_template % (inner_template % compile_members)
         end
 
         private
+
+        def compile_members
+          prev_content = false
+
+          members.each_with_object(+"") do |member, source|
+            content = content_member?(member)
+            source << " + " if content && prev_content
+            source << (content ? "(#{member.compile}).to_s" : member.compile)
+            prev_content = content
+          end
+        end
+
+        def content_member?(member)
+          !member.is_a?(Expression)
+        end
 
         def precompile_members
           compact(members.map(&:precompile).flatten).map(&method(:transform_member))
@@ -40,7 +55,7 @@ module Nextrb
           when Raw
             Raw.new(node.content, template: EXPR_STRING)
           when ComponentElement
-            ComponentElement.new(name: node.name, members: node.members, children: node.children, template: ComponentElement::EXPR_STRING)
+            ComponentElement.new(name: node.name, members: node.members, children: node.children, template: RAW)
           when ExpressionGroup
             ExpressionGroup.new(members: node.members, inner_template: node.inner_template, outer_template: RAW)
           else

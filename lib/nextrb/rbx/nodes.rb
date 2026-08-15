@@ -5,10 +5,10 @@ module Nextrb
     # Nodes is the namespace that contains all the different types of nodes parsed
     # from the html.
     module Nodes
-      OUTPUT_EXPR = "@output_buffer.concat(%s);\n"
-      OUTPUT_RAW = "@output_buffer.safe_concat('%s');\n"
-      EXPR_STRING = "'%s'"
+      OUTPUT_EXPR = "_nextrbout << Array(%s).join\n"
+      OUTPUT_RAW = "_nextrbout << '%s'\n"
       RAW = "%s"
+      EXPR_STRING = "'%s'"
 
       autoload :Base, "nextrb/rbx/nodes/base"
       autoload :ComponentElement, "nextrb/rbx/nodes/component_element"

@@ -17,7 +17,7 @@ module Nextrb
         end
 
         def compile
-          "#{children.map(&:compile).join}\n@output_buffer.to_s"
+          "#{children.map(&:compile).join}\n_nextrbout"
         end
       end
     end

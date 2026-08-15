@@ -1,35 +1,11 @@
 # frozen_string_literal: true
 
-require "nextrb/component/options"
+require "nextrb/components/options"
 
 module Nextrb
-  class OutputBuffer
-    def initialize(buffer = "")
-      @raw_buffer = String.new(buffer)
-      @raw_buffer.encode!
-    end
-
-    def <<(value)
-      unless value.nil?
-        @raw_buffer << value.to_s # ERB::Util.unwrapped_html_escape(value)
-      end
-      self
-    end
-    alias concat <<
-
-    def safe_concat(value)
-      @raw_buffer << value
-      self
-    end
-
-    def to_s
-      @raw_buffer.to_s
-    end
-  end
-
   # Component is a single view handler
   class Component
-    include Options
+    include Components::Options
 
     class << self
       attr_accessor :compiled_template
@@ -50,18 +26,46 @@ module Nextrb
         return data unless data.include?("@@")
 
         templates = {}
-        data.strip.split(/^(@@\s*.*\S)\s*$/)[1..].each_slice(2) do |(name, tmpl)|
-          templates[name.delete_prefix("@@").strip] = tmpl
+        data.strip.split(/^(@@\s*.*\S)\s*$/)[1..].each_slice(2) do |(section_name, tmpl)|
+          templates[section_name.delete_prefix("@@").strip] = tmpl
         end
 
-        templates[name]
+        templates.fetch(name) { raise "no @@#{name} template section found" }
       end
     end
 
+    def call
+      response = Rack::Response.new
+      response.status = Rack::Utils.status_code(:ok)
+      response["Content-Type"] = "text/html"
+      response.body = [render]
+      response.to_a
+    end
+
+    def capture(&)
+      @child_buffer = String.new
+      yield(@child_buffer)
+      self
+    end
+
     def render
-      @output_buffer = OutputBuffer.new
+      _render_with_block { @child_buffer.nil? ? "" : @child_buffer }
+    end
+
+    def _nextrbout
+      @_nextrbout ||= String.new
+    end
+
+    def reset!
+      @_nextrbout = nil
+    end
+
+    private
+
+    def _render_with_block
+      reset!
       instance_eval(self.class.compiled_template)
-      @output_buffer.to_s
+      _nextrbout
     end
   end
 end

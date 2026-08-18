@@ -1,27 +1,27 @@
 # frozen_string_literal: true
 
+$LOAD_PATH << File.expand_path("app", __dir__)
+
 require "nextrb"
-require_relative "./app/root"
+require "root"
 
-class App < Nextrb::App
-  @todos = [
-    { "id" => 0, "text" => "make this app" },
-    { "id" => 1, "text" => "don't go crazy" }
-  ]
+DEFAULT_TODOS = [
+  { "id" => 0, "text" => "make this app" },
+  { "id" => 1, "text" => "don't go crazy" }
+]
 
+class App < Nextrb::App # :nodoc:
+  @todos = DEFAULT_TODOS
+  @next_id = 2
   class << self
-    attr_accessor :todos
+    attr_accessor :todos, :next_id
   end
 
+  static File.join(__dir__, "public")
   get "/", Root
-  post "/todo" do |req, resp|
-    ::App.todos << { "id" => ::App.todos.count, "text" => req.params["text"] }
-    resp.redirect_back
-  end
-  delete "/todo/:id" do |req, resp|
-    ::App.todos.delete_at(req.args["id"].to_i)
-    resp.redirect_back
-  end
+  post "/todo", Todos::List
+  delete "/todo/:id", Todos::Todo
+  put "/todo/:id/toggle", Todos::Todo
 end
 
 Nextrb.run!(App.new)

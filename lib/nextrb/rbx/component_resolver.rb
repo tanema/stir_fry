@@ -29,7 +29,7 @@ module Nextrb
       end
 
       def register(klass)
-        components[klass.name.split("::").join(".")] = klass
+        components[classname_to_tagname(klass.name)] = klass
       end
 
       def component?(name)
@@ -37,7 +37,22 @@ module Nextrb
       end
 
       def component_class(name)
+        load_const(name) unless components[name]
         components[name]
+      end
+
+      def classname_to_tagname(name)
+        name.split("::").join(".")
+      end
+
+      def tagname_to_classname(name)
+        "::#{name.split(".").join("::")}"
+      end
+
+      def load_const(name)
+        Object.const_get(tagname_to_classname(name))
+      rescue StandardError
+        nil
       end
     end
   end

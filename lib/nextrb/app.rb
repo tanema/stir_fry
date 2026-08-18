@@ -27,6 +27,20 @@ module Nextrb
       def patch(pattern, options = nil, klass = nil, &) = route("PATCH", pattern, options, klass, &)
       def delete(pattern, options = nil, klass = nil, &) = route("DELETE", pattern, options, klass, &)
 
+      def static(dirname)
+        dirname = File.expand_path(dirname)
+        Dir[File.join(dirname, "**/*")].each do |path|
+          path = File.expand_path(path)
+          next unless File.file?(path)
+
+          get path.to_s.delete_prefix(dirname) do |req, resp|
+            resp.send_file(req, path)
+          end
+        end
+
+        # send_file path, options.merge(disposition: nil)
+      end
+
       # valid uses:
       # route("GET", "/") {}
       # route("GET", "/", Page)
@@ -54,20 +68,23 @@ module Nextrb
     def call(env)
       request = Request.new(env)
       response = Response.new(env)
-      route, request.args = find_route(request)
-      raise NotFound if route.nil?
+      handler, _, request.args = find_route(request)
+      raise NotFound if handler.nil?
 
-      route[2].call(request, response)
+      verb = request.request_method.downcase.to_sym
+      handler = handler.method(verb) if handler.respond_to?(verb)
+      handler.call(request, response)
       response.finish
     end
 
     def find_route(req)
+      puts "VERB: #{req.request_method} ROUTES: #{self.class.routes[req.request_method]}"
       routes = self.class.routes[req.request_method] || []
       routes.each do |route|
         params = route[0].params(req.path_info)
-        return [route, params] if params
+        return [route[2], route[1], params] if params
       end
-      [nil, nil]
+      [nil, nil, nil]
     end
 
     def builder

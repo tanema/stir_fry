@@ -5,6 +5,7 @@ module Nextrb
   module RBX
     autoload :Lexer, "nextrb/rbx/lexer"
     autoload :Parser, "nextrb/rbx/parser"
+    autoload :Compiler, "nextrb/rbx/compiler"
     autoload :Nodes, "nextrb/rbx/nodes"
     autoload :ComponentResolver, "nextrb/rbx/component_resolver"
 
@@ -19,7 +20,7 @@ module Nextrb
       end
 
       def register_component(klass)
-        raise "cannot register a non-component #{klass.name}" unless klass < ::Nextrb::Component
+        raise "cannot register a non-component #{klass.name}" unless klass < ::Nextrb::Component::Base
 
         resolver.register(klass)
       end

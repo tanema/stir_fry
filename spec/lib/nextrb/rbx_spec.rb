@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class FakeComponent
-  include Nextrb::Components::Options
+  include Nextrb::Component::Options
 
   class << self
     attr_accessor :template

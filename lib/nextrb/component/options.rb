@@ -3,7 +3,7 @@
 require "json"
 
 module Nextrb
-  module Components
+  module Component
     # Options is largely just taken from ActionView::TagHelper::TagBuilder#tag_options
     # and simplified for my own purposes.
     module Options
@@ -30,6 +30,7 @@ module Nextrb
               when "aria" then aria_attribute(value)
               when "data" then data_attribute(value)
               when "class" then class_attribute(value)
+              when "hx" then hx_attribute(value)
               else boolean_or_option(key, value)
               end
             end.flatten.compact.join(" ")
@@ -49,6 +50,10 @@ module Nextrb
             value.map do |k, v|
               tag_option("data-#{k}", v.is_a?(String) || v.is_a?(Symbol) ? v : JSON.dump(v))
             end
+          end
+
+          def hx_attribute(value)
+            value.map { |k, v| tag_option("hx-#{k}", v.to_s) }
           end
 
           def class_attribute(value)
@@ -73,7 +78,7 @@ module Nextrb
       end
 
       def tag_kwargs(options)
-        OptionMarshaller.tag_kwargs(options)
+        " #{OptionMarshaller.tag_kwargs(options)}"
       end
     end
   end

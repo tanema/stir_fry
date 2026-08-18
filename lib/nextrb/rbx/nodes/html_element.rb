@@ -6,7 +6,9 @@ module Nextrb
       # HTMLElement is an HTML tag
       class HTMLElement < Base
         # Referenced from https://html.spec.whatwg.org/#void-elements
-        HTML_VOID_ELEMENTS = %w[area base br col embed hr img input link meta source track wbr].freeze
+        HTML_VOID_ELEMENTS = %w[
+          area base br col embed hr img input link meta source track wbr
+        ].freeze
 
         attr_accessor :name, :members, :children
 
@@ -44,7 +46,7 @@ module Nextrb
         def attribute_node(node)
           ExpressionGroup.new(
             members: node.members,
-            inner_template: '" " + tag_kwargs(%s)',
+            inner_template: "tag_kwargs(%s)",
             outer_template: OUTPUT_EXPR
           )
         end

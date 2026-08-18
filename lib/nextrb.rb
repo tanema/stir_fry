@@ -11,7 +11,6 @@ module Nextrb
   autoload :App, "nextrb/app"
   autoload :Server, "nextrb/server"
   autoload :Component, "nextrb/component"
-  autoload :Components, "nextrb/components"
   autoload :RBX, "nextrb/rbx"
   autoload :Request, "nextrb/request"
   autoload :Response, "nextrb/response"

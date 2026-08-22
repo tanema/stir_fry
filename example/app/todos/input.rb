@@ -1,5 +1,5 @@
 module Todos
-  class Input < Nextrb::Component::Base
+  class Input < Nextrb::Component
   end
 end
 

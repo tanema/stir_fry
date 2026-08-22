@@ -2,213 +2,164 @@
 
 module Nextrb
   module RBX
-    # Parser takes in a tokenized stream and build semantic reasoning from it for
-    # rebuilding the html output with enriched components.
+    # Parser breaks down templates into a tree like data structure
     class Parser
-      class ParseError < StandardError; end
+      KNOWN_HTML_ELEMENTS = %w[
+        a abbr acronym address animate animateMotion animateTransform applet area article aside audio b base basefont
+        bdi bdo bgsound big blink blockquote body br button canvas caption center circle cite clipPath code col colgroup
+        color-profile command content data datalist dd defs del desc details dfn dialog dir discard div dl dt element
+        ellipse em embed feBlend feColorMatrix feComponentTransfer feComposite feConvolveMatrix feDiffuseLighting
+        feDisplacementMap feDistantLight feDropShadow feFlood feFuncA feFuncB feFuncG feFuncR feGaussianBlur feImage
+        feMerge feMergeNode feMorphology feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence
+        fieldset figcaption figure filter font footer foreignObject form frame frameset g h1 h2 h3 h4 h5 h6 hatch
+        hatchpath head header hgroup hr html i iframe image img input ins isindex kbd keygen label legend li line
+        linearGradient link listing main map mark marker marquee mask menu menuitem mesh meshgradient meshpatch meshrow
+        meta metadata meter mpath multicol nav nextid nobr noembed noframes noscript object ol optgroup option output p
+        param path pattern picture plaintext polygon polyline pre progress q radialGradient rb rect rp rt rtc ruby s
+        samp script section select set shadow slot small solidcolor source spacer span stop strike strong style sub
+        summary sup svg switch symbol table tbody td template text textarea textPath tfoot th thead time title tr track
+        tspan tt u ul unknown use var video view wbr xmp
+      ].to_set
 
-      attr_reader :tokens
-      attr_accessor :position
+      HTML_VOID_ELEMENTS = %w[area base br col embed hr img input link meta source track wbr].freeze
+      DECLR_OR_COMMENT = /\s*<![^>]*>/
+      TAG_START = %r{\s*<(?!/)}
+      TAG_END = %r{\s*/?>}
+      EXPR_START = /\s*{/
+      QUOTED_STRING = /["'](?<str>(?:[^"'\\]|\\.)*)["']/
+      QUOTES = /["']/
+      QUOTED_EXPRESSION_STRING = /(?<q>["'])(?:\\.|(?!\k<q>).)*\k<q>/m
+      PLAIN_TEXT = /(?<text>(?:[^<{\\]|\\.)*)/
+      TAGNAME = /[A-Za-z0-9\-_.]+/
+      DO_BLOCK_PREFIX = /do\s+(\|[^|]+\|)?/
+      BLOCK_PREFIX = /{\s*(\|[^|]+\|)?/
+      AND = /&&/
+      OR = /\|\|/
+      TERNARY = /[?:]/
+      TAG_PREFIX = Regexp.union(DO_BLOCK_PREFIX, BLOCK_PREFIX, AND, OR, TERNARY)
+      NESTED_TAG_PREFIX = /(\s+#{TAG_PREFIX.source}\s*\z|\A\s*\z)/
+      WORD = /\w+/
 
-      def self.parse(tokens)
-        root = new(tokens).parse
-        root.precompile.compile
+      attr_reader :filename, :template, :scanner
+
+      Node = Struct.new(:kind, :name, :attributes, :content, :void)
+
+      def self.parse(filename, template)
+        new(filename, template).parse
       end
 
-      def initialize(tokens)
-        @tokens = tokens
-        @position = 0
+      def initialize(filename, template)
+        @filename = filename
+        @template = template
+        @scanner = StringScanner.new(template)
       end
 
       def parse
-        validate_tokens!
-        Nodes::Root.new(parse_tokens)
-      end
-
-      def parse_tokens
-        results = []
-
-        while (result = parse_token)
-          results << result
-        end
-
-        results
-      end
-
-      def parse_token
-        parse_text || parse_newline || parse_expression || parse_tag || parse_declaration
-      end
-
-      def parse_text
-        return unless (token = take(:TEXT))
-
-        Nodes::Raw.new(token[1].gsub("'", "\\\\'"))
-      end
-
-      def parse_expression
-        return unless take(:OPEN_EXPRESSION)
-
-        members = []
-
-        eventually!(:CLOSE_EXPRESSION)
-        members << (parse_expression_body || parse_tag) until take(:CLOSE_EXPRESSION)
-
-        Nodes::ExpressionGroup.new(members: members)
-      end
-
-      def parse_expression!
-        peek!(:OPEN_EXPRESSION)
-        parse_expression
-      end
-
-      def parse_expression_body
-        return unless (token = take(:EXPRESSION_BODY))
-
-        Nodes::Expression.new(token[1])
-      end
-
-      def parse_tag
-        return unless take(:OPEN_TAG_DEF)
-
-        details = take!(:TAG_DETAILS)[1]
-        attr_class = details[:type] == :component ? Nodes::ComponentProp : Nodes::HTMLAttr
-        members = take_all(:NEWLINE).map { Nodes::Raw.new("\n") }.concat(parse_attrs(attr_class))
-        take!(:CLOSE_TAG_DEF)
-        if details[:type] == :component
-          Nodes::ComponentElement.new(name: details[:component_class], members: members, children: parse_children)
-        else
-          Nodes::HTMLElement.new(name: details[:name], members: members, children: parse_children)
-        end
-      end
-
-      def parse_attrs(attr_class)
-        return [] unless take(:OPEN_ATTRS)
-
-        attrs = []
-
-        eventually!(:CLOSE_ATTRS)
-        attrs << (parse_splat_attr || parse_newline || parse_attr(attr_class)) until take(:CLOSE_ATTRS)
-
-        attrs
-      end
-
-      def parse_splat_attr
-        return unless take(:OPEN_ATTR_SPLAT)
-
-        expression = parse_expression!
-        take!(:CLOSE_ATTR_SPLAT)
-
-        expression
-      end
-
-      def parse_newline
-        return unless take(:NEWLINE)
-
-        Nodes::Raw.new("\n")
-      end
-
-      def parse_attr(attr_class)
-        name = take!(:ATTR_NAME)[1]
-        value = nil
-
-        if take(:OPEN_ATTR_VALUE)
-          value = parse_text || parse_expression
-          raise ParseError, "Missing attribute value" unless value
-
-          take(:CLOSE_ATTR_VALUE)
-        else
-          value = default_empty_attr_value
-        end
-
-        attr_class.new(name, value)
+        parse_children
       end
 
       def parse_children
         children = []
-
-        eventually!(:OPEN_TAG_END)
-        children << parse_token until take(:OPEN_TAG_END)
-
-        take(:TAG_NAME)
-        take!(:CLOSE_TAG_END)
-
-        children
+        children << parse_child until scanner.eos? || scanner.check(%r{</})
+        children.empty? ? nil : children
       end
 
-      private
-
-      def parse_declaration
-        return unless (token = take(:DECLARATION))
-
-        Nodes::Raw.new(token[1].gsub("'", "\\\\'"))
-      end
-
-      def take(token_name)
-        return unless (token = peek(token_name))
-
-        self.position += 1
-        token
-      end
-
-      def take_all(token_name)
-        result = []
-        while (token = take(token_name))
-          result << token
+      def parse_child
+        if scanner.scan(DECLR_OR_COMMENT) then Node.new(kind: :raw, content: scanner.matched.gsub("'", "\\\\'"))
+        elsif scanner.scan(TAG_START) then parse_tag
+        elsif scanner.scan(EXPR_START) then parse_expression
+        elsif scanner.scan(PLAIN_TEXT) then Node.new(kind: :raw, content: scanner[:text])
+        else raise SyntaxError.new(self, "unexpected element")
         end
-        result
       end
 
-      def take!(token_name)
-        take(token_name) || unexpected_token!(token_name)
+      def parse_tag
+        tagname = scanner.scan(TAGNAME) # tagname
+        attributes = parse_tag_attributes
+        raise SyntaxError.new(self, "unclosed tag <#{tagname} found") unless scanner.scan(TAG_END)
+
+        is_void = scanner.matched.strip == "/>" || HTML_VOID_ELEMENTS.include?(tagname)
+        children = is_void ? nil : parse_children
+        if !is_void && !scanner.scan(%r{\s*</#{tagname}>})
+          raise SyntaxError.new(self, "Closing tag for non-void <#{tagname}> not found")
+        end
+
+        Node.new(kind: resolve_kind(tagname), name: tagname, void: is_void, attributes: attributes, content: children)
       end
 
-      def peek(token_name)
-        return unless (token = tokens[position]) && token[0] == token_name
+      def resolve_kind(tagname)
+        return :html if KNOWN_HTML_ELEMENTS.include?(tagname)
 
-        token
+        klass_name = "::#{tagname.split(".").join("::")}"
+        klass = Object.const_get(klass_name)
+        # TODO: allow duck typing, i.e responds_to
+        !klass.nil? && klass < ::Nextrb::Component ? :component : :html
       end
 
-      def peek!(token_name)
-        peek(token_name) || unexpected_token!(token_name)
+      def parse_tag_attributes
+        attrs = []
+        while scanner.check(/\s+[A-Za-z0-9\-_.:]+/) || scanner.check(EXPR_START)
+          attrs << (scanner.scan(EXPR_START) ? parse_expression : parse_tag_attribute)
+        end
+        attrs.empty? ? nil : attrs
       end
 
-      def eventually!(token_name)
-        tokens[position..].first { |t| t[0] == token_name } ||
-          raise(ParseError, "Expected to find a #{token_name} but never did")
+      def parse_tag_attribute
+        name = scanner.scan(/\s+[A-Za-z0-9\-_.:]+/).strip
+        value = parse_tag_attribute_value if scanner.scan(/\s*=\s*/)
+        Node.new(kind: :attribute, name: name, content: value)
       end
 
-      def default_empty_attr_value
-        Nodes::Raw.new("")
+      def parse_tag_attribute_value
+        if scanner.check(QUOTES) then Node.new(kind: :raw, content: chomp_quoted)
+        elsif scanner.scan(WORD) then Node.new(kind: :raw, content: scanner.matched)
+        elsif scanner.scan(EXPR_START) then parse_expression
+        else raise SyntaxError.new(self, "unexpected tag attribute formatting.")
+        end
       end
 
-      def error_window
-        window_start = [position - 2, 0].max
-        window_end = [position + 2, tokens.length - 1].min
-        err_token_window(window_start, window_end)
+      # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      def parse_expression
+        exprs = []
+
+        depth = 0
+        curr_expr = String.new
+        until scanner.eos?
+          if scanner.scan(/}/)
+            break if depth.zero?
+
+            depth -= 1
+            curr_expr << "}"
+          elsif scanner.scan(QUOTED_EXPRESSION_STRING)
+            curr_expr << scanner.matched
+          elsif scanner.scan(TAG_START)
+            # try to work out if we found a tag or a lessthan
+            if curr_expr =~ NESTED_TAG_PREFIX
+              exprs << Node.new(kind: :expression, content: curr_expr) unless curr_expr.empty?
+              curr_expr = String.new
+              exprs << parse_tag
+            else
+              curr_expr << scanner.matched
+            end
+          else
+            text = scanner.scan(/([^<}'"]|<\/)+/) || scanner.getch
+            depth += text.count("{")
+            curr_expr << text
+          end
+        end
+
+        exprs << Node.new(kind: :expression, content: curr_expr) unless curr_expr.empty?
+
+        Node.new(kind: :expr_group, content: exprs)
       end
+      # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-      def err_token_window(wstart, wend)
-        tokens[wstart..wend].map.with_index do |token, i|
-          "#{wstart + i == position ? "=>" : "  "} #{token}"
-        end.join("\n")
-      end
+      def chomp_quoted
+        scanner.scan(QUOTED_STRING)
+        val = scanner[:str]
+        raise SyntaxError.new(self, "unterminated string") if val.nil?
 
-      def unexpected_token!(expected_token)
-        raise(ParseError, "Unexpected token #{tokens[position][0]}, expecting #{expected_token}\n#{error_window}")
-      end
-
-      def validate_tokens!
-        validate_all_tags_close!
-      end
-
-      def validate_all_tags_close!
-        open_count = tokens.count { |t| t[0] == :OPEN_TAG_DEF }
-        close_count = tokens.count { |t| t[0] == :OPEN_TAG_END }
-        return unless open_count != close_count
-
-        raise(ParseError,
-              %(#{open_count - close_count} tags fail to close.
-              All tags must close, either <NAME></NAME> or self-closing <NAME />))
+        %("#{val}")
       end
     end
   end

@@ -1,330 +1,405 @@
 # frozen_string_literal: true
 
-require "timeout"
-
 RSpec.describe Nextrb::RBX::Parser do
-  it "handles :TEXT" do
-    subject = described_class.new([[:TEXT, "Hello world"]])
-    result = subject.parse.children
-    expect(result.first).to be_a Nextrb::RBX::Nodes::Raw
-    expect(result.first.content).to eq "Hello world"
+  def parse(template)
+    described_class.new("test", template).parse
+  end
+
+  def node(kind, **args)
+    Nextrb::RBX::Parser::Node.new(kind: kind, **args)
+  end
+
+  it "parses plain text" do
+    nodes = parse("Hello world")
+    expect(nodes.count).to be(1)
+    expect(nodes[0].content).to eq "Hello world"
   end
 
   it "parses declarations" do
-    subject = described_class.new([[:DECLARATION, "<!DOCTYPE html>"]])
-    result = subject.parse.children
-    expect(result.first).to be_a Nextrb::RBX::Nodes::Raw
-    expect(result.first.content).to eq "<!DOCTYPE html>"
+    nodes = parse("<!DOCTYPE html>")
+    expect(nodes.first).to eq node(:raw, content: "<!DOCTYPE html>")
   end
 
-  it "parses expressions" do
-    subject = described_class.new([
-                                    [:OPEN_EXPRESSION],
-                                    [:EXPRESSION_BODY, "thing = 'bar'"],
-                                    [:CLOSE_EXPRESSION]
-                                  ])
-    result = subject.parse.children
-    expect(result.first).to be_a Nextrb::RBX::Nodes::ExpressionGroup
-    group = result.first
-    expect(group.members.first).to be_a Nextrb::RBX::Nodes::Expression
-    expect(group.members.first.content).to eq "thing = 'bar'"
+  it "parses older html4 doctype declaration" do
+    template = <<~RBX.strip
+      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+    RBX
+    expected = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
+    expect(parse(template)).to eq [node(:raw, content: expected)]
   end
 
-  it "parses tags within expressions" do
-    subject = described_class.new([
-                                    [:OPEN_EXPRESSION],
-                                    [:EXPRESSION_BODY, "true && "],
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "h1", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:TEXT, "Is "],
-                                    [:OPEN_EXPRESSION],
-                                    [:EXPRESSION_BODY, "'hello'.upcase"],
-                                    [:CLOSE_EXPRESSION],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "h1"],
-                                    [:CLOSE_TAG_END],
-                                    [:EXPRESSION_BODY, ""],
-                                    [:CLOSE_EXPRESSION]
-                                  ])
-    result = subject.parse.children
-
-    expect(result.first).to be_a Nextrb::RBX::Nodes::ExpressionGroup
-    group = result.first
-
-    expect(group.members[0]).to be_a Nextrb::RBX::Nodes::Expression
-    expect(group.members[0].content).to eq "true && "
-
-    expect(group.members[1]).to be_a Nextrb::RBX::Nodes::HTMLElement
-    expect(group.members[1].name).to eq "h1"
-    expect(group.members[1].children[0]).to be_a Nextrb::RBX::Nodes::Raw
-    expect(group.members[1].children[0].content).to eq "Is "
-    expect(group.members[1].children[1]).to be_a Nextrb::RBX::Nodes::ExpressionGroup
-    expect(group.members[1].children[1].members[0].content).to eq "'hello'.upcase"
-
-    expect(group.members[2]).to be_a Nextrb::RBX::Nodes::Expression
-    expect(group.members[2].content).to eq ""
+  it "parses component tags" do
+    expect(parse("<Button></Button>")).to eq [node(:component, name: "Button", void: false)]
   end
 
-  it "parses named tags" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:CLOSE_TAG_END]
-                                  ])
-    result = subject.parse.children
-    expect(result.first).to be_a Nextrb::RBX::Nodes::HTMLElement
-    expect(result.first.name).to eq "div"
+  it "parses basic html tags" do
+    expect(parse("<div></div>")).to eq [node(:html, name: "div", void: false)]
   end
 
-  it "raises if tag is missing a name" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:CLOSE_TAG_END]
-                                  ])
-    expect { subject.parse }.to raise_error Nextrb::RBX::Parser::ParseError
+  it "parses some big nested markup with attributes" do
+    code = <<~CODE
+      <div foo="bar">
+        <h1>Some heading</h1>
+        <p class="someClass">A paragraph</p>
+        <div id={dynamicId} class="divClass">
+          <p>More text</p>
+        </div>
+      </div>
+    CODE
+    expect(parse(code)).to eq [
+      node(:html,
+           name: "div",
+           void: false,
+           attributes: [
+             node(:attribute, name: "foo", content: node(:raw, content: '"bar"'))
+           ],
+           content: [
+             node(:html, name: "h1", void: false, content: [node(:raw, content: "Some heading")]),
+             node(:html, name: "p", void: false,
+                         attributes: [node(:attribute, name: "class", content: node(:raw, content: '"someClass"'))],
+                         content: [node(:raw, content: "A paragraph")]),
+             node(:html, name: "div", void: false,
+                         attributes: [
+                           node(:attribute, name: "id", content: node(:expr_group, content: [
+                                                                        node(:expression, content: "dynamicId")
+                                                                      ])),
+                           node(:attribute, name: "class", content: node(:raw, content: '"divClass"'))
+                         ],
+                         content: [
+                           node(:html, name: "p", void: false, content: [node(:raw, content: "More text")]),
+                           node(:raw, content: "\n  ")
+                         ]),
+             node(:raw, content: "\n")
+           ]),
+      node(:raw, content: "\n")
+    ]
   end
 
-  it "raises if tag is missing an end" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF]
-                                  ])
-    expect { subject.parse }.to raise_error Nextrb::RBX::Parser::ParseError
+  it "parses basic html tag attributes" do
+    actual = parse(%(<div class="name" id = 'title' value=yes disabled></div>))
+    expect(actual).to eq [
+      node(:html, name: "div", void: false, attributes: [
+             node(:attribute, name: "class", content: node(:raw, content: '"name"')),
+             node(:attribute, name: "id", content: node(:raw, content: '"title"')),
+             node(:attribute, name: "value", content: node(:raw, content: "yes")),
+             node(:attribute, name: "disabled")
+           ])
+    ]
   end
 
-  it "parses tag attributes" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:OPEN_ATTRS],
-                                    [:ATTR_NAME, "foo"],
-                                    [:ATTR_NAME, "bar"],
-                                    [:OPEN_ATTR_VALUE],
-                                    [:TEXT, "baz"],
-                                    [:CLOSE_ATTR_VALUE],
-                                    [:ATTR_NAME, "thing"],
-                                    [:OPEN_ATTR_VALUE],
-                                    [:OPEN_EXPRESSION],
-                                    [:EXPRESSION_BODY, "exprValue"],
-                                    [:CLOSE_EXPRESSION],
-                                    [:CLOSE_ATTR_VALUE],
-                                    [:CLOSE_ATTRS],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:CLOSE_TAG_END]
-                                  ])
+  it "adds a silent newline between tag name and attributes that come on the next line (for source mapping)" do
+    code = <<~CODE.strip
+      <div
+        foo="bar">
+      </div>
+    CODE
 
-    div = subject.parse.children.first
-    expect(div).to be_a Nextrb::RBX::Nodes::HTMLElement
-    expect(div.members.length).to eq 3
-
-    attr_foo = div.members[0]
-    expect(attr_foo).to be_a Nextrb::RBX::Nodes::HTMLAttr
-    expect(attr_foo.name).to eq "foo"
-    expect(attr_foo.value).to be_a Nextrb::RBX::Nodes::Raw
-    expect(attr_foo.value.content).to eq ""
-
-    attr_bar = div.members[1]
-    expect(attr_bar).to be_a Nextrb::RBX::Nodes::HTMLAttr
-    expect(attr_bar.name).to eq "bar"
-    expect(attr_bar.value).to be_a Nextrb::RBX::Nodes::Raw
-    expect(attr_bar.value.content).to eq "baz"
-
-    attr_thing = div.members[2]
-    expect(attr_thing).to be_a Nextrb::RBX::Nodes::HTMLAttr
-    expect(attr_thing.name).to eq "thing"
-    expect(attr_thing.value).to be_a Nextrb::RBX::Nodes::ExpressionGroup
-    expect(attr_thing.value.members.first.content).to eq "exprValue"
+    expect(parse(code)).to eq [
+      node(:html, name: "div", void: false,
+                  attributes: [node(:attribute, name: "foo", content: node(:raw, content: '"bar"'))],
+                  content: [node(:raw, content: "\n")])
+    ]
   end
 
-  it "parses splat attributes" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:OPEN_ATTRS],
-                                    [:OPEN_ATTR_SPLAT],
-                                    [:OPEN_EXPRESSION],
-                                    [:EXPRESSION_BODY, "{ attr1: 'val1', attr2: 'val2' }"],
-                                    [:CLOSE_EXPRESSION],
-                                    [:CLOSE_ATTR_SPLAT],
-                                    [:CLOSE_ATTRS],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    div = subject.parse.children.first
-    expect(div).to be_a Nextrb::RBX::Nodes::HTMLElement
-    expect(div.members.length).to eq 1
-
-    attr_foo = div.members[0]
-    expect(attr_foo).to be_a Nextrb::RBX::Nodes::ExpressionGroup
-    expect(attr_foo.members.first.content).to eq "{ attr1: 'val1', attr2: 'val2' }"
+  it "allows attributes to span multiple lines" do
+    code = <<~CODE.strip
+      <div foo="bar"
+           baz="bip">
+      </div>
+    CODE
+    expect(parse(code)).to eq [
+      node(:html, name: "div", void: false,
+                  attributes: [
+                    node(:attribute, name: "foo", content: node(:raw, content: '"bar"')),
+                    node(:attribute, name: "baz", content: node(:raw, content: '"bip"'))
+                  ],
+                  content: [node(:raw, content: "\n")])
+    ]
   end
 
-  it "finds no children for self-closing tags" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "input", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    input = subject.parse.children.first
-    expect(input).to be_a Nextrb::RBX::Nodes::HTMLElement
-    expect(input.children.length).to eq 0
+  it "allows attributes to be on the next line after the tag name" do
+    code = <<~CODE.strip
+      <input
+        foo="bar"
+        baz="bip"
+      />
+    CODE
+    expect(parse(code)).to eq [
+      node(:html, name: "input", void: true,
+                  attributes: [
+                    node(:attribute, name: "foo", content: node(:raw, content: '"bar"')),
+                    node(:attribute, name: "baz", content: node(:raw, content: '"bip"'))
+                  ])
+    ]
   end
 
-  it "parses children" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "h1", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "h1"],
-                                    [:CLOSE_TAG_END],
-
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "p", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "span", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "span"],
-                                    [:CLOSE_TAG_END],
-
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "p"],
-                                    [:CLOSE_TAG_END],
-
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "div"],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    div = subject.parse.children.first
-    expect(div).to be_a Nextrb::RBX::Nodes::HTMLElement
-    expect(div.name).to eq "div"
-    expect(div.children.length).to eq 2
-
-    h1 = div.children[0]
-    expect(h1.name).to eq "h1"
-    expect(h1.children.length).to eq 0
-
-    p = div.children[1]
-    expect(p.name).to eq "p"
-    expect(p.children.length).to eq 1
-
-    span = p.children[0]
-    expect(span.name).to eq "span"
-    expect(span.children.length).to eq 0
+  it "parses attributes with colon in the name" do
+    nodes = parse(%(<svg version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" />))
+    expect(nodes).to eq [
+      node(:html, name: "svg", void: true,
+                  attributes: [
+                    node(:attribute, name: "version", content: node(:raw, content: '"1.1"')),
+                    node(:attribute, name: "xmlns:xlink", content: node(:raw, content: '"http://www.w3.org/1999/xlink"'))
+                  ])
+    ]
   end
 
-  it "parses multiple things at the root" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "div"],
-                                    [:CLOSE_TAG_END],
-
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "h1", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "h1"],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    template = subject.parse
-
-    div = template.children[0]
-    expect(div.name).to eq "div"
-
-    h1 = template.children[1]
-    expect(h1.name).to eq "h1"
+  it "doesn't try to parse tags within %q(...) string notation" do
+    template = <<~RBX.strip
+      <div attr={%q(
+        <p>something</p>
+      )} />
+    RBX
+    expect(parse(template)).to eq [
+      node(:html, name: "div", void: true, attributes: [
+             node(:attribute, name: "attr", content: node(:expr_group, content: [
+                                                            node(:expression, content: "%q(\n  <p>something</p>\n)")
+                                                          ]))
+           ])
+    ]
   end
 
-  it "parses text within a tag into Nextrb::RBX::Nodes::Text" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:TEXT, "Hello world"],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "div"],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    div = subject.parse.children.first
-    text = div.children.first
-    expect(text).to be_a Nextrb::RBX::Nodes::Raw
-    expect(text.content).to eq "Hello world"
+  it "treats escaped \\\" as part of the attribute value" do
+    expect(parse('<input value="Some \"value\"">')).to eq [
+      node(:html, name: "input", void: true, attributes: [
+             node(:attribute, name: "value", content: node(:raw, content: '"Some \"value\""'))
+           ])
+    ]
   end
 
-  it "parses expression within a tag into Nextrb::RBX::Nodes::Expression" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_EXPRESSION],
-                                    [:EXPRESSION_BODY, "thing = 'foo'"],
-                                    [:CLOSE_EXPRESSION],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "div"],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    div = subject.parse.children.first
-    expr = div.children.first
-    expect(expr).to be_a Nextrb::RBX::Nodes::ExpressionGroup
-    expect(expr.members.first.content).to eq "thing = 'foo'"
+  it "parses self-closing html tags with attributes" do
+    expected = [node(:html, name: "input", void: true, attributes: [
+                       node(:attribute, name: "thing", content: node(:raw, content: '"value"'))
+                     ])]
+    expect(parse('<input thing="value" />')).to eq expected
+    expect(parse('<input thing="value"/>')).to eq expected
   end
 
-  it "raises an error when encountering tag that opens but never closes" do
-    subject = described_class.new([
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "div", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "h1", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:TEXT, "Hello world"],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "h1"],
-                                    [:CLOSE_TAG_END],
-                                    [:OPEN_TAG_DEF],
-                                    [:TAG_DETAILS, { name: "br", type: :html }],
-                                    [:CLOSE_TAG_DEF],
-                                    [:OPEN_TAG_END],
-                                    [:TAG_NAME, "div"],
-                                    [:CLOSE_TAG_END]
-                                  ])
-
-    expect { Timeout.timeout(1) { subject.parse } }
-      .to raise_error(Nextrb::RBX::Parser::ParseError)
+  it "parses a kwarg splat attribute" do
+    expect(parse("<div {**the_attrs}></div>")).to eq [
+      node(:html, name: "div", void: false, attributes: [
+             node(:expr_group, content: [
+                    node(:expression, content: "**the_attrs")
+                  ])
+           ])
+    ]
   end
 
-  it "raises an error when encountering expression that opens but never closes" do
-    subject = described_class.new([
-                                    [:OPEN_EXPRESSION]
-                                  ])
+  it "parses attributes with expression values" do
+    expect(parse("<input value={aVar}>")).to eq [
+      node(:html, name: "input", void: true, attributes: [
+             node(:attribute, name: "value", content: node(:expr_group, content: [
+                                                             node(:expression, content: "aVar")
+                                                           ]))
+           ])
+    ]
+  end
 
-    expect { Timeout.timeout(1) { subject.parse } }
-      .to raise_error(Nextrb::RBX::Parser::ParseError)
+  it "parses basic html child tags" do
+    expect(parse(%(<div><span></span></div>))).to eq [
+      node(:html, name: "div", void: false, content: [node(:html, name: "span", void: false)])
+    ]
+  end
+
+  it "parses self-closing html tags" do
+    expect(parse("<input />")).to eq [node(:html, name: "input", void: true)]
+    expect(parse("<input/>")).to eq [node(:html, name: "input", void: true)]
+    expect(parse("<link>")).to eq [node(:html, name: "link", void: true)]
+  end
+
+  it "parses text inside a tag" do
+    expected = [node(:html, name: "div", void: false, content: [node(:raw, content: "Hello world")])]
+    expect(parse(%(<div>Hello world</div>))).to eq expected
+  end
+
+  it "parses an expression inside a tag" do
+    expect(parse("<div>{aVar}</div>")).to eq [
+      node(:html, name: "div", void: false,
+                  content: [node(:expr_group, content: [node(:expression, content: "aVar")])])
+    ]
+  end
+
+  it "parses two expressions next to one another" do
+    expect(parse("{aVar}{anotherVar}")).to eq [
+      node(:expr_group, content: [node(:expression, content: "aVar")]),
+      node(:expr_group, content: [node(:expression, content: "anotherVar")])
+    ]
+  end
+
+  it "parses an expression along with text inside a tag" do
+    expect(parse("<div>Hello {aVar}!</div>")).to eq [
+      node(:html, name: "div", void: false, content: [
+             node(:raw, content: "Hello "),
+             node(:expr_group, content: [node(:expression, content: "aVar")]),
+             node(:raw, content: "!")
+           ])
+    ]
+  end
+
+  it 'treats escaped \{ as text' do
+    expect(parse('Hey \{thing\}')).to eq [node(:raw, content: "Hey \\{thing\\}")]
+  end
+
+  it "allows for { ... } to exist within an expression (e.g. a Ruby hash)" do
+    nodes = parse('{thing = { hashKey: "value" }; moreCode}')
+    expect(nodes).to eq [node(:expr_group, content: [
+                                node(:expression, content: "thing = { hashKey: \"value\" }; moreCode")
+                              ])]
+  end
+
+  it "allows for expressions to have arbitrary brackets inside quoted strings" do
+    nodes = parse(%({something "quoted {bracket}" '{}' "'{'" more}))
+    expect(nodes).to eq [node(:expr_group, content: [
+                                node(:expression, content: %(something "quoted {bracket}" '{}' "'{'" more))
+                              ])]
+  end
+
+  it "doesn't consider escaped quotes to end an expression quoted string" do
+    nodes = parse('{"he said \"hello {there}\" loudly"}')
+    expect(nodes).to eq [node(:expr_group, content: [
+                                node(:expression, content: '"he said \"hello {there}\" loudly"')
+                              ])]
+  end
+
+  it "parses an expression that starts with a tag" do
+    expect(parse("{<h1>Title</h1>}")).to eq [
+      node(:expr_group, content: [
+             node(:html, name: "h1", void: false, content: [node(:raw, content: "Title")])
+           ])
+    ]
+  end
+
+  it "parses tags within a boolean expression" do
+    expect(parse("{true && <h1>Is true</h1>}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true && "),
+             node(:html, name: "h1", void: false, content: [node(:raw, content: "Is true")])
+           ])
+    ]
+  end
+
+  it "parses self-closing tags within a boolean expression" do
+    expect(parse("{true && <br />}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true && "),
+             node(:html, name: "br", void: true)
+           ])
+    ]
+  end
+
+  it "parses nested tags within a boolean expression" do
+    expect(parse("{true && <h1><span>Hey</span></h1>}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true && "),
+             node(:html, name: "h1", void: false, content: [
+                    node(:html, name: "span", void: false, content: [node(:raw, content: "Hey")])
+                  ])
+           ])
+    ]
+  end
+
+  it "does not specially tokenize boolean expressions that aren't followed by a tag" do
+    expect(parse("{true && 'hey'}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true && 'hey'")
+           ])
+    ]
+  end
+
+  it "allows for sub-expressions within a boolean expression tag" do
+    expect(parse("{true && <h1>Is {'hello'.upcase}</h1>}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true && "),
+             node(:html, name: "h1", void: false, content: [
+                    node(:raw, content: "Is "),
+                    node(:expr_group, content: [
+                           node(:expression, content: "'hello'.upcase")
+                         ])
+                  ])
+           ])
+    ]
+  end
+
+  it "parses tags within a ternary expression" do
+    expect(parse("{true ? <h1>Yes</h1> : <h2>No</h2>}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true ? "),
+             node(:html, name: "h1", void: false, content: [node(:raw, content: "Yes")]),
+             node(:expression, content: " : "),
+             node(:html, name: "h2", void: false, content: [node(:raw, content: "No")])
+           ])
+    ]
+  end
+
+  it "parses self-closing tags within a ternary expression" do
+    expect(parse("{true ? <br /> : <input />}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true ? "),
+             node(:html, name: "br", void: true),
+             node(:expression, content: " : "),
+             node(:html, name: "input", void: true)
+           ])
+    ]
+  end
+
+  it "parses tags within a boolean expression including an OR operator" do
+    expect(parse("{true || <p>Yes</p>}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "true || "),
+             node(:html, name: "p", void: false, content: [node(:raw, content: "Yes")])
+           ])
+    ]
+  end
+
+  it "parses tags within a do..end block" do
+    template = <<~RBX.strip
+      {3.times.map do
+        <p>Hello</p>
+      end}
+    RBX
+    expect(parse(template)).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "3.times.map do\n  "),
+             node(:html, name: "p", void: false, content: [node(:raw, content: "Hello")]),
+             node(:expression, content: "\nend")
+           ])
+    ]
+  end
+
+  it "parses tags within a do |var|..end block" do
+    template = <<~RBX.strip
+      {3.times.map do |n|
+        <p>Hello</p>
+      end}
+    RBX
+    expect(parse(template)).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "3.times.map do |n|\n  "),
+             node(:html, name: "p", void: false, content: [node(:raw, content: "Hello")]),
+             node(:expression, content: "\nend")
+           ])
+    ]
+  end
+
+  it "parses tags within a {..} block" do
+    expect(parse("{3.times.map { <p>Hello</p> }}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "3.times.map { "),
+             node(:html, name: "p", void: false, content: [node(:raw, content: "Hello")]),
+             node(:expression, content: " }")
+           ])
+    ]
+  end
+
+  it "parses tags within a {|var|..} block" do
+    expect(parse("{3.times.map { |n| <p>Hello</p> }}")).to eq [
+      node(:expr_group, content: [
+             node(:expression, content: "3.times.map { |n| "),
+             node(:html, name: "p", void: false, content: [node(:raw, content: "Hello")]),
+             node(:expression, content: " }")
+           ])
+    ]
   end
 end
+
+__END__

@@ -13,17 +13,12 @@ module Nextrb
       @env = env
       @req = Rack::Request.new(env)
       @resp = Rack::Response.new
+      content_type(Rack::MediaType.type(env["HTTP_ACCEPT"]))
     end
 
-    def ok(message = "OK") = text(message, :ok)
-    def bad_request(message = "Bad Request") = text(message, :bad_request)
-    def not_found(message = "Not Found") = text(message, :not_found)
-    def unauthorized(message = "Unauthorized") = text(message, :unauthorized)
-    def error(message = "Error") = text(message, 500)
-    def http_error(message, status) = text(message, status)
-    def text(message, txt_status = :ok) = respond(txt_status, :text, message)
-    def json(obj, json_status = :ok) = respond(json_status, :json, JSON.dump(obj))
-    def html(html_body, html_status = :ok) = respond(html_status, :html, html_body)
+    def text(body, stat = :ok) = respond(stat, :text, body)
+    def json(body, stat = :ok) = respond(stat, :json, JSON.dump(body))
+    def html(body, stat = :ok) = respond(stat, :html, body)
     def render(klass, **args) = html(klass.new(**args).render)
     def redirect_back = redirect(req.referer)
     def informational? = status.between?(100, 199)
@@ -33,6 +28,25 @@ module Nextrb
     def server_error? = status.between?(500, 599)
     def not_found? = status == 404
     def bad_request? = status == 400
+
+    def ok(body) = respond_with(body, :ok)
+    def not_found(body) = respond_with(body, :not_found)
+    def bad_request(body) = respond_with(body, :bad_request)
+    def unauthorized(body) = respond_with(body, :unauthorized)
+    def error(body) = respond_with(body, 500)
+
+    def respond_with(body, err_status)
+      case content_type
+      when "application/json"
+        json(body, err_status)
+      when "text/html"
+        html(body, err_status)
+      when "text/plain"
+        text(body, err_status)
+      else
+        status(err_status)
+      end
+    end
 
     def redirect(uri)
       http_version = env["SERVER_PROTOCOL"]
@@ -59,9 +73,9 @@ module Nextrb
       resp.headers
     end
 
-    def respond(stat, ctype, content)
+    def respond(stat, kind, content)
       status(stat)
-      content_type(ctype)
+      content_type(kind)
       body(content)
     end
 
@@ -81,8 +95,8 @@ module Nextrb
     # content_type will set the content-type header on the response if not already set.
     # If a content-type should be forced, meaning set even if it was already set, force
     # should be set to true.
-    def content_type(kind = nil, default: "text/html", force: false)
-      headers["Content-Type"] = mime_type(kind) || default if (!headers["content-type"] || force) && kind
+    def content_type(kind = nil)
+      headers["Content-Type"] = mime_type(kind) if kind
       headers["Content-Type"]
     end
 

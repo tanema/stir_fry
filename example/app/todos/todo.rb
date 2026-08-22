@@ -1,5 +1,5 @@
 module Todos
-  class Todo < Nextrb::Component::Base
+  class Todo < Nextrb::Component
     attr_reader :todo
 
     class << self
@@ -47,6 +47,9 @@ __END__
   <div class="view">
     <input type="checkbox" {**checkbox_attrs} />
     <label>{ todo["text"] }</label>
-    <button class="destroy" hx-delete={ "/todo/#{todo["id"]}" } hx-target="#todo-list" hx-swap="innerHTML"></button>
+    <button class="destroy"
+            hx-delete={ "/todo/#{todo["id"]}" }
+            hx-target="#todo-list" 
+            hx-swap="innerHTML"></button>
   </div>
 </li>

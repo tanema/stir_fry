@@ -66,25 +66,32 @@ module Nextrb
     end
 
     def call(env)
-      request = Request.new(env)
-      response = Response.new(env)
-      handler, _, request.args = find_route(request)
-      raise NotFound if handler.nil?
+      handle_request(Request.new(env), Response.new(env))
+    rescue NotFound
+      handle_not_found(env)
+    end
 
-      verb = request.request_method.downcase.to_sym
+    def handle_request(req, resp)
+      handler, _, req.args = find_route(req)
+      verb = req.request_method.downcase.to_sym
       handler = handler.method(verb) if handler.respond_to?(verb)
-      handler.call(request, response)
+      handler.call(req, resp)
+      resp.finish
+    end
+
+    def handle_not_found(env)
+      response = Response.new(env)
+      response.not_found("Not found")
       response.finish
     end
 
     def find_route(req)
-      puts "VERB: #{req.request_method} ROUTES: #{self.class.routes[req.request_method]}"
       routes = self.class.routes[req.request_method] || []
       routes.each do |route|
         params = route[0].params(req.path_info)
         return [route[2], route[1], params] if params
       end
-      [nil, nil, nil]
+      raise NotFound
     end
 
     def builder

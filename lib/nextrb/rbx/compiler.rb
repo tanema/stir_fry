@@ -2,151 +2,161 @@
 
 module Nextrb
   module RBX
-    # Compiler is a new version that does lexing and parsing all in one step
+    # Compiler takes in the parsed AST and outputs generated code.
     class Compiler
-      class SyntaxError < StandardError; end
-
-      attr_reader :filename, :template, :resolver, :scanner
-
-      HTML_VOID_ELEMENTS = %w[area base br col embed hr img input link meta source track wbr].freeze
-
-      DECLR_OR_COMMENT = /\s*<![^>]*>/
-      TAG_START = %r{\s*<(?!/)}
-      TAG_END = %r{\s*/?>}
-      TAG_CLOSE = %r{\s*</}
-      EXPR_START = /\s*{/
-      NOT_QUOTES = /[^"']+/
-      QUOTED_STRING = /["'](?<str>(?:[^"'\\]|\\.)*)["']/
-      QUOTES = /["']/
-      PLAIN_TEXT = /(?<text>(?:[^<{\\]|\\.)*)/
-      TAGNAME = /[A-Za-z0-9\-_.]+/
-      DO_BLOCK_PREFIX = /do\s+(\|[^|]+\|)?/
-      BLOCK_PREFIX = /{\s*(\|[^|]+\|)?/
-      AND = /&&/
-      OR = /\|\|/
-      TERNARY = /[?:]/
-      TAG_PREFIX = Regexp.union(DO_BLOCK_PREFIX, BLOCK_PREFIX, AND, OR, TERNARY)
-      NESTED_TAG_PREFIX = /(\s+#{TAG_PREFIX.source}\s*\z|\A\s*\z)/
-      WORD = /\w+/
-
-      def initialize(filename, template, resolver = ComponentResolver.new)
-        @filename = filename
-        @template = template
-        @resolver = resolver
-        @scanner = StringScanner.new(template)
+      def self.compile(nodes)
+        new.compile(nodes)
       end
 
-      def parse
-        parse_children
+      def compile(nodes)
+        <<~RBX
+          buffer = String.new
+          #{nodes.map { |n| buf_out(compile_node(n)) }.join.rstrip}
+          buffer
+        RBX
       end
 
-      def parse_children
-        parts = []
-        until scanner.eos? || scanner.check(%r{</})
-          parts << if scanner.scan(DECLR_OR_COMMENT) then Nodes::Raw.new(scanner.matched.gsub("'", "\\\\'"))
-                   elsif scanner.scan(TAG_START) then parse_tag
-                   elsif scanner.scan(EXPR_START) then parse_expression
-                   elsif scanner.scan(PLAIN_TEXT) then Nodes::Raw.new(scanner[:text])
-                   else raise SyntaxError
-                   end
+      def compile_node(node)
+        case node.kind
+        when :raw then node.content.strip.empty? ? "" : "'#{escape(node.content)}'"
+        when :html then compile_html(node).join("+")
+        when :component then compile_component(node)
+        when :expr_group then compile_text_expr_group(node)
+        else raise "unexpected node kind #{node.kind}"
         end
+      end
+
+      def compile_text_expr_group(node)
+        return "(#{compile_expr_group(node)}).to_s" if contains_markup?(node)
+
+        "::Nextrb::RBX.escape((#{compile_expr_group(node)}))"
+      end
+
+      def contains_markup?(node)
+        node.content&.any? { |n| %i[html component].include?(n.kind) }
+      end
+
+      def compile_html(node)
+        parts = tag_open(node)
+        parts.concat(node.content.map(&method(:compile_node))) unless node.void || node.content.nil?
+        parts << "'</#{node.name}>'" unless node.void
+        compact(parts)
+      end
+
+      def tag_open(node)
+        buffer = "<#{node.name}"
+        parts = []
+        node.attributes&.each { |attr| tag_attribute(buffer, parts, attr) }
+        buffer << (node.void ? "/>" : ">")
+        parts << "'#{escape(buffer)}'"
         parts
       end
 
-      def parse_tag
-        tagname = scanner.scan(TAGNAME) # tagname
-        node_klass = resolver.component?(tagname) ? Nodes::ComponentElement : Nodes::HTMLElement
-        attr_klass = resolver.component?(tagname) ? Nodes::ComponentProp : Nodes::HTMLAttr
-        node_klass.new(
-          name: tagname,
-          members: parse_tag_attributes(attr_klass),
-          children: parse_contents(tagname)
-        )
-      end
+      def tag_attribute(buffer, parts, attr)
+        return kwarg_attribute(buffer, parts, attr) if attr.kind == :expr_group
 
-      def parse_tag_attributes(attr_klass)
-        attrs = []
-        while scanner.check(/\s+[A-Za-z0-9\-_.:]+/) || scanner.check(EXPR_START)
-          attrs << (scanner.scan(EXPR_START) ? parse_expression : parse_tag_attribute(attr_klass))
-        end
-        attrs
-      end
+        buffer << " #{attr.name}"
+        return if attr.content.nil?
 
-      def parse_contents(tagname)
-        raise SyntaxError, "malformed tag, no end found" unless scanner.scan(TAG_END)
-
-        # allow void tags to not require using />
-        is_void = scanner.matched.strip == "/>" || HTML_VOID_ELEMENTS.include?(tagname)
-        children = is_void ? nil : parse_children
-        unless is_void || scanner.scan(%r{\s*</#{tagname}>})
-          raise SyntaxError,
-                "Closing tag for #{tagname} not found"
-        end
-
-        children
-      end
-
-      def parse_tag_attribute(attr_klass)
-        attr_name = scanner.scan(/\s+[A-Za-z0-9\-_.:]+/).strip
-        value = scanner.scan(/\s*=\s*/) ? parse_tag_attribute_value : true # attribute without assignment
-        attr_klass.new(attr_name, value)
-      end
-
-      def parse_tag_attribute_value
-        if scanner.check(QUOTES) # parse string value stack.push(:quoted_text)
-          chomp_quoted
-        elsif scanner.scan(WORD) # plain values like value=yes or width=300
-          scanner.matched
-        elsif scanner.scan(EXPR_START) # start expression open_expression
-          parse_expression
-        else
-          raise SyntaxError
+        buffer << "="
+        case attr.content.kind
+        when :raw then buffer << attr.content.content
+        when :expr_group then tag_attribute_expression(buffer, parts, attr.content)
+        else raise "unexpected attribute value kind #{attr.content.kind}"
         end
       end
 
-      def parse_expression
-        exprs = []
+      def tag_attribute_expression(buffer, parts, expr_group)
+        buffer << '"'
+        flush_buffer(buffer, parts)
+        parts << "::Nextrb::RBX.escape((#{compile_attr_expr_group(expr_group)}))"
+        buffer << '"'
+      end
 
-        open_count = 0
-        close_count = 0
-        curr_expr = String.new
-        until scanner.eos?
-          if scanner.scan(/}/)
-            break unless close_count + curr_expr.count("}") < open_count + curr_expr.count("{")
+      def kwarg_attribute(buffer, parts, expr_group)
+        flush_buffer(buffer, parts)
+        parts << "(tag_kwargs(#{compile_attr_expr_group(expr_group)})).to_s"
+      end
 
-            curr_expr += "}"
-          elsif scanner.scan(TAG_START)
-            # try to work out if we found a tag or a lessthan
-            if curr_expr =~ NESTED_TAG_PREFIX
-              open_count += curr_expr.count("{")
-              close_count += curr_expr.count("}")
-              exprs << Nodes::Expression.new(curr_expr) unless curr_expr.empty?
-              curr_expr = String.new
-              exprs << parse_tag
-            else
-              curr_expr += scanner.matched
-            end
+      def flush_buffer(buffer, parts)
+        parts << "'#{escape(buffer)}'" unless buffer.empty?
+        buffer.replace("")
+      end
+
+      def compile_component(node)
+        "::#{node.name.split(".").join("::")}.new(#{component_props(node)})#{component_block(node)}.render"
+      end
+
+      def component_props(node)
+        node.attributes&.map { |attr| component_prop(attr) }&.join(", ")
+      end
+
+      def component_prop(attr)
+        return "#{attr.name}: true" if attr.content.nil?
+
+        "#{attr.name}: #{component_prop_value(attr.content)}"
+      end
+
+      def component_prop_value(expr)
+        case expr.kind
+        when :raw then expr.content
+        when :expr_group then "(#{compile_attr_expr_group(expr)})"
+        else raise "unexpected component prop kind #{expr.kind}"
+        end
+      end
+
+      def compile_attr_expr_group(node)
+        node.content&.map do |n|
+          case n.kind
+          when :raw, :expression then n.content
+          else raise "unexpected component prop kind #{n.kind}"
+          end
+        end&.join
+      end
+
+      def compile_expr_group(node)
+        node.content&.map do |n|
+          case n.kind
+          when :raw, :expression then n.content
+          when :html then "(#{compile_html(n).join("+")})"
+          when :component then "(#{compile_component(n)})"
+          else raise "unexpected component prop kind #{n.kind}"
+          end
+        end&.join
+      end
+
+      def component_block(node)
+        return "" if node.content.nil? || node.content.empty?
+
+        <<~RBX.strip
+          .capture do |buffer|
+            #{node.content.map { |n| buf_out(compile_node(n)) }.join.rstrip}
+          end
+        RBX
+      end
+
+      def buf_out(content)
+        content.strip.empty? ? "" : %(buffer << #{content}\n)
+      end
+
+      def escape(str)
+        str.gsub("\\") { "\\\\" }.gsub("'") { "\\'" }
+      end
+
+      def compact(parts)
+        parts&.each_with_object([]) do |item, compacted|
+          next if item.empty?
+
+          if quoted_string?(item) && quoted_string?(compacted.last)
+            compacted[-1] = compacted.last.delete_suffix("'") + item.delete_prefix("'")
           else
-            curr_expr += scanner.scan(/[^<}]+/)
+            compacted.push(item)
           end
         end
-
-        exprs << Nodes::Expression.new(curr_expr) unless curr_expr.empty?
-
-        Nodes::ExpressionGroup.new(members: exprs)
       end
 
-      def chomp_quoted(with_quotes: false)
-        quote = scanner.check(QUOTES)
-        scanner.scan(QUOTED_STRING)
-        val = scanner[:str]
-        raise SyntaxError, "unterminated string" if val.nil?
-
-        with_quotes ? "#{quote}#{val}#{quote}" : val
-      end
-
-      def line_no
-        template[0..scanner.pos].count("\n") + 1
+      def quoted_string?(item)
+        item =~ /^'.*'$/
       end
     end
   end

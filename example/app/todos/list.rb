@@ -1,5 +1,5 @@
 module Todos
-  class List < Nextrb::Component::Base
+  class List < Nextrb::Component
     attr_reader :todos
 
     # POST /todo
@@ -19,6 +19,6 @@ end
 __END__
 <section id="todo-list" class="main">
   <ul class="todo-list">
-    {todos.map { |todo| <Todos.Todo todo={todo} /> } }
+    {todos.map { |todo| <Todos.Todo todo={todo} /> }.join}
   </ul>
 </section>

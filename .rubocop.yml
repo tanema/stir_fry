@@ -5,7 +5,7 @@ plugins:
 AllCops:
   TargetRubyVersion: 3.1
   Exclude:
-    - 'example/**/*.rb'
+    - "example/**/*.rb"
 
 Gemspec/AddRuntimeDependency: # new in 1.65
   Enabled: true
@@ -136,7 +136,7 @@ Metrics/CollectionLiteralLength: # new in 1.47
 Metrics/ClassLength: # new in 1.47
   Enabled: false
 Metrics/BlockLength:
-  AllowedMethods: ['describe', 'context', 'it']
+  AllowedMethods: ["describe", "context", "it"]
 Metrics/AbcSize:
   Max: 25
 Naming/BlockForwarding: # new in 1.24
@@ -335,7 +335,7 @@ Style/TallyMethod: # new in 1.85
   Enabled: true
 Style/YAMLFileRead: # new in 1.53
   Enabled: true
-RSpec/MultipleExpectations: 
+RSpec/MultipleExpectations:
   Enabled: false
 RSpec/ExampleLength:
   Enabled: false

@@ -21,7 +21,8 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler-cache: false
+      - name: Install gems
+        run: bundle install
       - name: RSpec
         run: bundle exec rake spec
       - name: Rubocop

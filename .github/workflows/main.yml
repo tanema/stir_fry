@@ -18,11 +18,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+          bundler-cache: false
       - name: RSpec
         run: bundle exec rake spec
       - name: Rubocop

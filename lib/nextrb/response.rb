@@ -16,11 +16,6 @@ module Nextrb
       content_type(Rack::MediaType.type(env["HTTP_ACCEPT"]))
     end
 
-    def text(body, stat = :ok) = respond(stat, :text, body)
-    def json(body, stat = :ok) = respond(stat, :json, JSON.dump(body))
-    def html(body, stat = :ok) = respond(stat, :html, body)
-    def render(klass, **args) = html(klass.new(**args).render)
-    def redirect_back = redirect(req.referer)
     def informational? = status.between?(100, 199)
     def success? = status.between?(200, 299)
     def redirect? = status.between?(300, 399)
@@ -47,6 +42,13 @@ module Nextrb
         status(err_status)
       end
     end
+
+    def text(body, stat = :ok) = respond(stat, :text, body)
+    def json(body, stat = :ok) = respond(stat, :json, JSON.dump(body))
+    def html(body, stat = :ok) = respond(stat, :html, body)
+    def render(klass, **args) = html(klass.new(**args).render)
+
+    def redirect_back = redirect(req.referer)
 
     def redirect(uri)
       http_version = env["SERVER_PROTOCOL"]

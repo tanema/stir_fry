@@ -29,9 +29,8 @@
 ## Todos
 
 - [ ] Rename? I don't like tying myself to preconceived notions.
-- [x] Improve/rewrite lexer/parser so that error messages can be clearer.
-- [x] Class.[verb] for handling specific requests.
+- [ ] Establish patterns for responding to mime types.
 - [ ] Server error handling / pages.
-- [x] check templates are not reused when the templates are not labelled
-- [x] HTML escaping has all been removed `Rack::Utils.escape_html`
 - [ ] File serving HTTP_IF_MODIFIED_SINCE
+- [ ] sessions
+- [ ] update example with database

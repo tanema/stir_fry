@@ -6,7 +6,7 @@ module Todos
   autoload :List, File.expand_path("todos/list", __dir__)
 end
 
-class Root < Nextrb::Component::Base
+class Root < Nextrb::Component
   def todos
     ::App.todos
   end

@@ -14,6 +14,7 @@ module Nextrb
   autoload :RBX, "nextrb/rbx"
   autoload :Request, "nextrb/request"
   autoload :Response, "nextrb/response"
+  autoload :OptionMarshaller, "nextrb/option_marshaller"
 
   @server = Server.new
   class << self

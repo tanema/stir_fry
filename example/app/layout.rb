@@ -1,4 +1,4 @@
-class Layout < Nextrb::Component::Base
+class Layout < Nextrb::Component
 end
 
 __END__

@@ -33,7 +33,9 @@ rooms and mailing lists is expected to follow the
 These are the projects that I took both inspiration and code chunks from. Since I 
 wanted an interface a lot like Sinatra, I used their codebase heavily for routing.
 Also since I wanted a reactjs markdown style, I used rbexy initially but then 
-ended up re-writing a lot of it to remove all rails integrations and simplify.
+ended up re-writing a lot of it to remove all rails integrations and I ended up 
+rewriting to more of a classical recursive descent parser just because it would be
+more comfortable for me to work on.
 
 - [Sinatra](https://github.com/sinatra/sinatra/)
 - [Rbexy](https://github.com/patbenatar/rbexy)

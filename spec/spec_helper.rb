@@ -2,13 +2,14 @@
 
 require "bundler/setup"
 require "nextrb"
+require_relative "support/button"
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
-
-  config.expect_with :rspec do |c|
-    c.syntax = :expect
-  end
-
   config.filter_run_when_matching :focus
+
+  config.expect_with :rspec do |expectations|
+    expectations.syntax = :expect
+    expectations.max_formatted_output_length = nil
+  end
 end

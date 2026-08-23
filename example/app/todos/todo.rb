@@ -7,13 +7,13 @@ module Todos
       def put(req, resp)
         todo = ::App.todos.find { |t| t["id"] == req.args["id"].to_i }
         todo["done"] = !todo["done"]
-        resp.render(self, todo: todo)
+        resp.ok(new(todo: todo))
       end
 
       # DELETE /todo/:id
       def delete(req, resp)
         ::App.todos.delete_if { |t| t["id"] == req.args["id"].to_i }
-        resp.render(List, todos: ::App.todos)
+        resp.render(List.new(todos: ::App.todos))
       end
     end
 

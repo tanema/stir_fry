@@ -23,7 +23,7 @@
     - Verb methods on classes to allow for handling a specific verb
     - Proc optional but not recommended
 - Component consists of a `Nextrb::Component` inherited class and a template at the 
-  end of the file with `__END__`, rendered with `Nextrb::RBX` a `jsx` style markup.
+  end of the file with `__END__`, rendered with `RBX` a `jsx` style markup.
 - Ideally the whole page is rendered then only partials replaced with htmx
 
 ## Todos
@@ -32,5 +32,7 @@
 - [ ] Establish patterns for responding to mime types.
 - [ ] Server error handling / pages.
 - [ ] File serving HTTP_IF_MODIFIED_SINCE
-- [ ] sessions
+- [ ] route scopes?
+- [ ] rack-session
+- [ ] rack-protection
 - [ ] update example with database

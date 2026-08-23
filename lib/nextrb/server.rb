@@ -7,8 +7,11 @@ module Nextrb
   class Server
     attr_reader :app, :running_server
 
-    def run!(app)
-      Rackup::Handler.default.run(app.builder) do |server|
+    def run!(app_klass)
+      builder = Rack::Builder.new
+      app_klass.middleware.each { |c, a, b| builder.use(c, *a, &b) }
+      builder.run(app_klass.new)
+      Rackup::Handler.default.run(builder) do |server|
         handle_traps
         @running_server = server
       end

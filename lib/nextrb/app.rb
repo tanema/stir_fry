@@ -37,8 +37,6 @@ module Nextrb
             resp.send_file(req, path)
           end
         end
-
-        # send_file path, options.merge(disposition: nil)
       end
 
       # valid uses:
@@ -65,11 +63,26 @@ module Nextrb
       end
     end
 
+    # rubocop:disable Metrics/MethodLength
     def call(env)
-      handle_request(Request.new(env), Response.new(env))
+      resp = Response.new(env)
+      handle_request(Request.new(env), resp)
     rescue NotFound
-      handle_not_found(env)
+      resp.not_found("Not found")
+    rescue BadRequest
+      resp.bad_request("Bad Request")
+    rescue Unauthorized
+      resp.unauthorized("Unauthorized")
+    rescue Error => e
+      resp.internal_error(e.message)
+    rescue OKAY
+      resp.finish
+    ensure
+      resp.finish
     end
+    # rubocop:enable Metrics/MethodLength
+
+    private
 
     def handle_request(req, resp)
       handler, _, req.args = find_route(req)
@@ -79,26 +92,12 @@ module Nextrb
       resp.finish
     end
 
-    def handle_not_found(env)
-      response = Response.new(env)
-      response.not_found("Not found")
-      response.finish
-    end
-
     def find_route(req)
-      routes = self.class.routes[req.request_method] || []
-      routes.each do |route|
+      self.class.routes[req.request_method]&.each do |route|
         params = route[0].params(req.path_info)
         return [route[2], route[1], params] if params
       end
       raise NotFound
-    end
-
-    def builder
-      builder = Rack::Builder.new
-      self.class.middleware.each { |c, a, b| builder.use(c, *a, &b) }
-      builder.run(self)
-      builder
     end
   end
 end

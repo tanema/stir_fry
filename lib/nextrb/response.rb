@@ -24,31 +24,37 @@ module Nextrb
     def not_found? = status == 404
     def bad_request? = status == 400
 
-    def ok(body) = respond_with(body, :ok)
-    def not_found(body) = respond_with(body, :not_found)
-    def bad_request(body) = respond_with(body, :bad_request)
-    def unauthorized(body) = respond_with(body, :unauthorized)
-    def error(body) = respond_with(body, 500)
+    def ok(body) = respond(body, :ok)
+    def not_found(body) = respond(body, :not_found)
+    def bad_request(body) = respond(body, :bad_request)
+    def unauthorized(body) = respond(body, :unauthorized)
+    def internal_error(body) = respond(body, 500)
 
-    def respond_with(body, err_status)
-      case content_type
-      when "application/json"
-        json(body, err_status)
-      when "text/html"
-        html(body, err_status)
-      when "text/plain"
-        text(body, err_status)
-      else
-        status(err_status)
+    def ok! = raise OKAY
+    def not_found! = raise NotFound
+    def bad_request! = raise BadRequest
+    def unauthorized! = raise Unauthorized
+    def internal_error! = raise Error
+
+    def respond(obj, stat)
+      case obj
+      when Hash then json(body, stat)
+      when Nextrb::Component then render(obj, stat)
+      when String then text(body, stat)
+      else status(stat)
       end
     end
 
-    def text(body, stat = :ok) = respond(stat, :text, body)
-    def json(body, stat = :ok) = respond(stat, :json, JSON.dump(body))
-    def html(body, stat = :ok) = respond(stat, :html, body)
-    def render(klass, **args) = html(klass.new(**args).render)
+    def text(body, stat = :ok) = answer(stat, :text, body)
+    def json(body, stat = :ok) = answer(stat, :json, JSON.dump(body))
+    def html(body, stat = :ok) = answer(stat, :html, body)
+    def render(klass, stat = :ok) = html(klass.render, stat)
 
-    def redirect_back = redirect(req.referer)
+    def answer(stat, kind, content)
+      status(stat)
+      content_type(kind)
+      body(content)
+    end
 
     def redirect(uri)
       http_version = env["SERVER_PROTOCOL"]
@@ -59,6 +65,8 @@ module Nextrb
       end
       headers["Location"] = uri.to_s
     end
+
+    def redirect_back = redirect(req.referer)
 
     def uri(addr = nil, absolute: true)
       port_required = req.forwarded? || (req.port != (req.secure? ? 443 : 80))
@@ -73,12 +81,6 @@ module Nextrb
     def headers(hash = nil)
       resp.headers.merge! hash if hash
       resp.headers
-    end
-
-    def respond(stat, kind, content)
-      status(stat)
-      content_type(kind)
-      body(content)
     end
 
     def status(value = nil)
@@ -145,7 +147,7 @@ module Nextrb
       else send_partial_file(filename, ranges, size)
       end
     rescue Errno::ENOENT
-      not_found
+      raise NotFound
     end
 
     def finish

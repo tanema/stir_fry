@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 
+require "rbx"
+
 # Nextrb is the namespace that contains the library and is the main entrypoint
 # to run the app.
 module Nextrb
   class Error < StandardError; end
+  class OKAY < Error; end
   class BadRequest < Error; end
   class NotFound < Error; end
+  class Unauthorized < Error; end
 
   autoload :Version, "nextrb/version"
   autoload :App, "nextrb/app"
   autoload :Server, "nextrb/server"
   autoload :Component, "nextrb/component"
-  autoload :RBX, "nextrb/rbx"
   autoload :Request, "nextrb/request"
   autoload :Response, "nextrb/response"
-  autoload :OptionMarshaller, "nextrb/option_marshaller"
 
   @server = Server.new
   class << self

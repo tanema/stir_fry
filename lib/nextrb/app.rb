@@ -65,19 +65,19 @@ module Nextrb
 
     # rubocop:disable Metrics/MethodLength
     def call(env)
+      req = Request.new(env)
       resp = Response.new(env)
-      handle_request(Request.new(env), resp)
-    rescue NotFound
-      resp.not_found("Not found")
-    rescue BadRequest
-      resp.bad_request("Bad Request")
-    rescue Unauthorized
-      resp.unauthorized("Unauthorized")
-    rescue Error => e
-      resp.internal_error(e.message)
-    rescue OKAY
-      resp.finish
-    ensure
+      begin
+        handle_request(req, resp)
+      rescue NotFound
+        Pages::NotFound.call(req, resp)
+      rescue BadRequest
+        Pages::BadRequest.call(req, resp)
+      rescue Unauthorized
+        Pages::Unauthorized.call(req, resp)
+      rescue Error => e
+        Pages::InternalError.call(req, resp, e.message)
+      end
       resp.finish
     end
     # rubocop:enable Metrics/MethodLength

@@ -30,7 +30,6 @@
 
 - [ ] Rename? I don't like tying myself to preconceived notions.
 - [ ] Establish patterns for responding to mime types.
-- [ ] Server error handling / pages.
 - [ ] File serving HTTP_IF_MODIFIED_SINCE
 - [ ] route scopes?
 - [ ] rack-session

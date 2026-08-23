@@ -2,7 +2,7 @@
 
 module Nextrb
   module Pages
-    class NotFound
+    class BadRequest
       include RBX::Component
 
       attr_reader :req, :resp
@@ -18,16 +18,16 @@ module Nextrb
 
       def call
         if req.json?
-          resp.json({ error: "not_found", message: message }, :not_found)
+          resp.json({ error: "bad_request", message: message }, :bad_request)
         elsif req.html?
-          resp.html(render, :not_found)
+          resp.html(render, :bad_request)
         else
-          resp.text(message, :not_found)
+          resp.text(message, :bad_request)
         end
       end
 
       def message
-        "No page was found for #{req.request_method.upcase} #{req.path_info}"
+        "Bad Request for #{req.request_method.upcase} #{req.path_info}"
       end
     end
   end
@@ -36,8 +36,8 @@ end
 __END__
 <Nextrb.Pages.Layout>
 <section class="error-page">
-  <p class="error-page__code">404</p>
-  <h1 class="error-page__title">Not Found</h1>
+  <p class="error-page__code">400</p>
+  <h1 class="error-page__title">Bad Request</h1>
   <p class="error-page__message">{message}</p>
 </section>
 </Nextrb.Pages.Layout>

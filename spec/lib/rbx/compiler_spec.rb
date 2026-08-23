@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe Nextrb::RBX::Compiler do
+RSpec.describe RBX::Compiler do
   def compile(template)
-    described_class.compile(Nextrb::RBX::Parser.parse("test", template))
+    described_class.compile(RBX::Parser.parse("test", template))
   end
 
   it "outputs plain text" do
@@ -89,7 +89,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     CODE
     expected = <<~RBX
       buffer = String.new
-      buffer << '<div foo="bar"><h1>Some heading</h1><p class="someClass">A paragraph</p><div id="'+::Nextrb::RBX.escape((dynamicId))+'" class="divClass"><p>More text</p></div></div>'
+      buffer << '<div foo="bar"><h1>Some heading</h1><p class="someClass">A paragraph</p><div id="'+::RBX.escape((dynamicId))+'" class="divClass"><p>More text</p></div></div>'
       buffer
     RBX
     expect(compile(template)).to eq expected
@@ -119,7 +119,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     template = '<p class={@dynamic_class}>Hello {"world".upcase}</p>'
     expected = <<~RBX
       buffer = String.new
-      buffer << '<p class="'+::Nextrb::RBX.escape((@dynamic_class))+'">Hello '+::Nextrb::RBX.escape(("world".upcase))+'</p>'
+      buffer << '<p class="'+::RBX.escape((@dynamic_class))+'">Hello '+::RBX.escape(("world".upcase))+'</p>'
       buffer
     RBX
     expect(compile(template)).to eq expected
@@ -132,7 +132,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     result = compile(template)
     expected = <<~RBX
       buffer = String.new
-      buffer << '<div attr="'+::Nextrb::RBX.escape((%q(<p>something</p>)))+'"/>'
+      buffer << '<div attr="'+::RBX.escape((%q(<p>something</p>)))+'"/>'
       buffer
     RBX
     expect(result).to eq expected
@@ -152,8 +152,8 @@ RSpec.describe Nextrb::RBX::Compiler do
     result = compile("{aVar}{anotherVar}")
     expected = <<~RBX
       buffer = String.new
-      buffer << ::Nextrb::RBX.escape((aVar))
-      buffer << ::Nextrb::RBX.escape((anotherVar))
+      buffer << ::RBX.escape((aVar))
+      buffer << ::RBX.escape((anotherVar))
       buffer
     RBX
     expect(result).to eq expected
@@ -163,7 +163,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     result = compile('{thing = { hashKey: "value" }; moreCode}')
     expected = <<~RBX
       buffer = String.new
-      buffer << ::Nextrb::RBX.escape((thing = { hashKey: "value" }; moreCode))
+      buffer << ::RBX.escape((thing = { hashKey: "value" }; moreCode))
       buffer
     RBX
     expect(result).to eq expected
@@ -213,7 +213,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     result = compile("{true && 'hey'}")
     expected = <<~RBX
       buffer = String.new
-      buffer << ::Nextrb::RBX.escape((true && 'hey'))
+      buffer << ::RBX.escape((true && 'hey'))
       buffer
     RBX
     expect(result).to eq expected
@@ -223,7 +223,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     result = compile("{true && <h1>Is {'hello'.upcase}</h1>}")
     expected = <<~RBX
       buffer = String.new
-      buffer << (true && ('<h1>Is '+::Nextrb::RBX.escape(('hello'.upcase))+'</h1>')).to_s
+      buffer << (true && ('<h1>Is '+::RBX.escape(('hello'.upcase))+'</h1>')).to_s
       buffer
     RBX
     expect(result).to eq expected
@@ -307,7 +307,7 @@ RSpec.describe Nextrb::RBX::Compiler do
     result = compile("<ul>{[1, 2, 3].map { |n| <li>{n}</li> }.join}</ul>")
     expected = <<~RBX
       buffer = String.new
-      buffer << '<ul>'+([1, 2, 3].map { |n| ('<li>'+::Nextrb::RBX.escape((n))+'</li>') }.join).to_s+'</ul>'
+      buffer << '<ul>'+([1, 2, 3].map { |n| ('<li>'+::RBX.escape((n))+'</li>') }.join).to_s+'</ul>'
       buffer
     RBX
     expect(result).to eq expected

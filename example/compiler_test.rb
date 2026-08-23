@@ -14,4 +14,4 @@ template = <<~RBX
 </li>
 RBX
 
-puts Nextrb::RBX.compile(__FILE__, template)
+puts RBX.compile(__FILE__, template)

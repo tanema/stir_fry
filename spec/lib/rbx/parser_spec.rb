@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe Nextrb::RBX::Parser do
+RSpec.describe RBX::Parser do
   def parse(template)
     described_class.new("test", template).parse
   end
 
   def node(kind, **args)
-    Nextrb::RBX::Parser::Node.new(kind: kind, **args)
+    RBX::Parser::Node.new(kind: kind, **args)
   end
 
   it "parses plain text" do

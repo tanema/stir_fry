@@ -3,7 +3,7 @@
 require "json"
 require "rack"
 
-module Nextrb
+module RBX
   # OptionMarshaller is a class that is used for serializing a hash into
   # html tag attributes. It is a class so that scope of methods can be managed.
   class OptionMarshaller

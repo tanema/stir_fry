@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Nextrb::OptionMarshaller do
+RSpec.describe RBX::OptionMarshaller do
   it "sets regular tag arguments" do
     expect(described_class.tag_kwargs({ width: 10 })).to eq 'width="10"'
   end

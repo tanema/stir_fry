@@ -24,4 +24,4 @@ class App < Nextrb::App # :nodoc:
   put "/todo/:id/toggle", Todos::Todo
 end
 
-Nextrb.run!(App.new)
+Nextrb.run!(App)

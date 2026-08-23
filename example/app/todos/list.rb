@@ -6,7 +6,7 @@ module Todos
     def self.post(req, resp)
       ::App.todos << { "id" => ::App.next_id, "text" => req.params["text"] }
       ::App.next_id += 1
-      resp.render(self, todos: ::App.todos)
+      resp.ok(new(todos: ::App.todos))
     end
 
     def initialize(todos:)

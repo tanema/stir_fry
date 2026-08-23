@@ -11,12 +11,13 @@ module Nextrb
   class NotFound < Error; end
   class Unauthorized < Error; end
 
-  autoload :Version, "nextrb/version"
   autoload :App, "nextrb/app"
-  autoload :Server, "nextrb/server"
   autoload :Component, "nextrb/component"
+  autoload :Pages, "nextrb/pages"
   autoload :Request, "nextrb/request"
   autoload :Response, "nextrb/response"
+  autoload :Server, "nextrb/server"
+  autoload :Version, "nextrb/version"
 
   @server = Server.new
   class << self

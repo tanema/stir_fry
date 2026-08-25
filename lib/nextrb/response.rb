@@ -126,14 +126,12 @@ module Nextrb
       "\n" => "%0A"
     }.freeze
 
-    def send_attachment(req, filename)
-      headers["Content-Disposition"] =
-        format('attachment; filename="%s"',
-               File.basename(filename).gsub(/["\r\n]/, MULTIPART_FORM_DATA_REPLACEMENT_TABLE))
-      servce_file(req, filename)
-    end
-
-    def send_file(req, filename)
+    def send_file(req, filename, attachment: false)
+      if attachment
+        headers["Content-Disposition"] =
+          format('attachment; filename="%s"',
+                 File.basename(filename).gsub(/["\r\n]/, MULTIPART_FORM_DATA_REPLACEMENT_TABLE))
+      end
       serve_file(req, filename)
     end
 

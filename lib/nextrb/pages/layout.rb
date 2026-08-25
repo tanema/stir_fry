@@ -65,6 +65,18 @@ module Nextrb
           margin: 0.5rem 0 1rem;
         }
 
+        .error-page__path {
+          display: inline-block;
+          margin: 0 0 1rem;
+          padding: 0.35rem 0.75rem;
+          border: 1px solid var(--ruby-green);
+          border-radius: 4px;
+          background: #eef6f0;
+          color: var(--ink);
+          font-family: Menlo, Consolas, "Liberation Mono", monospace;
+          font-size: 0.9rem;
+        }
+
         .error-page__message {
           color: var(--muted);
         }

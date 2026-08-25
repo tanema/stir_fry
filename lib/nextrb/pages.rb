@@ -4,9 +4,6 @@ module Nextrb
   # Pages contains built in pages for errors
   module Pages
     autoload :Layout, "nextrb/pages/layout"
-    autoload :NotFound, "nextrb/pages/not_found"
-    autoload :BadRequest, "nextrb/pages/bad_request"
-    autoload :Unauthorized, "nextrb/pages/unauthorized"
-    autoload :InternalError, "nextrb/pages/internal_error"
+    autoload :ErrorPage, "nextrb/pages/error_page"
   end
 end

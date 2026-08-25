@@ -11,10 +11,12 @@ module Nextrb
 
     def initialize(env)
       @env = env
-      @req = Rack::Request.new(env)
+      @req = Nextrb::Request.new(env)
       @resp = Rack::Response.new
       content_type(Rack::MediaType.type(env["HTTP_ACCEPT"]))
     end
+
+    def logger = req.logger
 
     def informational? = status.between?(100, 199)
     def success? = status.between?(200, 299)
@@ -30,25 +32,25 @@ module Nextrb
     def unauthorized(body) = respond(body, :unauthorized)
     def internal_error(body) = respond(body, 500)
 
-    def ok! = raise OKAY
-    def not_found! = raise NotFound
-    def bad_request! = raise BadRequest
-    def unauthorized! = raise Unauthorized
-    def internal_error! = raise Error
-
-    def respond(obj, stat)
-      case obj
-      when Hash then json(body, stat)
-      when Nextrb::Component then render(obj, stat)
-      when String then text(body, stat)
-      else status(stat)
-      end
-    end
+    def ok!(msg = "") = raise OKAY, msg
+    def not_found!(msg = "") = raise NotFound, msg
+    def bad_request!(msg = "") = raise BadRequest, msg
+    def unauthorized!(msg = "") = raise Unauthorized, msg
+    def internal_error!(msg = "") = raise InternalError, msg
 
     def text(body, stat = :ok) = answer(stat, :text, body)
     def json(body, stat = :ok) = answer(stat, :json, JSON.dump(body))
     def html(body, stat = :ok) = answer(stat, :html, body)
     def render(klass, stat = :ok) = html(klass.render, stat)
+
+    def respond(obj, stat)
+      case obj
+      when Hash then json(obj, stat)
+      when Nextrb::Component then render(obj, stat)
+      when String then text(obj, stat)
+      else status(stat)
+      end
+    end
 
     def answer(stat, kind, content)
       status(stat)
@@ -72,7 +74,7 @@ module Nextrb
       port_required = req.forwarded? || (req.port != (req.secure? ? 443 : 80))
       uri = [host = String.new]
       if absolute
-        host.push("http#{"s" if req.secure?}://", port_required ? req.host_with_port : req.host)
+        host.concat("http#{"s" if req.secure?}://", port_required ? req.host_with_port : req.host)
       end
       uri << (addr || req.path_info).to_s
       File.join uri
@@ -171,6 +173,8 @@ module Nextrb
       headers["content-range"] = "bytes */#{size}"
       http_error("Byte range unsatisfiable", 416)
     end
+
+    def http_error(message, code) = answer(code, :text, message)
 
     def send_partial_file(filename, ranges, size)
       if ranges.size == 1

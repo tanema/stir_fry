@@ -10,6 +10,7 @@ module Nextrb
   class BadRequest < Error; end
   class NotFound < Error; end
   class Unauthorized < Error; end
+  class InternalError < Error; end
 
   autoload :App, "nextrb/app"
   autoload :Component, "nextrb/component"
@@ -24,13 +25,7 @@ module Nextrb
     attr_reader :server
   end
 
-  def self.run!(app)
-    server.run!(app)
-  end
-
-  def self.quit!
-    return if server.nil?
-
-    server.respond_to?(:stop!) ? server.stop! : server.stop
-  end
+  def self.run!(app) = server.run!(app)
+  def self.running? = server.running?
+  def self.quit! = server.quit!
 end

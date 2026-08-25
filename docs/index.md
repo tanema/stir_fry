@@ -31,25 +31,14 @@
 
 ## Todos
 
+- enable/disable production where default error pages are not served and nextrb
+    specific routes are not registered.
 - Rename? I don't like tying myself to preconceived notions.
 - File serving HTTP_IF_MODIFIED_SINCE
+- response#cache_control
+- response#last_modified
+- response#etag
 - rack-session
 - rack-protection
 - update example with sqlite
-- middleware
-- Config
-    - Error handlers
-
-
-```ruby
-builder1 = Rack::Builder.new
-builder1.use( ... )
-builder1.run(app_klass1)
-
-builder2 = Rack::Builder.new
-builder2.use( ... )
-builder2.run(app_klass2)
- 
-cascade = Rack::Cascade.new(builder1, builder2)
-Rackup::Handler.default.run(cascade)
-```
+- logger

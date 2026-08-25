@@ -2,7 +2,7 @@
 
 require "bundler/setup"
 require "nextrb"
-require_relative "support/button"
+require_relative "fixtures/button"
 
 RSpec.configure do |config|
   config.disable_monkey_patching!

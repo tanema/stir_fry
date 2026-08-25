@@ -11,9 +11,8 @@
 
 ## What this framework will not do
 - Manage datastores.
-- Manage configuration.
-- Manage layouts. It is up to the dev to decide exactly what is returned. 
-  This is for easy htmx usage.
+- Manage configuration will have the least amount of configuration and default to overrides.
+- Manage layouts. It is up to the dev to decide exactly what is returned. This is for easy htmx usage.
 
 ## Design points.
 - Single `Nextrb::App` that runs as the server
@@ -25,13 +24,32 @@
 - Component consists of a `Nextrb::Component` inherited class and a template at the 
   end of the file with `__END__`, rendered with `RBX` a `jsx` style markup.
 - Ideally the whole page is rendered then only partials replaced with htmx
+- Recommendations
+    - HTMX
+    - DryRb https://hanakai.org/dry
+    - smart_properties
 
 ## Todos
 
-- [ ] Rename? I don't like tying myself to preconceived notions.
-- [ ] Establish patterns for responding to mime types.
-- [ ] File serving HTTP_IF_MODIFIED_SINCE
-- [ ] route scopes?
-- [ ] rack-session
-- [ ] rack-protection
-- [ ] update example with database
+- Rename? I don't like tying myself to preconceived notions.
+- File serving HTTP_IF_MODIFIED_SINCE
+- rack-session
+- rack-protection
+- update example with sqlite
+- middleware
+- Config
+    - Error handlers
+
+
+```ruby
+builder1 = Rack::Builder.new
+builder1.use( ... )
+builder1.run(app_klass1)
+
+builder2 = Rack::Builder.new
+builder2.use( ... )
+builder2.run(app_klass2)
+ 
+cascade = Rack::Cascade.new(builder1, builder2)
+Rackup::Handler.default.run(cascade)
+```

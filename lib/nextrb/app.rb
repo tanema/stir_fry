@@ -17,8 +17,15 @@ module Nextrb
       [Rack::ContentType, "text/html"]
     ].freeze
 
+    @context = [["", DEFAULT_MIDDLEWARE.dup]]
+    @routes = {}
+
+    attr_accessor :request, :response, :env
+
     class << self
-      def use(middleware_class, *args, &block) = middleware << [middleware_class, args, block]
+      attr_accessor :context, :routes
+
+      def use(middleware_class, *args, &block) = context.last[1] << [middleware_class, args, block]
       def get(pattern, options = nil, klass = nil, &) = route("GET", pattern, options, klass, &)
       def head(pattern, options = nil, klass = nil, &) = route("HEAD", pattern, options, klass, &)
       def options(pattern, options = nil, klass = nil, &) = route("OPTIONS", pattern, options, klass, &)
@@ -39,62 +46,65 @@ module Nextrb
         end
       end
 
-      # valid uses:
-      # route("GET", "/") {}
-      # route("GET", "/", Page)
-      # route("GET", "/", {opt: true}) {}
-      # route("GET", "/", {opt: true}, Page)
+      def scope(prefix = "")
+        context.push([prefix, []])
+        yield
+        context.pop
+      end
+
       def route(verb, pattern, args, klass, &block)
         options, klass = if args.is_a?(Class)
                            [{}, args]
                          else
                            [args || {}, klass]
                          end
-        route_pat = Mustermann.new(pattern, **options.fetch(:path_options, {}))
+        prefix = context.each_with_object("") { |ctx, pfx| pfx + ctx[0] }
+        # middleware = options.fetch(:middleware, {})
+        route_pat = Mustermann.new(prefix + pattern, **options.fetch(:path_options, {}))
         (routes[verb] ||= []) << [route_pat, options, klass || block]
       end
 
-      def routes
-        @routes ||= {}
-      end
-
-      def middleware
-        @middleware ||= DEFAULT_MIDDLEWARE.dup
+      def call(env)
+        new(env).call
       end
     end
 
-    # rubocop:disable Metrics/MethodLength
-    def call(env)
-      req = Request.new(env)
-      resp = Response.new(env)
-      begin
-        handle_request(req, resp)
-      rescue NotFound
-        Pages::NotFound.call(req, resp)
-      rescue BadRequest
-        Pages::BadRequest.call(req, resp)
-      rescue Unauthorized
-        Pages::Unauthorized.call(req, resp)
-      rescue Error => e
-        Pages::InternalError.call(req, resp, e.message)
-      end
-      resp.finish
+    def initialize(env)
+      @env = env
+      @request = Request.new(env)
+      @response = Response.new(env)
     end
-    # rubocop:enable Metrics/MethodLength
+
+    def call
+      handle_request
+    rescue NotFound
+      error_page(:not_found)
+    rescue BadRequest
+      error_page(:bad_request)
+    rescue Unauthorized
+      error_page(:unauthorized)
+    rescue Error => e
+      error_page(:internal_server_error, e.message)
+    end
 
     private
 
-    def handle_request(req, resp)
-      handler, _, req.args = find_route(req)
-      verb = req.request_method.downcase.to_sym
-      handler = handler.method(verb) if handler.respond_to?(verb)
-      handler.call(req, resp)
-      resp.finish
+    def error_page(status, message = "")
+      Pages::ErrorPage.call(request, response, status, message)
+      response.finish
     end
 
-    def find_route(req)
-      self.class.routes[req.request_method]&.each do |route|
-        params = route[0].params(req.path_info)
+    def handle_request
+      handler, _, request.args = find_route
+      verb = request.request_method.downcase.to_sym
+      handler = handler.method(verb) if handler.respond_to?(verb)
+      handler.call(request, response)
+      response.finish
+    end
+
+    def find_route
+      self.class.routes[request.request_method]&.each do |route|
+        params = route[0].params(request.path_info)
         return [route[2], route[1], params] if params
       end
       raise NotFound

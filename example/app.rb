@@ -10,7 +10,7 @@ DEFAULT_TODOS = [
   { "id" => 1, "text" => "don't go crazy" }
 ]
 
-class App < Nextrb::App # :nodoc:
+class App < Nextrb::App 
   @todos = DEFAULT_TODOS
   @next_id = 2
   class << self

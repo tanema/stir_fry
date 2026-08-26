@@ -142,7 +142,7 @@ RSpec.describe RBX::Compiler do
     result = compile("<div {**the_attrs}></div>")
     expected = <<~RBX
       buffer = String.new
-      buffer << '<div'+(tag_kwargs(**the_attrs)).to_s+'></div>'
+      buffer << '<div'+(::RBX.tag_kwargs(**the_attrs)).to_s+'></div>'
       buffer
     RBX
     expect(result).to eq expected

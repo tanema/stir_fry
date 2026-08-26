@@ -59,17 +59,26 @@ class AppSpecApp < Nextrb::App
 
   get("/plain") { |_req, resp| resp.text("plain-ok") }
 
-  get("/wrapped", { middleware: [[AppSpecFixtures::HeaderMiddleware, "X-Powered-By", "nextrb"]] }) do |_req, resp|
-    resp.text("wrapped-ok")
+  scope do
+    use AppSpecFixtures::HeaderMiddleware, "X-Powered-By", "nextrb"
+    get("/wrapped") do |_req, resp|
+      resp.text("wrapped-ok")
+    end
   end
 
-  get("/blocked", { middleware: [AppSpecFixtures::BlockingMiddleware] }, AppSpecFixtures::Ping)
+  scope do
+    use AppSpecFixtures::BlockingMiddleware
+    get("/blocked", AppSpecFixtures::Ping)
+  end
 
   scope("/scoped") do
     use(AppSpecFixtures::TraceMiddleware, trace, "outer")
 
-    get("/order", { middleware: [[AppSpecFixtures::TraceMiddleware, trace, "inner"]] }) do |_req, resp|
-      resp.text("order-ok")
+    scope do
+      use AppSpecFixtures::TraceMiddleware, trace, "inner"
+      get("/order") do |_req, resp|
+        resp.text("order-ok")
+      end
     end
     get("/nested") { |_req, resp| resp.text("nested-ok") }
   end

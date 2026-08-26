@@ -3,12 +3,12 @@
 module RBX
   # SyntaxError is a error with a pinpoint of where in the template the issue lies.
   class SyntaxError < StandardError
-    attr_reader :parser
-
     def initialize(parser, message)
       @parser = parser
-      super("#{parser.filename}:#{line}:#{col} #{message}\n#{excerpt}")
+      super("#{@parser.filename}:#{line}:#{col} #{message}\n#{excerpt}")
     end
+
+    private
 
     def excerpt
       (excerpt_start..excerpt_end).map do |i|
@@ -17,7 +17,7 @@ module RBX
     end
 
     def lines
-      @lines ||= parser.template.split(/\R/, -1)
+      @lines ||= @parser.template.split(/\R/, -1)
     end
 
     def excerpt_start
@@ -37,7 +37,7 @@ module RBX
     end
 
     def line_info
-      @line_info ||= parser.template[0..parser.scanner.pos].split(/\R/, -1)
+      @line_info ||= @parser.template[0..@parser.scanner.pos].split(/\R/, -1)
     end
   end
 end

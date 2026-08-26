@@ -7,7 +7,7 @@ module RBX
   # the supporting capture/option marshalling behavior compiled templates
   # rely on.
   module Component
-    def self.included(base)
+    def self.included(base) # :nodoc:
       base.extend(ClassMethods)
     end
 
@@ -39,6 +39,9 @@ module RBX
       end
     end
 
+    # render will lazily compile the template for this class and then render it using
+    # the class as context as the compilation will define a _render_template method
+    # on the instance.
     def render
       klass = self.class
       klass.send(:compile!, *RBX.resolve_template(klass)) unless klass.respond_to?(:_render_template)
@@ -46,14 +49,11 @@ module RBX
       _render_template { RBX.safe(@child_buffer.nil? ? "" : @child_buffer) }
     end
 
-    def capture(&)
+    # public method to capture child content but should not be considered public interface.
+    def capture(&) # :nodoc:
       @child_buffer = String.new
       yield(@child_buffer)
       self
-    end
-
-    def tag_kwargs(options)
-      " #{OptionMarshaller.tag_kwargs(options)}"
     end
   end
 end

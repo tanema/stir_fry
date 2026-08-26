@@ -3,17 +3,20 @@
 module RBX
   # Compiler takes in the parsed AST and outputs generated code.
   class Compiler
+    # Compile parsed nodes into ruby source code that will output html
     def self.compile(nodes)
       new.compile(nodes)
     end
 
-    def compile(nodes)
+    def compile(nodes) # :nodoc:
       <<~RBX
         buffer = String.new
         #{nodes.map { |n| buf_out(compile_node(n)) }.join.rstrip}
         buffer
       RBX
     end
+
+    private
 
     def compile_node(node)
       case node.kind
@@ -74,7 +77,7 @@ module RBX
 
     def kwarg_attribute(buffer, parts, expr_group)
       flush_buffer(buffer, parts)
-      parts << "(tag_kwargs(#{compile_attr_expr_group(expr_group)})).to_s"
+      parts << "(::RBX.tag_kwargs(#{compile_attr_expr_group(expr_group)})).to_s"
     end
 
     def flush_buffer(buffer, parts)

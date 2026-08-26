@@ -6,8 +6,21 @@ require "mustermann"
 module Nextrb
   # App is the root of your Nextrb app that makes it runnable and ready for use
   # on any rack server
+  #
+  # Example:
+  #
+  # ```ruby
+  # class App < Nextrb::App
+  #   get "/" do |req, resp|
+  #     resp.text("Hello world")
+  #   end
+  #   get "/todo", Todos::List
+  # end
+  #
+  # Nextrb.run!(App)
+  # ```
   class App
-    DEFAULT_MIDDLEWARE = [
+    DEFAULT_MIDDLEWARE = [ # :nodoc:
       [Rack::Head],
       [Rack::CommonLogger], # maybe not default and should be added by dev
       [Rack::ShowStatus], # disable in production
@@ -15,11 +28,11 @@ module Nextrb
       [Rack::ContentLength]
     ].freeze
 
-    DEFAULT_STATIC = [ # disable in production
+    DEFAULT_STATIC = [ # :nodoc: disable in production
       Rack::URLMap.new("/nextrb" => Rack::Files.new(File.join(__dir__, "static")))
     ].freeze
 
-    DEFAULT_ERROR_HANDLERS = { # disable in production
+    DEFAULT_ERROR_HANDLERS = { # :nodoc: disable in production
       OKAY => ->(_req, resp, _err) { resp.finish },
       NotFound => ->(req, resp, err) { error_page(req, resp, :not_found, safe_err_message(err)) },
       BadRequest => ->(req, resp, err) { error_page(req, resp, :bad_request, safe_err_message(err)) },
@@ -27,70 +40,122 @@ module Nextrb
       InternalError => ->(req, resp, err) { error_page(req, resp, :internal_server_error, safe_err_message(err)) }
     }.freeze
 
-    FALLBACK_ERROR_HANDLER = lambda { |req, resp, err|
+    FALLBACK_ERROR_HANDLER = lambda { |req, resp, err| # :nodoc:
       error_page(req, resp, :internal_server_error, safe_err_message(err))
     }.freeze
 
-    REQUEST_ENV_KEY = "nextrb.request"
-    RESPONSE_ENV_KEY = "nextrb.response"
+    REQUEST_ENV_KEY = "nextrb.request" # :nodoc:
+    RESPONSE_ENV_KEY = "nextrb.response" # :nodoc:
 
-    attr_accessor :request, :response, :env
+    attr_accessor :request, :response, :env # :nodoc:
 
     class << self
-      def routes = @routes ||= {}
-      def error_handlers = @error_handlers ||= DEFAULT_ERROR_HANDLERS.dup
-      def use(middleware_class, *args, &block) = context.last[1] << [middleware_class, args, block]
-      def get(pattern, options = nil, klass = nil, &) = route("GET", pattern, options, klass, &)
-      def head(pattern, options = nil, klass = nil, &) = route("HEAD", pattern, options, klass, &)
-      def options(pattern, options = nil, klass = nil, &) = route("OPTIONS", pattern, options, klass, &)
-      def post(pattern, options = nil, klass = nil, &) = route("POST", pattern, options, klass, &)
-      def put(pattern, options = nil, klass = nil, &) = route("PUT", pattern, options, klass, &)
-      def patch(pattern, options = nil, klass = nil, &) = route("PATCH", pattern, options, klass, &)
-      def delete(pattern, options = nil, klass = nil, &) = route("DELETE", pattern, options, klass, &)
+      def routes = @routes ||= {} # :nodoc:
+      def error_handlers = @error_handlers ||= DEFAULT_ERROR_HANDLERS.dup # :nodoc:
+      def call(env) = root_app.call(env) # :nodoc:
+
+      # Add a GET request route to the application
+      def get(pattern, klass = nil, &) = route("GET", pattern, klass, &)
+
+      # Add a HEAD request route to the application
+      def head(pattern, klass = nil, &) = route("HEAD", pattern, klass, &)
+
+      # Add a OPTIONS request route to the application
+      def options(pattern, klass = nil, &) = route("OPTIONS", pattern, klass, &)
+
+      # Add a POST request route to the application
+      def post(pattern, klass = nil, &) = route("POST", pattern, klass, &)
+
+      # Add a PUT request route to the application
+      def put(pattern, klass = nil, &) = route("PUT", pattern, klass, &)
+
+      # Add a PATCH request route to the application
+      def patch(pattern, klass = nil, &) = route("PATCH", pattern, klass, &)
+
+      # Add a DELETE request route to the application
+      def delete(pattern, klass = nil, &) = route("DELETE", pattern, klass, &)
+
+      ##
+      # Add a handler for an error raised during runtime.
+      #
+      # Example:
+      #
+      # ```ruby
+      # class App < Nextrb::App
+      #   rescue_from Nextrb::NotFound do |req, resp|
+      #     resp.text("Not Found", :not_found)
+      #   end
+      # end
+      # ```
       def rescue_from(klass, &block) = error_handlers[klass] = block
 
+      ##
+      # Adds a middleware class to the chain of middleware. The order of operations
+      # is significant! So if you create routes before you add a middleware, the
+      # routes will not include the later middleware. This can be nice to scope
+      # your middleware but it can also be an easy mistake.
+      def use(middleware_class, *args, &block) = context.last[1] << [middleware_class, args, block]
+
+      ##
+      # Hosts a directory of static files. Every file within the directory will
+      # be requestable and sym links are followed so be careful what you host.
+      # A prefix can be added to the file routes to allow them to be scoped to a
+      # certain endpoint.
+      #
+      # Example:
+      #
+      # ```ruby
+      # class App < Nextrb::App
+      #   static File.join(__dir__, "public")
+      # end
+      # ```
       def static(dirname, prefix: "/")
         files = Rack::Files.new(File.expand_path(dirname))
         static_apps << (prefix == "/" ? files : Rack::URLMap.new(prefix => files))
       end
 
-      def scope(prefix = "")
+      ##
+      # Creates a sub-scope of routes that allow to prefix all the routes and add
+      # specific middleware that only applies to those routes.
+      #
+      # Example:
+      #
+      # ```ruby
+      # class App < Nextrb::App
+      #   scope "/todos" do
+      #     use AuthenticationMiddleware
+      #
+      #     get "/:id", Todo
+      #     delete "/:id", Todo
+      #     post "/:id", Todo
+      #   end
+      # end
+      # ```
+      def scope(prefix = "", &)
         context.push([prefix, []])
         yield
       ensure
         context.pop
       end
 
-      # valid uses:
-      # route("GET", "/") {}
-      # route("GET", "/", Page)
-      # route("GET", "/", {opt: true}) {}
-      # route("GET", "/", {opt: true}, Page)
-      # route("GET", "/", {middleware: [AuthCheck]}, Page)
-      def route(verb, pattern, args, klass, &block)
-        options, klass = args.is_a?(Class) ? [{}, args] : [args || {}, klass]
-        (routes[verb] ||= []) << [
-          build_route(pattern, options),
-          options,
-          route_handler(klass || block, options.fetch(:middleware, []))
-        ]
+      ##
+      # Raw route builder, used by the other helper models so `get("/")` becomes
+      # `route("GET", "/")`
+      def route(verb, pattern, klass, &block)
+        (routes[verb] ||= []) << [Mustermann.new(route_prefix + pattern), route_handler(klass || block)]
       end
-
-      def call(env) = root_app.call(env)
-      def _call = ->(env) { new(env).call }
 
       private
 
-      def build_route(pattern, options) = Mustermann.new(route_prefix + pattern, **options.fetch(:path_options, {}))
       def static_apps = @static_apps ||= DEFAULT_STATIC.dup
       def context = @context ||= [["", DEFAULT_MIDDLEWARE.dup]]
-      def root_app = @root_app ||= build_rack_app(context[0][1], Rack::Cascade.new(static_apps + [_call]))
-      def normalize_middleware(list) = list.map { |m| m.is_a?(Array) ? [m[0], m[1..], nil] : [m, [], nil] }
       def route_prefix = context.map(&:first).join
-      def route_middleware(mware) = context[1..].flat_map(&:last) + normalize_middleware(mware)
-      def route_handler(handler, mware) = build_rack_app(route_middleware(mware), wrap_handler(handler))
-
+      def route_handler(handler) = build_rack_app(context[1..].flat_map(&:last), wrap_handler(handler))
       def safe_err_message(err) = err.message == err.class.name ? "" : err.message
+
+      def root_app
+        @root_app ||= build_rack_app(context[0][1], Rack::Cascade.new(static_apps + [->(env) { new(env).call }]))
+      end
 
       def error_page(req, resp, status, message = "")
         Pages::ErrorPage.call(req, resp, status, message)
@@ -116,7 +181,7 @@ module Nextrb
       end
     end
 
-    def initialize(env)
+    def initialize(env) # :nodoc:
       @env = env
       @request = Request.new(env)
       @response = Response.new(env)
@@ -124,7 +189,7 @@ module Nextrb
       env[RESPONSE_ENV_KEY] = response
     end
 
-    def call
+    def call # :nodoc:
       find_route.call(env)
     rescue StandardError => e
       error_handler_for(e.class).call(env.fetch(REQUEST_ENV_KEY), env.fetch(RESPONSE_ENV_KEY), e)
@@ -142,7 +207,7 @@ module Nextrb
       self.class.routes[request.request_method]&.each do |route|
         params = route[0].params(request.path_info)
         request.args = params if params
-        return route[2] if params
+        return route[1] if params
       end
       raise NotFound
     end

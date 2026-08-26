@@ -3,8 +3,7 @@
 require "rackup"
 
 module Nextrb
-  # Server manages a rack instance to actually run the rack app with the Nextrb::App
-  class Server
+  class Server # :nodoc:
     SIGNALS = %i[INT TERM].freeze
 
     attr_reader :app, :running_server

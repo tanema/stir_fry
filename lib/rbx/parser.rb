@@ -39,23 +39,41 @@ module RBX
     NESTED_TAG_PREFIX = /(\s+#{TAG_PREFIX.source}\s*\z|\A\s*\z)/
     WORD = /\w+/
 
-    attr_reader :filename, :template, :scanner
+    private_constant :KNOWN_HTML_ELEMENTS, :HTML_VOID_ELEMENTS, :DECLR_OR_COMMENT,
+                     :TAG_START, :TAG_END, :EXPR_START, :QUOTED_STRING, :QUOTES,
+                     :QUOTED_EXPRESSION_STRING, :PLAIN_TEXT, :TAGNAME, :DO_BLOCK_PREFIX,
+                     :BLOCK_PREFIX, :AND, :OR, :TERNARY, :TAG_PREFIX, :NESTED_TAG_PREFIX, :WORD
 
+    # Is a struct for a single node in an AST type structure returned from the parser.
+    # This struct consists of:
+    #
+    # - `kind`: raw, attribute, expression, expr_group, html, component
+    # - `name`: If it is a component or html element this will be the tag name and
+    #   the name of an element attribute if the node is an attribute.
+    # - `attributes`: For tag, or components these are the attributes and their values.
+    # - `content`: For tag, or components this will be any nested child nodes, for
+    #   raw or expressions, this will be a string of raw output.
+    # - `void`: marks if an element has nested content or expects nested content.
     Node = Struct.new(:kind, :name, :attributes, :content, :void)
 
+    # Reads a template, lexes tokens, and builds an AST from the tokens.
     def self.parse(filename, template)
       new(filename, template).parse
     end
 
-    def initialize(filename, template)
+    def initialize(filename, template) # :nodoc:
       @filename = filename
       @template = template
       @scanner = StringScanner.new(template)
     end
 
-    def parse
+    def parse # :nodoc:
       parse_children
     end
+
+    private
+
+    attr_reader :filename, :template, :scanner
 
     def parse_children
       children = []
@@ -118,6 +136,7 @@ module RBX
     end
 
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+
     def parse_expression
       exprs = []
 
@@ -151,6 +170,7 @@ module RBX
 
       Node.new(kind: :expr_group, content: exprs)
     end
+
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     def chomp_quoted

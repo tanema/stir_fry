@@ -98,9 +98,6 @@ module Nextrb
       Rack::Mime.mime_type(type, nil)
     end
 
-    # content_type will set the content-type header on the response if not already set.
-    # If a content-type should be forced, meaning set even if it was already set, force
-    # should be set to true.
     def content_type(kind = nil)
       headers["Content-Type"] = mime_type(kind) if kind
       headers["Content-Type"]
@@ -137,6 +134,15 @@ module Nextrb
       serve_file(req, filename)
     end
 
+    def finish
+      clear_body_headers if informational? || [204, 304].include?(status)
+      resp.body = [] if [204, 304].include?(status)
+      content_length(body.map(&:bytesize).reduce(0, :+)) if calculate_content_length?
+      resp.to_a
+    end
+
+    private
+
     def serve_file(req, filename)
       content_type(File.extname(filename))
       last_modified(File.mtime(filename))
@@ -149,15 +155,6 @@ module Nextrb
     rescue Errno::ENOENT
       raise NotFound
     end
-
-    def finish
-      clear_body_headers if informational? || [204, 304].include?(status)
-      resp.body = [] if [204, 304].include?(status)
-      content_length(body.map(&:bytesize).reduce(0, :+)) if calculate_content_length?
-      resp.to_a
-    end
-
-    private
 
     def send_full_file_content(filename, size)
       content_length(size)

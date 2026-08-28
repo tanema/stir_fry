@@ -20,27 +20,46 @@ module Nextrb
   # Nextrb.run!(App)
   # ```
   class App
-    DEFAULT_MIDDLEWARE = [ # :nodoc:
+    include Common
+    extend Common
+
+    DEFAULT_DEVELOPMENT_MIDDLEWARE = [ # :nodoc:
       [Rack::Head],
-      [Rack::CommonLogger], # maybe not default and should be added by dev
-      [Rack::ShowStatus], # disable in production
-      [Rack::ShowExceptions], # disable in production
+      [Rack::CommonLogger],
+      [Rack::ShowStatus],
+      [Rack::ShowExceptions],
       [Rack::ContentLength]
     ].freeze
 
-    DEFAULT_STATIC = [ # :nodoc: disable in production
+    DEFAULT_PRODUCTION_MIDDLEWARE = [ # :nodoc:
+      [Rack::Head],
+      [Rack::CommonLogger],
+      [Rack::ContentLength]
+    ].freeze
+
+    DEFAULT_STATIC = [ # :nodoc:
       Rack::URLMap.new("/nextrb" => Rack::Files.new(File.join(__dir__, "static")))
     ].freeze
 
     DEFAULT_ERROR_HANDLERS = { # :nodoc: disable in production
       OKAY => ->(_req, resp, _err) { resp.finish },
+      Found => lambda { |_req, resp, _err|
+        resp.status(302)
+        resp.finish
+      },
+      NotModified => lambda { |_req, resp, _err|
+        resp.status(304)
+        resp.finish
+      },
       NotFound => ->(req, resp, err) { error_page(req, resp, :not_found, safe_err_message(err)) },
       BadRequest => ->(req, resp, err) { error_page(req, resp, :bad_request, safe_err_message(err)) },
       Unauthorized => ->(req, resp, err) { error_page(req, resp, :unauthorized, safe_err_message(err)) },
-      InternalError => ->(req, resp, err) { error_page(req, resp, :internal_server_error, safe_err_message(err)) }
+      InternalError => ->(req, resp, err) { error_page(req, resp, :internal_server_error, safe_err_message(err)) },
+      PreconditionFailed => ->(req, resp, err) { error_page(req, resp, :precondition_failed, safe_err_message(err)) }
     }.freeze
 
     FALLBACK_ERROR_HANDLER = lambda { |req, resp, err| # :nodoc:
+      req.logger.error(err)
       error_page(req, resp, :internal_server_error, safe_err_message(err))
     }.freeze
 
@@ -147,8 +166,12 @@ module Nextrb
 
       private
 
-      def static_apps = @static_apps ||= DEFAULT_STATIC.dup
-      def context = @context ||= [["", DEFAULT_MIDDLEWARE.dup]]
+      def static_apps = @static_apps ||= (development? ? DEFAULT_STATIC.dup : [])
+
+      def context
+        @context ||= [["", development? ? DEFAULT_DEVELOPMENT_MIDDLEWARE.dup : DEFAULT_PRODUCTION_MIDDLEWARE]]
+      end
+
       def route_prefix = context.map(&:first).join
       def route_handler(handler) = build_rack_app(context[1..].flat_map(&:last), wrap_handler(handler))
       def safe_err_message(err) = err.message == err.class.name ? "" : err.message

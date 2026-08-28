@@ -8,7 +8,7 @@ end
 
 class Root < Nextrb::Component
   def todos
-    ::App.todos
+    DB.all
   end
 end
 

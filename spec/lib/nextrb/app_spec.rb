@@ -59,6 +59,11 @@ class AppSpecApp < Nextrb::App
 
   get("/plain") { |_req, resp| resp.text("plain-ok") }
 
+  get("/conditional") do |_req, resp|
+    resp.last_modified(Time.at(1_700_000_000))
+    resp.text("fresh")
+  end
+
   scope do
     use AppSpecFixtures::HeaderMiddleware, "X-Powered-By", "nextrb"
     get("/wrapped") do |_req, resp|
@@ -100,6 +105,16 @@ RSpec.describe Nextrb::App do
     resp = mock.get("/plain")
     expect(resp.status).to eq(200)
     expect(resp.body).to eq("plain-ok")
+  end
+
+  it "returns 304 with an empty body when If-Modified-Since matches last_modified" do
+    resp = mock.get("/conditional")
+    expect(resp.status).to eq(200)
+    expect(resp.body).to eq("fresh")
+
+    resp = mock.get("/conditional", "HTTP_IF_MODIFIED_SINCE" => Time.at(1_700_000_000).httpdate)
+    expect(resp.status).to eq(304)
+    expect(resp.body).to eq("")
   end
 
   it "runs route-level middleware around the handler" do

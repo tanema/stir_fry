@@ -4,9 +4,8 @@ module Todos
 
     # POST /todo
     def self.post(req, resp)
-      ::App.todos << { "id" => ::App.next_id, "text" => req.params["text"] }
-      ::App.next_id += 1
-      resp.ok(new(todos: ::App.todos))
+      DB.create(req.params["text"])
+      resp.ok(new(todos: DB.all))
     end
 
     def initialize(todos:)

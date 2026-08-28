@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>CODE_OF_CONDUCT - RDoc Documentation</title>
+
+
+  <meta name="keywords" content="ruby,documentation,CODE_OF_CONDUCT">
+  <meta
+    name="description"
+    content="CODE_OF_CONDUCT: Contributor Covenant Code of Conduct ## Our Pledge We as members, contributors, and leaders pledge to make participation in our community a harassme"
+  >
+
+
+
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="CODE_OF_CONDUCT - RDoc Documentation">
+
+
+
+    <meta property="og:description" content="Contributor Covenant Code of Conduct ## Our Pledge We as members, contributors, and leaders pledge to make participation in our community a harassme">
+
+
+
+
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CODE_OF_CONDUCT - RDoc Documentation">
+
+
+
+    <meta name="twitter:description" content="Contributor Covenant Code of Conduct ## Our Pledge We as members, contributors, and leaders pledge to make participation in our community a harassme">
+
+
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script
+  src="./js/theme-toggle.js?v=8.0.0"
+></script>
+
+<script
+  src="./js/search_navigation.js?v=8.0.0"
+  defer
+></script>
+
+<script
+  src="./js/search_data.js?v=8.0.0"
+  defer
+></script>
+
+<script
+  src="./js/search_ranker.js?v=8.0.0"
+  defer
+></script>
+
+<script
+  src="./js/search_controller.js?v=8.0.0"
+  defer
+></script>
+
+<script
+  src="./js/c_highlighter.js?v=8.0.0"
+  defer
+></script>
+
+<script
+  src="./js/bash_highlighter.js?v=8.0.0"
+  defer
+></script>
+
+<script
+  src="./js/aliki.js?v=8.0.0"
+  defer
+></script>
+
+<link
+  href="./css/rdoc.css?v=8.0.0"
+  rel="stylesheet"
+>
+
+
+
+
+<body role="document" class="file has-toc">
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <!-- Chevron (right arrow) - used for expand/collapse -->
+  <symbol
+    id="icon-chevron"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </symbol>
+
+  <!-- File/Document - Pages section -->
+  <symbol
+    id="icon-file"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path
+      d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+    ></path>
+
+    <polyline points="14 2 14 8 20 8"></polyline>
+  </symbol>
+
+  <!-- Layers/Stack - Classes and Modules section -->
+  <symbol
+    id="icon-layers"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+    <polyline points="2 17 12 22 22 17"></polyline>
+    <polyline points="2 12 12 17 22 12"></polyline>
+  </symbol>
+
+  <!-- Curly braces with C - Class Methods section -->
+  <symbol
+    id="icon-class-methods"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M6 3C3.5 3 2 4.5 2 7v3c0 1.5-1 2-1 2s1 .5 1 2v5c0 2.5 1.5 4 4 4"></path>
+    <path d="M18 3c2.5 0 4 1.5 4 4v3c0 1.5 1 2 1 2s-1 .5-1 2v5c0 2.5-1.5 4-4 4"></path>
+
+    <text
+      x="12"
+      y="17"
+      text-anchor="middle"
+      font-size="13"
+      font-weight="bold"
+      fill="currentColor"
+      stroke="none"
+    >
+      C
+    </text>
+  </symbol>
+
+  <!-- Curly braces with I - Instance Methods section -->
+  <symbol
+    id="icon-instance-methods"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M6 3C3.5 3 2 4.5 2 7v3c0 1.5-1 2-1 2s1 .5 1 2v5c0 2.5 1.5 4 4 4"></path>
+    <path d="M18 3c2.5 0 4 1.5 4 4v3c0 1.5 1 2 1 2s-1 .5-1 2v5c0 2.5-1.5 4-4 4"></path>
+
+    <text
+      x="12"
+      y="17"
+      text-anchor="middle"
+      font-size="13"
+      font-weight="bold"
+      fill="currentColor"
+      stroke="none"
+    >
+      I
+    </text>
+  </symbol>
+
+  <!-- Double chevrons up - Ancestors section -->
+  <symbol
+    id="icon-ancestors"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <polyline points="17 11 12 6 7 11"></polyline>
+    <polyline points="17 18 12 13 7 18"></polyline>
+  </symbol>
+
+  <!-- User with plus - Included Modules section -->
+  <symbol
+    id="icon-includes"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+    <circle cx="8.5" cy="7" r="4"></circle>
+
+    <line
+      x1="20"
+      y1="8"
+      x2="20"
+      y2="14"
+    ></line>
+
+    <line
+      x1="23"
+      y1="11"
+      x2="17"
+      y2="11"
+    ></line>
+  </symbol>
+
+  <!-- User with check - Extended Modules section -->
+  <symbol
+    id="icon-extends"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+    <circle cx="8.5" cy="7" r="4"></circle>
+    <polyline points="17 11 19 13 23 9"></polyline>
+  </symbol>
+
+  <!-- List - Sections section -->
+  <symbol
+    id="icon-list"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <line
+      x1="8"
+      y1="6"
+      x2="21"
+      y2="6"
+    ></line>
+
+    <line
+      x1="8"
+      y1="12"
+      x2="21"
+      y2="12"
+    ></line>
+
+    <line
+      x1="8"
+      y1="18"
+      x2="21"
+      y2="18"
+    ></line>
+
+    <line
+      x1="3"
+      y1="6"
+      x2="3.01"
+      y2="6"
+    ></line>
+
+    <line
+      x1="3"
+      y1="12"
+      x2="3.01"
+      y2="12"
+    ></line>
+
+    <line
+      x1="3"
+      y1="18"
+      x2="3.01"
+      y2="18"
+    ></line>
+  </symbol>
+</svg>
+
+<header class="top-navbar">
+  <a href="./index.html" class="navbar-brand">
+    RDoc Documentation
+  </a>
+
+  <!-- Desktop search bar -->
+  <div class="navbar-search navbar-search-desktop" role="search">
+    <form action="#" method="get" accept-charset="utf-8">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results-desktop"
+             type="text" name="search" placeholder="Search (/) for a class, method..."
+             spellcheck="false" autocomplete="off"
+             title="Type to search, Up and Down to navigate, Enter to load">
+      <ul id="search-results-desktop" aria-label="Search Results"
+          aria-busy="false" aria-expanded="false"
+          aria-atomic="false" class="initially-hidden search-results"></ul>
+    </form>
+  </div>
+
+  <!-- Mobile search icon button -->
+  <button id="search-toggle" class="navbar-search-mobile" aria-label="Open search" type="button">
+    <span aria-hidden="true">🔍</span>
+  </button>
+
+  <!-- Theme toggle button -->
+  <button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" type="button">
+    <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
+  </button>
+</header>
+
+<!-- Search Modal (Mobile) -->
+<div id="search-modal" class="search-modal" hidden aria-modal="true" role="dialog" aria-label="Search">
+  <div class="search-modal-backdrop"></div>
+  <div class="search-modal-content">
+    <div class="search-modal-header">
+      <form class="search-modal-form" action="#" method="get" accept-charset="utf-8">
+        <span class="search-modal-icon" aria-hidden="true">🔍</span>
+        <input id="search-field-mobile" role="combobox" aria-label="Search"
+               aria-autocomplete="list" aria-controls="search-results-mobile"
+               type="text" name="search" placeholder="Search documentation"
+               spellcheck="false" autocomplete="off">
+        <button type="button" class="search-modal-close" aria-label="Close search" id="search-modal-close">
+          <span aria-hidden="true">esc</span>
+        </button>
+      </form>
+    </div>
+    <div class="search-modal-body">
+      <ul id="search-results-mobile" aria-label="Search Results"
+          aria-busy="false" aria-expanded="false"
+          aria-atomic="false" class="search-results search-modal-results initially-hidden"></ul>
+      <div class="search-modal-empty">
+        <p>No recent searches</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sidebar-navigation-toggle" role="button" tabindex="0" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="sidebar-navigation">
+  <span aria-hidden="true">&#9776;</span>
+</div>
+
+
+<nav id="sidebar-navigation" role="navigation" hidden>
+  
+
+
+
+
+
+
+  <div id="fileindex-section" class="nav-section">
+    <details class="nav-section-collapsible" open>
+      <summary class="nav-section-header">
+        <span class="nav-section-icon">
+          <svg>
+            <use href="#icon-file"></use>
+          </svg>
+        </span>
+
+        <span class="nav-section-title">Pages</span>
+
+        <span class="nav-section-chevron">
+          <svg>
+            <use href="#icon-chevron"></use>
+          </svg>
+        </span>
+      </summary>
+
+      <ul class="nav-list">
+
+
+
+
+
+
+            <li>
+              <a href="./CHANGELOG_md.html">
+                CHANGELOG
+              </a>
+            </li>
+
+
+
+
+            <li>
+              <a href="./CODE_OF_CONDUCT_md.html">
+                CODE_OF_CONDUCT
+              </a>
+            </li>
+
+
+
+
+            <li>
+              <a href="./LICENSE.html">
+                LICENSE
+              </a>
+            </li>
+
+      </ul>
+    </details>
+  </div>
+
+
+  <div id="classindex-section" class="nav-section">
+  <details class="nav-section-collapsible" open>
+    <summary class="nav-section-header">
+      <span class="nav-section-icon">
+        <svg><use href="#icon-layers"></use></svg>
+      </span>
+      <span class="nav-section-title">Classes and Modules</span>
+      <span class="nav-section-chevron">
+        <svg><use href="#icon-chevron"></use></svg>
+      </span>
+    </summary>
+
+    <ul class="link-list nav-list"><li><details><summary><code><a href="./Nextrb.html">Nextrb</a></code></summary><ul class="link-list nav-list"><li><code><a href="./Nextrb/App.html">App</a></code></li><li><code><a href="./Nextrb/BadRequest.html">BadRequest</a></code></li><li><code><a href="./Nextrb/Common.html">Common</a></code></li><li><code><a href="./Nextrb/Component.html">Component</a></code></li><li><code><a href="./Nextrb/Error.html">Error</a></code></li><li><code><a href="./Nextrb/Found.html">Found</a></code></li><li><code><a href="./Nextrb/InternalError.html">InternalError</a></code></li><li><code><a href="./Nextrb/NotFound.html">NotFound</a></code></li><li><code><a href="./Nextrb/NotModified.html">NotModified</a></code></li><li><code><a href="./Nextrb/OKAY.html">OKAY</a></code></li><li><details><summary><code><a href="./Nextrb/Pages.html">Pages</a></code></summary><ul class="link-list nav-list"><li><code><a href="./Nextrb/Pages/ErrorPage.html">ErrorPage</a></code></li><li><code><a href="./Nextrb/Pages/Layout.html">Layout</a></code></li></ul></details></li><li><code><a href="./Nextrb/PreconditionFailed.html">PreconditionFailed</a></code></li><li><code><a href="./Nextrb/Request.html">Request</a></code></li><li><code><a href="./Nextrb/Response.html">Response</a></code></li><li><code><a href="./Nextrb/Unauthorized.html">Unauthorized</a></code></li></ul></details></li><li><details><summary><code><a href="./RBX.html">RBX</a></code></summary><ul class="link-list nav-list"><li><code><a href="./RBX/Compiler.html">Compiler</a></code></li><li><details><summary><code><a href="./RBX/Component.html">Component</a></code></summary><ul class="link-list nav-list"><li><code><a href="./RBX/Component/ClassMethods.html">ClassMethods</a></code></li></ul></details></li><li><code><a href="./RBX/OptionMarshaller.html">OptionMarshaller</a></code></li><li><code><a href="./RBX/Parser.html">Parser</a></code></li><li><code><a href="./RBX/SafeString.html">SafeString</a></code></li><li><code><a href="./RBX/SyntaxError.html">SyntaxError</a></code></li></ul></details></li></ul>
+  </details>
+</div>
+
+</nav>
+
+<main role="main" aria-label="Page CODE_OF_CONDUCT.md">
+
+<span id="label-Contributor+Covenant+Code+of+Conduct" class="legacy-anchor"></span>
+<h1 id="contributor-covenant-code-of-conduct"><a href="#contributor-covenant-code-of-conduct">Contributor Covenant Code of Conduct</a></h1>
+
+<span id="label-Our+Pledge" class="legacy-anchor"></span>
+<h2 id="our-pledge"><a href="#our-pledge">Our Pledge</a></h2>
+
+<p>We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, color, religion, or sexual identity and orientation.</p>
+
+<p>We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.</p>
+
+<span id="label-Our+Standards" class="legacy-anchor"></span>
+<h2 id="our-standards"><a href="#our-standards">Our Standards</a></h2>
+
+<p>Examples of behavior that contributes to a positive environment for our community include:</p>
+<ul><li>
+<p>Demonstrating empathy and kindness toward other people</p>
+</li><li>
+<p>Being respectful of differing opinions, viewpoints, and experiences</p>
+</li><li>
+<p>Giving and gracefully accepting constructive feedback</p>
+</li><li>
+<p>Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience</p>
+</li><li>
+<p>Focusing on what is best not just for us as individuals, but for the overall community</p>
+</li></ul>
+
+<p>Examples of unacceptable behavior include:</p>
+<ul><li>
+<p>The use of sexualized language or imagery, and sexual attention or advances of any kind</p>
+</li><li>
+<p>Trolling, insulting or derogatory comments, and personal or political attacks</p>
+</li><li>
+<p>Public or private harassment</p>
+</li><li>
+<p>Publishing others’ private information, such as a physical or email address, without their explicit permission</p>
+</li><li>
+<p>Other conduct which could reasonably be considered inappropriate in a professional setting</p>
+</li></ul>
+
+<span id="label-Enforcement+Responsibilities" class="legacy-anchor"></span>
+<h2 id="enforcement-responsibilities"><a href="#enforcement-responsibilities">Enforcement Responsibilities</a></h2>
+
+<p>Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.</p>
+
+<p>Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.</p>
+
+<span id="label-Scope" class="legacy-anchor"></span>
+<h2 id="scope"><a href="#scope">Scope</a></h2>
+
+<p>This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces. Examples of representing our community include using an official email address, posting via an official social media account, or acting as an appointed representative at an online or offline event.</p>
+
+<span id="label-Enforcement" class="legacy-anchor"></span>
+<h2 id="enforcement"><a href="#enforcement">Enforcement</a></h2>
+
+<p>Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at [INSERT CONTACT METHOD]. All complaints will be reviewed and investigated promptly and fairly.</p>
+
+<p>All community leaders are obligated to respect the privacy and security of the reporter of any incident.</p>
+
+<span id="label-Enforcement+Guidelines" class="legacy-anchor"></span>
+<h2 id="enforcement-guidelines"><a href="#enforcement-guidelines">Enforcement Guidelines</a></h2>
+
+<p>Community leaders will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:</p>
+
+<span id="label-1.+Correction" class="legacy-anchor"></span>
+<h3 id="1-correction"><a href="#1-correction">1. Correction</a></h3>
+
+<p><strong>Community Impact</strong>: Use of inappropriate language or other behavior deemed unprofessional or unwelcome in the community.</p>
+
+<p><strong>Consequence</strong>: A private, written warning from community leaders, providing clarity around the nature of the violation and an explanation of why the behavior was inappropriate. A public apology may be requested.</p>
+
+<span id="label-2.+Warning" class="legacy-anchor"></span>
+<h3 id="2-warning"><a href="#2-warning">2. Warning</a></h3>
+
+<p><strong>Community Impact</strong>: A violation through a single incident or series of actions.</p>
+
+<p><strong>Consequence</strong>: A warning with consequences for continued behavior. No interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, for a specified period of time. This includes avoiding interactions in community spaces as well as external channels like social media. Violating these terms may lead to a temporary or permanent ban.</p>
+
+<span id="label-3.+Temporary+Ban" class="legacy-anchor"></span>
+<h3 id="3-temporary-ban"><a href="#3-temporary-ban">3. Temporary Ban</a></h3>
+
+<p><strong>Community Impact</strong>: A serious violation of community standards, including sustained inappropriate behavior.</p>
+
+<p><strong>Consequence</strong>: A temporary ban from any sort of interaction or public communication with the community for a specified period of time. No public or private interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, is allowed during this period. Violating these terms may lead to a permanent ban.</p>
+
+<span id="label-4.+Permanent+Ban" class="legacy-anchor"></span>
+<h3 id="4-permanent-ban"><a href="#4-permanent-ban">4. Permanent Ban</a></h3>
+
+<p><strong>Community Impact</strong>: Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an individual, or aggression toward or disparagement of classes of individuals.</p>
+
+<p><strong>Consequence</strong>: A permanent ban from any sort of public interaction within the community.</p>
+
+<span id="label-Attribution" class="legacy-anchor"></span>
+<h2 id="attribution"><a href="#attribution">Attribution</a></h2>
+
+<p>This Code of Conduct is adapted from the <a href="https://www.contributor-covenant.org">Contributor Covenant</a>, version 2.1, available at <a href="https://www.contributor-covenant.org/version/2/1/code_of_conduct.html">https://www.contributor-covenant.org/version/2/1/code_of_conduct.html</a>.</p>
+
+<p>Community Impact Guidelines were inspired by <a href="https://github.com/mozilla/diversity">Mozilla’s code of conduct enforcement ladder</a>.</p>
+
+<p>For answers to common questions about this code of conduct, see the FAQ at <a href="https://www.contributor-covenant.org/faq">https://www.contributor-covenant.org/faq</a>. Translations are available at <a href="https://www.contributor-covenant.org/translations">https://www.contributor-covenant.org/translations</a>.</p>
+
+</main>
+
+<aside id="table-of-contents" class="table-of-contents" role="complementary" aria-label="Table of Contents">
+  <div class="toc-sticky">
+    <h3 class="toc-heading">On This Page</h3>
+    <nav class="toc-nav" id="toc-nav" aria-label="Page sections">
+      <!-- Generated by JavaScript based on page headings -->
+    </nav>
+  </div>
+</aside>
+
+
+<footer class="site-footer">
+  
+
+  <div class="footer-bottom">
+    <p>
+      Generated by <a href="https://ruby.github.io/rdoc/">RDoc 8.0.0</a>
+      using the Aliki theme by <a href="http://st0012.dev">Stan Lo</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+

@@ -6,6 +6,8 @@ require "json"
 module Nextrb
   # Request expands Rack::Request to include url args
   class Request < Rack::Request
+    include Common
+
     attr_accessor :args
 
     def path = @path ||= Rack::Utils.unescape_path(path_info)

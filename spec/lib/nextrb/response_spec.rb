@@ -159,12 +159,12 @@ RSpec.describe Nextrb::Response do
       expect(resp.content_type).to eq("text/html")
     end
 
-    it "reads and writes last_modified and content_length" do
+    it "writes last_modified as an httpdate and reads/writes content_length" do
       resp = build_response
       time = Time.now
       resp.last_modified(time)
       resp.content_length(42)
-      expect(resp.last_modified).to eq(time)
+      expect(resp.headers["Last-Modified"]).to eq(time.httpdate)
       expect(resp.content_length).to eq("42")
     end
 
@@ -172,6 +172,84 @@ RSpec.describe Nextrb::Response do
       resp = build_response
       resp.body("hello")
       expect(resp.body).to eq(["hello"])
+    end
+  end
+
+  describe "#cache_control" do
+    it "joins flags and key=value pairs, dropping falsy entries and promoting true flags" do
+      resp = build_response
+      resp.cache_control(:public, :no_cache, max_age: 60, must_revalidate: true, private: false)
+      expect(resp.headers["Cache-Control"]).to eq("public, no-cache, must-revalidate, max-age=60")
+    end
+  end
+
+  describe "#expires" do
+    it "sets Expires and a derived max-age Cache-Control from a second count" do
+      resp = build_response
+      resp.expires(60, :public)
+      expect(resp.headers["Cache-Control"]).to eq("public, max-age=60")
+      expect(resp.headers["Expires"]).to eq((Time.now + 60).httpdate)
+    end
+  end
+
+  describe "#etag" do
+    it "quotes a strong etag by default and a weak one when requested" do
+      resp = build_response
+      resp.etag("abc")
+      expect(resp.headers["ETag"]).to eq('"abc"')
+
+      resp = build_response
+      resp.etag("abc", weak: true)
+      expect(resp.headers["ETag"]).to eq('W/"abc"')
+    end
+
+    it "raises NotModified for a safe request whose If-None-Match matches" do
+      resp = build_response("/", method: "GET", "HTTP_IF_NONE_MATCH" => '"abc"')
+      expect { resp.etag("abc") }.to raise_error(Nextrb::NotModified)
+    end
+
+    it "raises PreconditionFailed for an unsafe request whose If-None-Match matches" do
+      resp = build_response("/", method: "POST", "HTTP_IF_NONE_MATCH" => '"abc"')
+      expect { resp.etag("abc") }.to raise_error(Nextrb::PreconditionFailed)
+    end
+
+    it "raises PreconditionFailed when If-Match does not match the current etag" do
+      resp = build_response("/", method: "GET", "HTTP_IF_MATCH" => '"other"')
+      expect { resp.etag("abc") }.to raise_error(Nextrb::PreconditionFailed)
+    end
+
+    it "does not raise when If-Match matches the current etag" do
+      resp = build_response("/", method: "GET", "HTTP_IF_MATCH" => '"abc"')
+      expect { resp.etag("abc") }.not_to raise_error
+    end
+  end
+
+  describe "#last_modified conditional handling" do
+    let(:time) { Time.at(1_700_000_000) }
+
+    it "raises NotModified when If-Modified-Since is at or after the given time" do
+      resp = build_response("/", "HTTP_IF_MODIFIED_SINCE" => time.httpdate)
+      expect { resp.last_modified(time) }.to raise_error(Nextrb::NotModified)
+    end
+
+    it "does not raise when If-Modified-Since predates the given time" do
+      resp = build_response("/", "HTTP_IF_MODIFIED_SINCE" => (time - 60).httpdate)
+      expect { resp.last_modified(time) }.not_to raise_error
+    end
+
+    it "skips the If-Modified-Since check when If-None-Match is present" do
+      resp = build_response("/", "HTTP_IF_MODIFIED_SINCE" => time.httpdate, "HTTP_IF_NONE_MATCH" => '"abc"')
+      expect { resp.last_modified(time) }.not_to raise_error
+    end
+
+    it "raises PreconditionFailed when If-Unmodified-Since predates the given time" do
+      resp = build_response("/", "HTTP_IF_UNMODIFIED_SINCE" => (time - 60).httpdate)
+      expect { resp.last_modified(time) }.to raise_error(Nextrb::PreconditionFailed)
+    end
+
+    it "does not raise when If-Unmodified-Since is at or after the given time" do
+      resp = build_response("/", "HTTP_IF_UNMODIFIED_SINCE" => time.httpdate)
+      expect { resp.last_modified(time) }.not_to raise_error
     end
   end
 

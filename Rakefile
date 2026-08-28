@@ -17,10 +17,16 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 RDoc::Task.new do |rdoc|
-  rdoc.main = "docs/index.md"
+  rdoc.main = "README.md"
   rdoc.generator = "aliki"
-  rdoc.rdoc_files.include("lib/**/*.rb")
-  rdoc.rdoc_dir = "docs/reference"
+  rdoc.rdoc_files.include(
+    "lib/**/*.rb",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "README.md",
+    "LICENSE"
+  )
+  rdoc.rdoc_dir = "docs"
   rdoc.markup = "markdown"
 end
 

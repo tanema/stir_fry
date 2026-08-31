@@ -3,6 +3,8 @@
 module RBX
   # SyntaxError is a error with a pinpoint of where in the template the issue lies.
   class SyntaxError < StandardError
+    # Create a new syntax error with the parser, to locate where the syntax error
+    # is located.
     def initialize(parser, message)
       @parser = parser
       super("#{@parser.filename}:#{line}:#{col} #{message}\n#{excerpt}")

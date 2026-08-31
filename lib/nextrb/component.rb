@@ -16,16 +16,16 @@ module Nextrb
   #
   #     class << self
   #       # PUT /todo/:id/toggle
-  #       def put(req, resp)
-  #         todo = ::App.todos.find { |t| t["id"] == req.args["id"].to_i }
+  #       def put(request:, response:, id:)
+  #         todo = ::App.todos.find { |t| t["id"] == id.to_i }
   #         todo["done"] = !todo["done"]
-  #         resp.ok(new(todo: todo)) # Return a Todo view
+  #         response.ok(new(todo: todo)) # Return a Todo view
   #       end
   #
   #       # DELETE /todo/:id
-  #       def delete(req, resp)
-  #         ::App.todos.delete_if { |t| t["id"] == req.args["id"].to_i }
-  #         resp.render(List.new(todos: ::App.todos)) # Return a list view instead
+  #       def delete(request:, response:, id:)
+  #         ::App.todos.delete_if { |t| t["id"] == id.to_i }
+  #         response.render(List.new(todos: ::App.todos)) # Return a list view instead
   #       end
   #     end
   #
@@ -39,16 +39,37 @@ module Nextrb
   class Component
     include RBX::Component
 
-    attr_reader :request, :response
+    # request is the request that called this component. This is only defined on the root
+    # component that is defined on the route.
+    attr_accessor :request
+    # response is the response that is used for responding in the component.
+    # This is only defined on the root component that is defined on the route.
+    attr_accessor :response
 
-    def self.call(req, resp, **args)
-      new(**args).call(req, resp)
+    # Simple access to Nextrb.logger
+    def self.logger = Nextrb.logger
+
+    # call it the method called from routing. It is called with the request and response
+    # first, and the arguments to initialize the component will be appended to the
+    # end. It will set the request, and response on the component and call render
+    # on the component.
+    def self.call(request: nil, response: nil, **args)
+      new(request: request, response: response, **args).call
     end
 
-    def call(request, response)
-      @request = request
-      @response = response
+    # create a new component with a request and response
+    def initialize(request: nil, response: nil, **_args)
+      self.request = request
+      self.response = response
+    end
+
+    # call is sugar for `response.html(render)` and should be overriden to change how
+    # a component responds.
+    def call
       response.html(render)
     end
+
+    # Simple access to Nextrb.logger
+    def logger = Nextrb.logger
   end
 end

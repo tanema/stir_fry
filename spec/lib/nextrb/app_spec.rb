@@ -8,9 +8,15 @@ module AppSpecFixtures
   end
 
   class Ping
-    def self.get(req, resp)
-      AppSpecFixtures.handler_calls << req.path_info
-      resp.text("pong")
+    def self.get(request:, response:)
+      AppSpecFixtures.handler_calls << request.path_info
+      response.text("pong")
+    end
+  end
+
+  class Echo
+    def self.get(response:, id:, **)
+      response.text("echo-#{id}")
     end
   end
 
@@ -57,17 +63,23 @@ class AppSpecApp < Nextrb::App
   static(File.expand_path("../../fixtures/static", __dir__))
   static(File.expand_path("../../fixtures/static_prefixed", __dir__), prefix: "/assets")
 
-  get("/plain") { |_req, resp| resp.text("plain-ok") }
+  get("/plain") { |response:, **| response.text("plain-ok") }
 
-  get("/conditional") do |_req, resp|
-    resp.last_modified(Time.at(1_700_000_000))
-    resp.text("fresh")
+  get("/conditional") do |response:, **|
+    response.last_modified(Time.at(1_700_000_000))
+    response.text("fresh")
+  end
+
+  get("/echo/:id", AppSpecFixtures::Echo)
+
+  get("/items/:category/:id") do |category:, id:, response:, **|
+    response.text("#{category}/#{id}")
   end
 
   scope do
     use AppSpecFixtures::HeaderMiddleware, "X-Powered-By", "nextrb"
-    get("/wrapped") do |_req, resp|
-      resp.text("wrapped-ok")
+    get("/wrapped") do |response:, **|
+      response.text("wrapped-ok")
     end
   end
 
@@ -81,16 +93,16 @@ class AppSpecApp < Nextrb::App
 
     scope do
       use AppSpecFixtures::TraceMiddleware, trace, "inner"
-      get("/order") do |_req, resp|
-        resp.text("order-ok")
+      get("/order") do |response:, **|
+        response.text("order-ok")
       end
     end
-    get("/nested") { |_req, resp| resp.text("nested-ok") }
+    get("/nested") { |response:, **| response.text("nested-ok") }
   end
 end
 
 class OtherAppSpecApp < Nextrb::App
-  get("/only-here") { |_req, resp| resp.text("isolated-ok") }
+  get("/only-here") { |response:, **| response.text("isolated-ok") }
 end
 
 RSpec.describe Nextrb::App do
@@ -115,6 +127,18 @@ RSpec.describe Nextrb::App do
     resp = mock.get("/conditional", "HTTP_IF_MODIFIED_SINCE" => Time.at(1_700_000_000).httpdate)
     expect(resp.status).to eq(304)
     expect(resp.body).to eq("")
+  end
+
+  it "passes a captured route param as a keyword argument to a class-based handler" do
+    resp = mock.get("/echo/42")
+    expect(resp.status).to eq(200)
+    expect(resp.body).to eq("echo-42")
+  end
+
+  it "passes multiple captured route params as keyword arguments to a block handler" do
+    resp = mock.get("/items/books/7")
+    expect(resp.status).to eq(200)
+    expect(resp.body).to eq("books/7")
   end
 
   it "runs route-level middleware around the handler" do

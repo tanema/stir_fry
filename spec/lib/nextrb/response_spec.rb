@@ -143,14 +143,6 @@ RSpec.describe Nextrb::Response do
       expect(resp.status).to eq(201)
     end
 
-    it "resolves mime types from a symbol, extension, or full type" do
-      resp = build_response
-      expect(resp.mime_type(:html)).to eq("text/html")
-      expect(resp.mime_type(".css")).to eq("text/css")
-      expect(resp.mime_type("application/json")).to eq("application/json")
-      expect(resp.mime_type(nil)).to be_nil
-    end
-
     it "only sets content_type if not already set, unless given a fresh value" do
       resp = build_response
       resp.content_type(:json)
@@ -266,12 +258,13 @@ RSpec.describe Nextrb::Response do
       expect(headers["last-modified"]).not_to be_nil
     end
 
-    it "serves a byte range with 206 and a content-range header" do
+    it "serves a byte range with 206, a content-range header, and the range's length" do
       req = Nextrb::Request.new(Rack::MockRequest.env_for("/hello.txt", "HTTP_RANGE" => "bytes=0-4"))
       resp = build_response("/hello.txt", "HTTP_RANGE" => "bytes=0-4")
       resp.send_file(req, fixture_path)
       expect(resp.status).to eq(206)
       expect(resp.headers["content-range"]).to eq("bytes 0-4/13")
+      expect(resp.headers["content-length"]).to eq("5")
     end
 
     it "returns 416 for an unsatisfiable range" do

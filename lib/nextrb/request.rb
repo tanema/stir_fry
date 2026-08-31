@@ -6,24 +6,26 @@ require "json"
 module Nextrb
   # Request expands Rack::Request to include url args
   class Request < Rack::Request
-    include Common
-
+    # args are the parameters that were parsed from the url path such as resource ids.
     attr_accessor :args
 
+    # The unescaped path from the request.
     def path = @path ||= Rack::Utils.unescape_path(path_info)
+    # Returns true if the request accepts json
     def json? = accept?("application/json")
+    # Returns true if the request accepts html
     def html? = accept?("text/html")
+    # Returns true if the request accepts text
     def text? = accept?("text/plain")
+    # Returns true if the request accepts xml
     def xml? = accept?("application/xml")
+    # Returns true if the request accepts csv
     def csv? = accept?("text/csv")
+    # Returns true if the request accepts header matches a mime type string
     def accept?(mime) = accept_types.include?(mime)
-    def forwarded? = !forwarded_authority.nil?
-    def safe? = get? || head? || options? || trace?
-    def idempotent? = safe? || put? || delete? || link? || unlink?
-    def link? = request_method == "LINK"
-    def unlink? = request_method == "UNLINK"
-    alias secure? ssl?
 
+    # params wraps rack:request params and captures common errors. This is copied
+    # from Sinatra's handling of params.
     def params
       super
     rescue Rack::Utils::ParameterTypeError, Rack::Utils::InvalidParameterError => e

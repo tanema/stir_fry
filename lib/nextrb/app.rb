@@ -11,8 +11,8 @@ module Nextrb
   #
   # ```ruby
   # class App < Nextrb::App
-  #   get "/" do |req, resp|
-  #     resp.text("Hello world")
+  #   get "/greet/:name" do |request:, response:, name:|
+  #     response.text("Hello #{name}")
   #   end
   #   get "/todo", Todos::List
   # end
@@ -20,12 +20,8 @@ module Nextrb
   # Nextrb.run!(App)
   # ```
   class App
-    include Common
-    extend Common
-
     DEFAULT_DEVELOPMENT_MIDDLEWARE = [ # :nodoc:
       [Rack::Head],
-      [Rack::CommonLogger],
       [Rack::ShowStatus],
       [Rack::ShowExceptions],
       [Rack::ContentLength]
@@ -33,7 +29,6 @@ module Nextrb
 
     DEFAULT_PRODUCTION_MIDDLEWARE = [ # :nodoc:
       [Rack::Head],
-      [Rack::CommonLogger],
       [Rack::ContentLength]
     ].freeze
 
@@ -42,25 +37,14 @@ module Nextrb
     ].freeze
 
     DEFAULT_ERROR_HANDLERS = { # :nodoc: disable in production
-      OKAY => ->(_req, resp, _err) { resp.finish },
-      Found => lambda { |_req, resp, _err|
-        resp.status(302)
-        resp.finish
-      },
-      NotModified => lambda { |_req, resp, _err|
-        resp.status(304)
-        resp.finish
-      },
-      NotFound => ->(req, resp, err) { error_page(req, resp, :not_found, safe_err_message(err)) },
-      BadRequest => ->(req, resp, err) { error_page(req, resp, :bad_request, safe_err_message(err)) },
-      Unauthorized => ->(req, resp, err) { error_page(req, resp, :unauthorized, safe_err_message(err)) },
-      InternalError => ->(req, resp, err) { error_page(req, resp, :internal_server_error, safe_err_message(err)) },
-      PreconditionFailed => ->(req, resp, err) { error_page(req, resp, :precondition_failed, safe_err_message(err)) }
-    }.freeze
-
-    FALLBACK_ERROR_HANDLER = lambda { |req, resp, err| # :nodoc:
-      req.logger.error(err)
-      error_page(req, resp, :internal_server_error, safe_err_message(err))
+      OKAY => ->(**args) { pass_through(status: :ok, **args) },
+      Found => ->(**args) { pass_through(status: :found, **args) },
+      NotModified => ->(**args) { pass_through(status: :not_modified, **args) },
+      NotFound => Pages::ErrorPage,
+      BadRequest => Pages::ErrorPage,
+      Unauthorized => Pages::ErrorPage,
+      InternalError => Pages::ErrorPage,
+      PreconditionFailed => Pages::ErrorPage
     }.freeze
 
     REQUEST_ENV_KEY = "nextrb.request" # :nodoc:
@@ -94,6 +78,25 @@ module Nextrb
       # Add a DELETE request route to the application
       def delete(pattern, klass = nil, &) = route("DELETE", pattern, klass, &)
 
+      # running environment for this app.
+      def app_env = Nextrb.app_env
+
+      # is the app running in development.
+      def development? = app_env == :development
+
+      # is the app running in test.
+      def test? = app_env == :test
+
+      # is the app running in production
+      def production? = app_end == :production
+
+      # configured logger for the application for easy access in the app
+      def logger = Nextrb.logger
+
+      def pass_through(response:, status:, **) # :nodoc:
+        response.status(status)
+      end
+
       ##
       # Add a handler for an error raised during runtime.
       #
@@ -101,8 +104,8 @@ module Nextrb
       #
       # ```ruby
       # class App < Nextrb::App
-      #   rescue_from Nextrb::NotFound do |req, resp|
-      #     resp.text("Not Found", :not_found)
+      #   rescue_from Nextrb::NotFound do |request:, response:, error:|
+      #     response.text("Not Found", :not_found)
       #   end
       # end
       # ```
@@ -174,15 +177,15 @@ module Nextrb
 
       def route_prefix = context.map(&:first).join
       def route_handler(handler) = build_rack_app(context[1..].flat_map(&:last), wrap_handler(handler))
-      def safe_err_message(err) = err.message == err.class.name ? "" : err.message
 
       def root_app
-        @root_app ||= build_rack_app(context[0][1], Rack::Cascade.new(static_apps + [->(env) { new(env).call }]))
-      end
-
-      def error_page(req, resp, status, message = "")
-        Pages::ErrorPage.call(req, resp, status, message)
-        resp.finish
+        @root_app ||= begin
+          builder = Rack::Builder.new
+          context[0][1].each { |c, a, b| builder.use(c, *a, &b) }
+          builder.use(Middleware::Logger, logger)
+          builder.run(Rack::Cascade.new(static_apps + [->(env) { new(env).call }]))
+          builder.to_app
+        end
       end
 
       def wrap_handler(handler)
@@ -191,7 +194,8 @@ module Nextrb
           resp = env.fetch(RESPONSE_ENV_KEY)
           verb = req.request_method.downcase.to_sym
           handler = handler.method(verb) if handler.respond_to?(verb)
-          handler.call(req, resp)
+          call_params = req.args.to_h { |k, v| [k.to_sym, v] }.merge({ request: req, response: resp })
+          handler.call(**call_params)
           resp.finish
         end
       end
@@ -212,18 +216,35 @@ module Nextrb
       env[RESPONSE_ENV_KEY] = response
     end
 
+    # running environment for this app.
+    def app_env = self.class.app_env
+    # is the app running in development.
+    def development? = self.class.development?
+    # is the app running in test.
+    def test? = self.class.test?
+    # is the app running in production
+    def production? = self.class.production?
+    # configured logger for the application for easy access in the app
+    def logger = self.class.logger
+
     def call # :nodoc:
       find_route.call(env)
     rescue StandardError => e
-      error_handler_for(e.class).call(env.fetch(REQUEST_ENV_KEY), env.fetch(RESPONSE_ENV_KEY), e)
+      handle_error(e)
     end
 
     private
 
+    def handle_error(err)
+      handler = error_handler_for(err.class)
+      handler.call(request: request, response: response, error: err)
+      response.finish
+    end
+
     def error_handler_for(err_class)
       error_handlers = self.class.error_handlers
       err_class.ancestors.each { |klass| return error_handlers[klass] if error_handlers.key?(klass) }
-      FALLBACK_ERROR_HANDLER
+      Pages::ErrorPage
     end
 
     def find_route

@@ -7,8 +7,8 @@ class ComponentSpecWrapper < Nextrb::Component
 end
 
 class ComponentSpecChild < Nextrb::Component
-  def initialize(text:)
-    super()
+  def initialize(text:, **args)
+    super
     @text = text
   end
   attr_reader :text
@@ -17,8 +17,8 @@ class ComponentSpecChild < Nextrb::Component
 end
 
 class ComponentSpecPage < Nextrb::Component
-  def initialize(name: "world")
-    super()
+  def initialize(name: "world", **args)
+    super
     @name = name
   end
   attr_reader :name
@@ -44,21 +44,11 @@ RSpec.describe Nextrb::Component do
     it "forwards keyword args to .new and renders the result as html" do
       req, resp = build_req_resp
 
-      ComponentSpecPage.call(req, resp, name: "jack")
+      ComponentSpecPage.call(name: "jack", request: req, response: resp)
 
       expect(resp.status).to eq(200)
       expect(resp.content_type).to eq("text/html")
       expect(resp.body).to eq(["<p>hello jack</p>"])
-    end
-
-    it "exposes the request and response to the instance once called" do
-      req, resp = build_req_resp
-      page = ComponentSpecPage.new
-
-      page.call(req, resp)
-
-      expect(page.request).to equal(req)
-      expect(page.response).to equal(resp)
     end
   end
 end

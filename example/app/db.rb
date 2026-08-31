@@ -1,11 +1,14 @@
-require 'pstore'
+# frozen_string_literal: true
 
+require "pstore"
+
+# DB is a wrapper around pstore to mimic a database for persistent todos.
 class DB
   @store = PStore.new("example/todos.store")
 
-  class << self 
+  class << self
     def all
-      store.transaction { store.keys.map {|k| store[k] } }
+      store.transaction { store.keys.map { |k| store[k] } }
     end
 
     def count
@@ -13,16 +16,16 @@ class DB
     end
 
     def create(value)
-      id = self.count
-      store.transaction do 
-        store[id] = {id: id, value: value, done: false}
+      id = next_id + 1
+      store.transaction do
+        store[id] = { id: id, value: value, done: false }
         store[id]
       end
     end
 
     def update(id, **args)
-      store.transaction do 
-        store[id].merge!(args) unless store[id].nil?
+      store.transaction do
+        store[id]&.merge!(args)
         store[id]
       end
     end
@@ -40,6 +43,10 @@ class DB
     end
 
     private
+
+    def next_id
+      store.transaction { store.keys.map(&:to_i).max + 1 }
+    end
 
     attr_reader :store
   end

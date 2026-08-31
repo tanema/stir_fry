@@ -1,11 +1,8 @@
-require_relative "./layout"
+# frozen_string_literal: true
 
-module Todos
-  autoload :Todo, File.expand_path("todos/todo", __dir__)
-  autoload :Input, File.expand_path("todos/input", __dir__)
-  autoload :List, File.expand_path("todos/list", __dir__)
-end
+require_relative "layout"
 
+# Root is the root of the application, the home page.
 class Root < Nextrb::Component
   def todos
     DB.all

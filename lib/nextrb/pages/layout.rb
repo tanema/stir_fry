@@ -2,6 +2,7 @@
 
 module Nextrb
   module Pages
+    # Layout is the layout of the frameworks pages that it serves.
     class Layout < Component; end
   end
 end

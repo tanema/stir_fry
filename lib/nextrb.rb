@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "semantic_logger"
 require "rbx"
 require "rackup"
 require "logger"
@@ -8,31 +9,46 @@ require "logger"
 # Nextrb as a module provides an entrypoint to starting your app. It is also the
 # namespace that contains the server library that will render the rbx templates.
 module Nextrb
+  # Error is the main root error for most errors raised by the library. Most of these
+  # errors are raised to bail out of a request cycle early and return early.
   class Error < StandardError; end
+  # Okay represents a http 200 response.
   class OKAY < Error; end
+  # Found represents a http 302 response.
   class Found < Error; end
+  # NotModified represents a http 304 response.
   class NotModified < Error; end
+  # BadRequest represents a http 400 response.
   class BadRequest < Error; end
-  class NotFound < Error; end
+  # Unauthorized represents a http 401 response.
   class Unauthorized < Error; end
-  class InternalError < Error; end
+  # NotFound represents a http 404 response.
+  class NotFound < Error; end
+  # PreconditionFailed represents a http 412 response.
   class PreconditionFailed < Error; end
+  # InternalError represents a http 500 response.
+  class InternalError < Error; end
 
   autoload :App, "nextrb/app"
   autoload :Component, "nextrb/component"
-  autoload :Common, "nextrb/common"
   autoload :Pages, "nextrb/pages"
   autoload :Request, "nextrb/request"
   autoload :Response, "nextrb/response"
+  autoload :Middleware, "nextrb/middleware"
   autoload :Version, "nextrb/version"
 
-  SIGNALS = %i[INT TERM].freeze
+  SIGNALS = %i[INT TERM].freeze # :nodoc:
 
-  @env = (ENV["APP_ENV"] || ENV["RACK_ENV"] || ENV["ENV"] || :development).to_sym
+  @app_env = (ENV["APP_ENV"] || ENV["RACK_ENV"] || ENV["ENV"] || :development).to_sym
   @logger = ::Logger.new($stdout)
 
   class << self
-    attr_reader :running_server, :env, :logger
+    attr_reader :running_server # :nodoc:
+    # Is the set environment setting evaluated from environment variables APP_ENV,
+    # RACK_ENV or ENV. It defaults to :development.
+    attr_reader :app_env
+    # Logger is the app wide logger for any app messages.
+    attr_reader :logger
 
     ##
     # Start the application server for an App.
@@ -41,17 +57,38 @@ module Nextrb
     #
     # ```ruby
     # class App < Nextrb::App
-    #   get "/" { |req, resp| resp.text("Hello world") }
+    #   get "/" { |request:, response:| response.text("Hello world") }
     # end
     #
     # Nextrb.run!(App)
     # ```
+    #
+    # Options:
+    #
+    # - port       [int]    port to listen on for the server.
+    #                       Defaults to 8080 in development and 80 in production.
+    # - host       [string] host to bind on.
+    #                       Default to `localhost` in development and `0.0.0.0` in production
+    # - logger     [Logger] logger to output requests and app messages to.
+    #                       Defaults to new semantic logger.
+    # - log_level  [Symbol] the log level or limit output of the log.
+    #                       options: (:trace, :debug, :info, :warn, :error, :fatal)
+    #                       default: :trace in development and :info in production.
+    # - log_format [Symbol] the output format of the semantic logger.
+    #                       options: (:default, :color, :json, :logfmt)
+    # - log_stdout          disable stdout logging.
+    #                       default: true
+    # - log_file            set a filepath to output logs to.
+    #                       default: nil, only outputs to stdout.
+    #
     def run!(app_klass, **options)
       return unless running_server.nil?
 
+      options = extract_options(app_klass, **options)
       Rackup::Handler.default.run(app_klass, **options) do |server|
         at_exit { quit! }
         SIGNALS.each { |signal| chain_trap(signal) { quit! } }
+        @logger.info("Server started", port: @port, host: @host, app_env: @app_env)
         @running_server = server
       end
     ensure
@@ -63,12 +100,66 @@ module Nextrb
     # then this will return false.
     def running? = !running_server.nil?
 
+    # is the app running in development.
+    def development? = app_env == :development
+
+    # is the app running in test.
+    def test? = app_env == :test
+
+    # is the app running in production
+    def production? = app_end == :production
+
     ##
     # Stops the running server if it is running. If it is not running then this is
     # a no-op
-    def quit! = running_server.respond_to?(:stop!) ? running_server.stop! : running_server.stop
+    def quit!
+      return if running_server.nil?
+
+      running_server.respond_to?(:stop!) ? running_server.stop! : running_server.stop
+    end
 
     private
+
+    def extract_options(klass, **options)
+      @port = options.fetch(:Port, options.fetch(:port, default_port)) || default_port
+      @host = options.fetch(:Host, options.fetch(:host, default_host)) || default_host
+      @logger = options.delete(:logger) || default_logger(klass, options)
+      dev_null = Logger.new(File.open(File::NULL, "w"))
+      {
+        # Set the capitalized options in case the downcased options are set.
+        Port: @port,
+        Host: @host,
+        # Disable Rack logging
+        Logger: dev_null,
+        AccessLog: dev_null
+      }
+    end
+
+    def default_logger(klass, options)
+      log_format = options.fetch(:log_format, :color) || :color
+      log_stdout = options.fetch(:log_silence, false)
+      log_file = options.fetch(:log_file, nil)
+
+      SemanticLogger.application = klass.name.to_s
+      SemanticLogger.environment = @app_env
+      SemanticLogger.host        = @host
+      SemanticLogger.default_level = options.fetch(:log_level, default_log_level) || default_log_level
+      SemanticLogger.add_appender(io: $stdout, formatter: log_format) unless log_stdout
+      SemanticLogger.add_appender(filename: log_file, formatter: log_format) unless log_file.nil?
+      SemanticLogger[klass.name.to_s]
+    end
+
+    def default_port
+      development? ? "8080" : "80"
+    end
+
+    def default_host
+      development? ? "localhost" : "0.0.0.0"
+    end
+
+    def default_log_level
+      development? ? :trace : :info
+    end
 
     def chain_trap(sig, &)
       prev = Signal.trap(sig) do

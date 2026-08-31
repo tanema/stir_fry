@@ -37,4 +37,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rack-protection", ">= 3.1"
   spec.add_dependency "rack-session", ">= 2.0.0", "< 3"
   spec.add_dependency "rackup", ">= 2.1"
+  spec.add_dependency "semantic_logger", ">= 5.1"
 end

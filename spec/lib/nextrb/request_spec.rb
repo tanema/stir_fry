@@ -31,46 +31,6 @@ RSpec.describe Nextrb::Request do
     end
   end
 
-  describe "#forwarded?" do
-    it "is false with no forwarding headers" do
-      expect(build_request("/").forwarded?).to be false
-    end
-
-    it "is true when a forwarded host header is present" do
-      req = build_request("/", "HTTP_X_FORWARDED_HOST" => "example.com")
-      expect(req.forwarded?).to be true
-    end
-  end
-
-  describe "#safe? and #idempotent?" do
-    {
-      "GET" => [true, true],
-      "HEAD" => [true, true],
-      "OPTIONS" => [true, true],
-      "TRACE" => [true, true],
-      "PUT" => [false, true],
-      "DELETE" => [false, true],
-      "LINK" => [false, true],
-      "UNLINK" => [false, true],
-      "POST" => [false, false],
-      "PATCH" => [false, false]
-    }.each do |verb, (safe, idempotent)|
-      it "reports #{verb} as safe=#{safe} idempotent=#{idempotent}" do
-        req = build_request("/", method: verb)
-        expect(req.safe?).to eq(safe)
-        expect(req.idempotent?).to eq(idempotent)
-      end
-    end
-  end
-
-  describe "#secure?" do
-    it "aliases ssl?" do
-      req = build_request("https://example.com/")
-      expect(req.secure?).to eq(req.ssl?)
-      expect(req.secure?).to be true
-    end
-  end
-
   describe "#params" do
     it "returns parsed query params on the happy path" do
       req = build_request("/?name=jack")

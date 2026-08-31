@@ -50,7 +50,9 @@ class App < Nextrb::App
   # Render the components
   get "/", Home
   # Raw API call
-  get "/hello/:name" {|req,resp| resp.text("Hello #{req.args["name"]}", :ok) }
+  get "/hello/:name" do|request:, response:, name:| 
+    response.text("Hello #{req.args["name"]}") 
+  end
 end
 
 Nextrb.run!(App)
@@ -84,14 +86,6 @@ After checking out the repo,
 - run `rake` to run the specs and rubocop. 
 - run `rake run` to run the example todos app. 
 
-## Releasing
-
-To release a new version
-
-- update the version number in `version.rb`
-- run `bundle exec rake release`, which will create a git tag for the version
-- push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
 ## Further Reading
 
 - [Project Design Conventions](CONVENTIONS.md)
@@ -103,8 +97,8 @@ These are the projects that I took both inspiration and code chunks from. Since 
 wanted an interface a lot like Sinatra, I used their codebase heavily for routing.
 Also since I wanted a reactjs markdown style, I used rbexy initially but then 
 ended up re-writing a lot of it to remove all rails integrations and I ended up 
-rewriting to more of a classical recursive descent parser just because it would be
-more comfortable for me to work on.
+rewriting to more of a classical recursive descent parser since I find push-down
+automata harder to parse personally and it would be more comfortable for me to work on.
 
 - [Sinatra](https://github.com/sinatra/sinatra/)
 - [Rbexy](https://github.com/patbenatar/rbexy)

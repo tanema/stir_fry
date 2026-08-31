@@ -7,10 +7,21 @@ module Nextrb
   # Response is a wrapper around Rack::Response that makes it easier to generate
   # rich responses easily.
   class Response
-    include Common
+    # the corresponding reqest to this reponse.
+    attr_reader :req
+    # the inner Rack::Response that we are building.
+    attr_reader :resp
+    # the rack request env.
+    attr_reader :env
 
-    attr_reader :req, :resp, :env
+    MULTIPART_BOUNDARY = "AaB03x" # :nodoc:
+    MULTIPART_FORM_DATA_REPLACEMENT_TABLE = { # :nodoc:
+      '"' => "%22",
+      "\r" => "%0D",
+      "\n" => "%0A"
+    }.freeze
 
+    # create a new Reponse
     def initialize(env)
       @env = env
       @req = Nextrb::Request.new(env)
@@ -100,44 +111,42 @@ module Nextrb
     # Sugar for redirect(request.referer)
     def redirect_back = redirect(req.referer)
 
+    # Build and format a link with the current host and port.
     def uri(addr = nil, absolute: true)
-      port_required = req.forwarded? || (req.port != (req.secure? ? 443 : 80))
+      port_required = !req.forwarded_authority.nil? || (req.port != (req.ssl? ? 443 : 80))
       uri = [host = String.new]
       if absolute
-        host.concat("http#{"s" if req.secure?}://", port_required ? req.host_with_port : req.host)
+        host.concat("http#{"s" if req.ssl?}://", port_required ? req.host_with_port : req.host)
       end
       uri << (addr || req.path_info).to_s
       File.join uri
     end
 
+    # Add headers, and return the current headers.
     def headers(hash = nil)
       resp.headers.merge! hash if hash
       resp.headers
     end
 
+    # Set the response status, and return the current status.
     def status(value = nil)
       resp.status = Rack::Utils.status_code(value) if value
       resp.status
     end
 
-    def mime_type(type)
-      return type      if type.nil?
-      return type.to_s if type.to_s.include?("/")
-
-      type = ".#{type}" unless type.to_s[0] == "."
-      Rack::Mime.mime_type(type, nil)
-    end
-
+    # Set the content type header on the response
     def content_type(kind = nil)
       headers["Content-Type"] = mime_type(kind) if kind
       headers["Content-Type"]
     end
 
+    # Set the content length header on the response
     def content_length(len = nil)
       headers["Content-Length"] = len.to_s if len
       headers["Content-Length"]
     end
 
+    # Set the body on the response
     def body(value = nil)
       resp.body = [value] if value
       resp.body
@@ -151,8 +160,6 @@ module Nextrb
     #   cache_control :public, :must_revalidate, :max_age => 60
     #   => Cache-Control: public, must-revalidate, max-age=60
     #
-    # See RFC 2616 / 14.9 for more on standard cache control directives:
-    # http://tools.ietf.org/html/rfc2616#section-14.9.1
     def cache_control(*values)
       hash = extract_cache_control_hash(values)
       values.map! { |value| value.to_s.tr("_", "-") }
@@ -173,7 +180,7 @@ module Nextrb
       headers["ETag"] = etag_header_value(value, weak)
       return unless success? || status == 304
 
-      raise(req.safe? ? NotModified : PreconditionFailed) if etag_matches?(env["HTTP_IF_NONE_MATCH"], new_resource)
+      raise(request_safe? ? NotModified : PreconditionFailed) if etag_matches?(env["HTTP_IF_NONE_MATCH"], new_resource)
       raise PreconditionFailed if env["HTTP_IF_MATCH"] && !etag_matches?(env["HTTP_IF_MATCH"], new_resource)
     end
 
@@ -214,13 +221,7 @@ module Nextrb
       check_if_unmodified_since(time)
     end
 
-    MULTIPART_BOUNDARY = "AaB03x"
-    MULTIPART_FORM_DATA_REPLACEMENT_TABLE = {
-      '"' => "%22",
-      "\r" => "%0D",
-      "\n" => "%0A"
-    }.freeze
-
+    # Responde directly with a file.
     def send_file(req, filename, attachment: false)
       if attachment
         headers["Content-Disposition"] =
@@ -230,14 +231,26 @@ module Nextrb
       serve_file(req, filename)
     end
 
-    def finish
+    def finish # :nodoc:
       clear_body_headers if informational? || [204, 304].include?(status)
       resp.body = [] if [204, 304].include?(status)
-      content_length(body.map(&:bytesize).reduce(0, :+)) if calculate_content_length?
+      content_length(resp.body.sum(&:bytesize)) if resp.body.is_a?(Array) && !content_length
       resp.to_a
     end
 
     private
+
+    def request_safe?
+      req.get? || req.head? || req.options? || req.trace?
+    end
+
+    def mime_type(type)
+      return type      if type.nil?
+      return type.to_s if type.to_s.include?("/")
+
+      type = ".#{type}" unless type.to_s[0] == "."
+      Rack::Mime.mime_type(type, nil)
+    end
 
     def etag_matches?(list, new_resource = req.post?)
       return !new_resource if list == "*"
@@ -330,17 +343,14 @@ module Nextrb
         content_type("multipart/byteranges; boundary=#{MULTIPART_BOUNDARY}")
       end
       status(206)
-      resp.body = req.head? ? [] : Rack::Files::BaseIterator.new(filename, ranges, mime_type: content_type, size: size)
-      content_length(size)
+      body = Rack::Files::BaseIterator.new(filename, ranges, mime_type: content_type, size: size)
+      content_length(body.bytesize)
+      resp.body = req.head? ? [] : body
     end
 
     def clear_body_headers
       headers.delete "content-length"
       headers.delete "content-type"
-    end
-
-    def calculate_content_length?
-      headers["content-type"] && !headers["content-length"] && body.is_a?(Array)
     end
   end
 end

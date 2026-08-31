@@ -86,7 +86,7 @@ RSpec.describe Nextrb do
 
       described_class.run!(:my_app)
 
-      expect(handler).to have_received(:run).with(:my_app)
+      expect(handler).to have_received(:run).with(:my_app, anything)
     end
 
     it "stores the yielded server as running_server" do

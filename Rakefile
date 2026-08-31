@@ -7,7 +7,7 @@ require "rubocop/rake_task"
 require "rdoc/task"
 require "rerun"
 
-task default: %i[spec rubocop]
+task default: %i[spec rubocop rdoc:coverage]
 
 RuboCop::RakeTask.new
 
@@ -41,9 +41,4 @@ end
 desc "Run the example server"
 task :run do
   require_relative "example/app"
-end
-
-desc "Run the example server and reload if there are changes"
-task :watch do
-  Rerun::Runner.keep_running("./bin/run ./example/app.rb", {})
 end

@@ -1,24 +1,30 @@
+# frozen_string_literal: true
+
 module Todos
+  # a single todo element to display in the list. It also handles toggling and
+  # deleteing todos
   class Todo < Nextrb::Component
     attr_reader :todo
 
     class << self
       # PUT /todo/:id/toggle
-      def put(req, resp)
-        todo_id = req.args["id"].to_i
+      def put(response:, id:, **)
+        todo_id = id.to_i
         todo = DB.update(todo_id, done: !DB.find(todo_id)[:done])
-        resp.ok(new(todo: todo))
+        App.logger.info("Set Todo done:#{todo[:done]}")
+        response.ok(new(todo: todo))
       end
 
       # DELETE /todo/:id
-      def delete(req, resp)
-        DB.delete(req.args["id"].to_i)
-        resp.render(List.new(todos: DB.all))
+      def delete(response:, id:, **)
+        DB.delete(id.to_i)
+        App.logger.info("Deleted Todo #{id}")
+        response.render(List.new(todos: DB.all))
       end
     end
 
-    def initialize(todo:)
-      super()
+    def initialize(todo:, **)
+      super
       @todo = todo
     end
 
@@ -31,12 +37,16 @@ module Todos
         class: "toggle",
         name: "done",
         checked: todo[:done] == true,
-        hx: {
-          put: "/todo/#{todo[:id]}/toggle",
-          trigger: "change",
-          target: "##{list_key}",
-          swap: "outerHTML"
-        }
+        hx: hx_attrs
+      }
+    end
+
+    def hx_attrs
+      {
+        put: "/todo/#{todo[:id]}/toggle",
+        trigger: "change",
+        target: "##{list_key}",
+        swap: "outerHTML"
       }
     end
   end

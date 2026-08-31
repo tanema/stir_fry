@@ -28,7 +28,7 @@ module RBX
 
       protected
 
-      def compile!(loc, tmpl)
+      def compile!(loc, tmpl) # :nodoc:
         return if loc.nil? || tmpl.empty?
 
         class_eval(<<~RENDER, __FILE__, __LINE__ + 1)

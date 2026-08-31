@@ -2,39 +2,52 @@
 
 module Nextrb
   module Pages
-    # ErrorPage is a main handler for server errors
-    class ErrorPage
-      include RBX::Component
+    # ErrorPage is a custom component and main handler for server errors. It will
+    # respond with a specific mime type depending on what was requested.
+    class ErrorPage < Component
+      # error is the error raised during the request cycle.
+      attr_reader :error
 
-      attr_reader :req, :resp, :message
-
-      def self.call(req, resp, status, message = "")
-        resp.status(status)
-        new(req, resp, message).call
+      # Create a new error page that will display the message and status.
+      def initialize(error: "", **args)
+        super
+        @error = error
       end
 
-      def initialize(req, resp, message)
-        @req = req
-        @resp = resp
-        @message = message
+      # format a message from the error
+      def message = error.message == error.class.name ? "" : error.message
+
+      # status will derive a response status from the error raised.
+      def status
+        @status ||= case error
+                    when NotFound then :not_found
+                    when BadRequest then :bad_request
+                    when Unauthorized then :unauthorized
+                    when PreconditionFailed then :precondition_failed
+                    else :internal_server_error
+                    end
       end
 
+      # Overrides Component#call to customize the output based on mime.
       def call
-        if req.json?
-          resp.json({ error: error_code, message: message }, resp.status)
-        elsif req.html?
-          resp.html(render, resp.status)
-        else
-          resp.text(message, resp.status)
+        response.status(status)
+        if request.json? then response.json(render_json, status)
+        elsif request.html? then response.html(render, status)
+        else response.text(message, status)
         end
       end
 
-      def title
-        Rack::Utils::HTTP_STATUS_CODES[resp.status].to_s
+      def title # :nodoc:
+        Rack::Utils::HTTP_STATUS_CODES[response.status].to_s
       end
 
-      def error_code
-        title.downcase.tr(" ", "_")
+      private
+
+      def render_json
+        {
+          error: title.downcase.tr(" ", "_"),
+          message: message
+        }
       end
     end
   end
@@ -43,9 +56,9 @@ end
 __END__
 <Nextrb.Pages.Layout>
 <section class="error-page">
-  <p class="error-page__code">{resp.status}</p>
+  <p class="error-page__code">{response.status}</p>
   <h1 class="error-page__title">{title}</h1>
-  <p class="error-page__path">{ "[#{req.request_method.upcase}] #{req.host_with_port}#{req.path_info}" }</p>
+  <p class="error-page__path">{ "[#{request.request_method.upcase}] #{request.host_with_port}#{request.path_info}" }</p>
   <p class="error-page__message">{message}</p>
 </section>
 </Nextrb.Pages.Layout>

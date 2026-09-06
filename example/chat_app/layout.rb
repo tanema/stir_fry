@@ -8,6 +8,9 @@ end
 __END__
 <!DOCTYPE html>
 <html>
-  <head><title>Super Simple Chat with Nextrb</title></head>
+  <head>
+    <title>Super Simple Chat with Nextrb</title>
+    <link rel="stylesheet" href="/chat.css" />
+  </head>
   <body>{ yield }</body>
 </html>

@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+class Button
+  include RBX::Component
+end
+
 RSpec.describe RBX::Parser do
   def parse(template)
     described_class.new("test", template).parse

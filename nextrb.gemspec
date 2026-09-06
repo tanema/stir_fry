@@ -8,19 +8,22 @@ Gem::Specification.new do |spec|
   spec.authors = ["Tim Anema"]
   spec.email = ["timanema@gmail.com"]
   spec.summary = "Small simple ruby web framework that feels familiar."
-  spec.description = "Small simple ruby web framework that feels familiar."
+  spec.description = <<~DESC
+    Small simple ruby web framework that feels familiar.
+    It leverages a JSX like templating language, simple routing definitions
+    similar to sinatra and usage of ruby that will make it feel easy and understandable.
+  DESC
   spec.homepage = "https://github.com/tanema/nextrb"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1"
   spec.require_paths = ["lib"]
   spec.metadata = {
-    allowed_push_host: "TODO: Set to your gem server 'https://example.com'",
-    source_code_uri: "https://github.com/tanema/nextrb",
-    changelog_uri: "https://github.com/tanema/nextrb/blob/main/CHANGELOG.md",
-    homepage_uri: spec.homepage,
-    bug_tracker_uri: "https://github.com/tanema/nextrb/issues",
-    documentation_uri: "https://github.com/tanema/nextrb",
-    rubygems_mfa_required: "true"
+    "source_code_uri"       => "https://github.com/tanema/nextrb",
+    "changelog_uri"         => "https://github.com/tanema/nextrb/blob/main/CHANGELOG.md",
+    "homepage_uri"          => spec.homepage,
+    "bug_tracker_uri"       => "https://github.com/tanema/nextrb/issues",
+    "documentation_uri"     => "https://github.com/tanema/nextrb",
+    "rubygems_mfa_required" => "true"
   }
   spec.files = Dir["lib/**/*"] + [
     "README.md",

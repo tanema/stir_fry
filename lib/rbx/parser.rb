@@ -44,6 +44,8 @@ module RBX
                      :QUOTED_EXPRESSION_STRING, :PLAIN_TEXT, :TAGNAME, :DO_BLOCK_PREFIX,
                      :BLOCK_PREFIX, :AND, :OR, :TERNARY, :TAG_PREFIX, :NESTED_TAG_PREFIX, :WORD
 
+    attr_reader :filename, :template, :scanner # :nodoc:
+
     # Is a struct for a single node in an AST type structure returned from the parser.
     # This struct consists of:
     #
@@ -73,8 +75,6 @@ module RBX
 
     private
 
-    attr_reader :filename, :template, :scanner
-
     def parse_children
       children = []
       children << parse_child until scanner.eos? || scanner.check(%r{</})
@@ -96,12 +96,32 @@ module RBX
       raise SyntaxError.new(self, "unclosed tag <#{tagname} found") unless scanner.scan(TAG_END)
 
       is_void = scanner.matched.strip == "/>" || HTML_VOID_ELEMENTS.include?(tagname)
-      children = is_void ? nil : parse_children
+      children = is_void ? nil : parse_tag_contents(tagname, is_void)
+      Node.new(kind: resolve_kind(tagname), name: tagname, void: is_void, attributes: attributes, content: children)
+    end
+
+    def parse_tag_contents(tagname, is_void)
+      return consume_script_tag_raw(tagname) if tagname == "script" && !is_void
+
+      children = parse_children
       if !is_void && !scanner.scan(%r{\s*</#{tagname}>})
         raise SyntaxError.new(self, "Closing tag for non-void <#{tagname}> not found")
       end
 
-      Node.new(kind: resolve_kind(tagname), name: tagname, void: is_void, attributes: attributes, content: children)
+      children
+    end
+
+    # We consume script tag contents simply as a raw node because we cannot interpolate
+    # anything in javascript. We cannot tell what {} are javascript and which are
+    # interpolation so it is safer to just leave script contents alone.
+    def consume_script_tag_raw(tagname)
+      warn "WARN found a <script> tag in #{filename}, be aware contents are consumed raw and will not be interpolated."
+
+      scanner.scan(%r{(?<str>.*)</#{tagname}>})
+      val = scanner[:str]
+      raise SyntaxError.new(self, "unterminated tag #{tagname}") if val.nil?
+
+      [Node.new(kind: :raw, content: val)]
     end
 
     def resolve_kind(tagname)

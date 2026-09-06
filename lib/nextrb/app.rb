@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rack"
+require "rack/session"
 require "mustermann"
 
 module Nextrb
@@ -11,7 +12,7 @@ module Nextrb
   #
   # ```ruby
   # class App < Nextrb::App
-  #   get "/greet/:name" do |request:, response:, name:|
+  #   get "/greet/:name" do |response:, **|
   #     response.text("Hello #{name}")
   #   end
   #   get "/todo", Todos::List
@@ -20,31 +21,11 @@ module Nextrb
   # Nextrb.run!(App)
   # ```
   class App
-    DEFAULT_DEVELOPMENT_MIDDLEWARE = [ # :nodoc:
-      [Rack::Head],
-      [Rack::ShowStatus],
-      [Rack::ShowExceptions],
-      [Rack::ContentLength]
-    ].freeze
-
-    DEFAULT_PRODUCTION_MIDDLEWARE = [ # :nodoc:
-      [Rack::Head],
-      [Rack::ContentLength]
-    ].freeze
-
-    DEFAULT_STATIC = [ # :nodoc:
-      Rack::URLMap.new("/nextrb" => Rack::Files.new(File.join(__dir__, "static")))
-    ].freeze
-
     DEFAULT_ERROR_HANDLERS = { # :nodoc: disable in production
       OKAY => ->(**args) { pass_through(status: :ok, **args) },
       Found => ->(**args) { pass_through(status: :found, **args) },
       NotModified => ->(**args) { pass_through(status: :not_modified, **args) },
-      NotFound => Pages::ErrorPage,
-      BadRequest => Pages::ErrorPage,
-      Unauthorized => Pages::ErrorPage,
-      InternalError => Pages::ErrorPage,
-      PreconditionFailed => Pages::ErrorPage
+      NotFound => Pages::NotFoundPage
     }.freeze
 
     REQUEST_ENV_KEY = "nextrb.request" # :nodoc:
@@ -54,8 +35,28 @@ module Nextrb
 
     class << self
       def routes = @routes ||= {} # :nodoc:
+      def all_routes = @all_routes ||= [] # :nodoc:
       def error_handlers = @error_handlers ||= DEFAULT_ERROR_HANDLERS.dup # :nodoc:
       def call(env) = root_app.call(env) # :nodoc:
+
+      # sugar for `use Rack::Session::Cookie, config`
+      # See https://github.com/rack/rack-session for more config.
+      # Params:
+      # - `domain`       host for the cookie security (example: 'mywebsite.com')
+      # - `path`         path for the cookie security (example: '/')
+      # - `expire_after` mark the cookie as expired after seconds (example: 3600*24)
+      # - `max_age`      similar to expires_after.
+      # - `secret`       *required* a random string 64 character long or longer. Used to encrypt cookie.
+      def use_session(**config)
+        raise "cannot enable sessions without a :secret set." if config[:secret].nil?
+
+        secret_len = config[:secret].length
+        if secret_len < 64
+          raise "session secret too short, secret is #{secret_len} but session secret is required to be >= 64"
+        end
+
+        use Rack::Session::Cookie, config
+      end
 
       # Add a GET request route to the application
       def get(pattern, klass = nil, &) = route("GET", pattern, klass, &)
@@ -104,7 +105,7 @@ module Nextrb
       #
       # ```ruby
       # class App < Nextrb::App
-      #   rescue_from Nextrb::NotFound do |request:, response:, error:|
+      #   rescue_from Nextrb::NotFound do |response:, **|
       #     response.text("Not Found", :not_found)
       #   end
       # end
@@ -131,9 +132,10 @@ module Nextrb
       #   static File.join(__dir__, "public")
       # end
       # ```
-      def static(dirname, prefix: "/")
+      def static(dirname, path: "/")
         files = Rack::Files.new(File.expand_path(dirname))
-        static_apps << (prefix == "/" ? files : Rack::URLMap.new(prefix => files))
+        path = route_prefix + path
+        static_apps << (path == "/" ? files : Rack::URLMap.new(path => files))
       end
 
       ##
@@ -164,17 +166,32 @@ module Nextrb
       # Raw route builder, used by the other helper models so `get("/")` becomes
       # `route("GET", "/")`
       def route(verb, pattern, klass, &block)
-        (routes[verb] ||= []) << [Mustermann.new(route_prefix + pattern), route_handler(klass || block)]
+        path_pattern = Mustermann.new(route_prefix + pattern)
+        all_routes << path_pattern.to_s unless path_pattern.to_s.start_with?("/nextrb")
+        (routes[verb] ||= []) << [path_pattern, route_handler(klass || block)]
+      end
+
+      protected
+
+      def setup_default_middleware # :nodoc:
+        use Middleware::Logger, logger
+        use Rack::Head
+        use Rack::ShowStatus if development?
+        use Rack::ShowExceptions if development?
+        use Rack::ContentLength
+      end
+
+      def setup_framework_routes # :nodoc:
+        scope "/nextrb" do
+          static File.join(__dir__, "static")
+          get "/routes", Pages::RoutesPage
+        end
       end
 
       private
 
-      def static_apps = @static_apps ||= (development? ? DEFAULT_STATIC.dup : [])
-
-      def context
-        @context ||= [["", development? ? DEFAULT_DEVELOPMENT_MIDDLEWARE.dup : DEFAULT_PRODUCTION_MIDDLEWARE]]
-      end
-
+      def static_apps = @static_apps ||= []
+      def context = @context ||= [["", []]]
       def route_prefix = context.map(&:first).join
       def route_handler(handler) = build_rack_app(context[1..].flat_map(&:last), wrap_handler(handler))
 
@@ -182,7 +199,6 @@ module Nextrb
         @root_app ||= begin
           builder = Rack::Builder.new
           context[0][1].each { |c, a, b| builder.use(c, *a, &b) }
-          builder.use(Middleware::Logger, logger)
           builder.run(Rack::Cascade.new(static_apps + [->(env) { new(env).call }]))
           builder.to_app
         end
@@ -194,8 +210,9 @@ module Nextrb
           resp = env.fetch(RESPONSE_ENV_KEY)
           verb = req.request_method.downcase.to_sym
           handler = handler.method(verb) if handler.respond_to?(verb)
-          call_params = req.args.to_h { |k, v| [k.to_sym, v] }.merge({ request: req, response: resp })
-          handler.call(**call_params)
+          call_params = req.args.to_h { |k, v| [k.to_sym, v] }
+          default_handler_params = { application: self, request: req, response: resp }
+          handler.call(**call_params, **default_handler_params)
           resp.finish
         end
       end
@@ -205,6 +222,15 @@ module Nextrb
         middleware.each { |c, a, b| builder.use(c, *a, &b) }
         builder.run(handler)
         builder.to_app
+      end
+    end
+
+    # Hook into the app to define development routes and default middleware
+    def self.inherited(subclass)
+      super
+      subclass.class_eval do
+        subclass.setup_default_middleware
+        subclass.setup_framework_routes if subclass.development?
       end
     end
 
@@ -233,11 +259,16 @@ module Nextrb
       handle_error(e)
     end
 
+    def all_routes # :nodoc:
+      self.class.all_routes
+    end
+
     private
 
     def handle_error(err)
+      response.request_error = err
       handler = error_handler_for(err.class)
-      handler.call(request: request, response: response, error: err)
+      handler.call(error: err, application: self, request: request, response: response)
       response.finish
     end
 

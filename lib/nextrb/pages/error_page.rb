@@ -30,7 +30,6 @@ module Nextrb
 
       # Overrides Component#call to customize the output based on mime.
       def call
-        response.status(status)
         if request.json? then response.json(render_json, status)
         elsif request.html? then response.html(render, status)
         else response.text(message, status)
@@ -55,10 +54,15 @@ end
 
 __END__
 <Nextrb.Pages.Layout>
-<section class="error-page">
-  <p class="error-page__code">{response.status}</p>
-  <h1 class="error-page__title">{title}</h1>
-  <p class="error-page__path">{ "[#{request.request_method.upcase}] #{request.host_with_port}#{request.path_info}" }</p>
-  <p class="error-page__message">{message}</p>
-</section>
+  <section>
+    <header><h1>{title}</h1></header>
+    <section class="error-page">
+      <p class="error-page__code">{response.status}</p>
+      <p class="error-page__path">{ "[#{request.request_method.upcase}] #{request.host_with_port}#{request.path_info}" }</p>
+      <p class="error-page__message">{message}</p>
+      <ul class="error-page__backtrace">
+        {error.backtrace.map {|t| <li>{t.to_s}</li> }.join }
+      </ul>
+    </section>
+  </section>
 </Nextrb.Pages.Layout>

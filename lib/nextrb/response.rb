@@ -13,6 +13,8 @@ module Nextrb
     attr_reader :resp
     # the rack request env.
     attr_reader :env
+    # if there was an error during the request it will be set here.
+    attr_accessor :request_error
 
     MULTIPART_BOUNDARY = "AaB03x" # :nodoc:
     MULTIPART_FORM_DATA_REPLACEMENT_TABLE = { # :nodoc:
@@ -74,6 +76,8 @@ module Nextrb
     def html(body, stat = :ok) = answer(stat, :html, body)
     # respond with a rendered component. sugar for `html(view.render)`
     def render(klass, stat = :ok) = html(klass.render, stat)
+    # start a streaming body that doesn't immeadiately close the connection.
+    def stream(&block) = resp.body = block.to_proc
 
     # respond will choose what kind of content to respond with depending on what
     # kind of data you give it.
@@ -81,20 +85,13 @@ module Nextrb
     # `respond({message: "hi"}, :ok)` => application/json JSON response
     # `respond(AppView, :ok)` => text/html HTML Component response
     # `respond("OKAY", :ok)` => text/plain response
-    def respond(obj, stat)
+    def respond(obj, stat = :ok)
       case obj
       when Hash then json(obj, stat)
       when Nextrb::Component then render(obj, stat)
       when String then text(obj, stat)
       else status(stat)
       end
-    end
-
-    # set the status, content_type, and body all in one call.
-    def answer(stat, contenttype, body_content)
-      status(stat)
-      content_type(contenttype)
-      body(body_content)
     end
 
     # redirect the request to a uri
@@ -108,9 +105,6 @@ module Nextrb
       headers["Location"] = uri.to_s
     end
 
-    # Sugar for redirect(request.referer)
-    def redirect_back = redirect(req.referer)
-
     # Build and format a link with the current host and port.
     def uri(addr = nil, absolute: true)
       port_required = !req.forwarded_authority.nil? || (req.port != (req.ssl? ? 443 : 80))
@@ -122,11 +116,14 @@ module Nextrb
       File.join uri
     end
 
-    # Add headers, and return the current headers.
-    def headers(hash = nil)
-      resp.headers.merge! hash if hash
-      resp.headers
-    end
+    # Sugar for redirect(request.referer)
+    def redirect_back = redirect(req.referer)
+    # Readonly body content. To change the content you should use one of the response methods
+    # text, html, render, json, stream or other methods available to set the body
+    # in a valid way.
+    def body = resp.body
+    # Response headers.
+    def headers = resp.headers
 
     # Set the response status, and return the current status.
     def status(value = nil)
@@ -144,12 +141,6 @@ module Nextrb
     def content_length(len = nil)
       headers["Content-Length"] = len.to_s if len
       headers["Content-Length"]
-    end
-
-    # Set the body on the response
-    def body(value = nil)
-      resp.body = [value] if value
-      resp.body
     end
 
     # Specify response freshness policy for HTTP caches (Cache-Control header).
@@ -239,6 +230,12 @@ module Nextrb
     end
 
     private
+
+    def answer(stat, contenttype, value)
+      status(stat)
+      content_type(contenttype)
+      resp.body = value.is_a?(String) ? [value.to_str] : value
+    end
 
     def request_safe?
       req.get? || req.head? || req.options? || req.trace?
@@ -331,10 +328,8 @@ module Nextrb
 
     def bad_file_send_range(size)
       headers["content-range"] = "bytes */#{size}"
-      http_error("Byte range unsatisfiable", 416)
+      answer(416, :text, "Byte range unsatisfiable")
     end
-
-    def http_error(message, code) = answer(code, :text, message)
 
     def send_partial_file(filename, ranges, size)
       if ranges.size == 1

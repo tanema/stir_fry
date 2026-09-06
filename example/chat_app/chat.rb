@@ -3,13 +3,6 @@
 require "json"
 
 module ChatApp
-  # https://develclan.com/ruby-streaming-bodies-sse-websockets-rack/
-  # Thread.new { }
-  # Thread::Queue is a thread safe communication method.
-  # queue = Thread::Queue.new
-  # queue << message
-  # stream.write("data: #{queue.pop}\n\n")
-  #
   # Chat is the root of the application, the home page.
   class Chat < Nextrb::Component
     def self.get(request:, response:, **)
@@ -29,7 +22,9 @@ end
 
 __END__
 <ChatApp.Layout>
-  <pre id='chat'></pre>
-  <form id='new_message'><input id='msg' placeholder='type message here...' /></form>
+  <div class="card">
+    <pre id='chat' class="chat-messages"></pre>
+    <form id='new_message' class="chat-form"><input id='msg' placeholder='type message here...' /></form>
+  </div>
   <script src="/chat.js"></script>
 </ChatApp.Layout>

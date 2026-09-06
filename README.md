@@ -25,9 +25,7 @@ __END__
 
 ```ruby
 class Home < Nextrb::Component
-  def name
-    "Bobby"
-  end
+  def name = "Bobby"
 end
 
 __END__
@@ -54,7 +52,7 @@ end
 Nextrb.run!(App)
 ```
 
-See the [examples](/examples) directory for more in-depth examples.
+See the `/examples` directory for more in-depth examples.
 
 ### Multiple Inline templates
 Multiple templates can be defined in the same file as well with an addition of 
@@ -85,7 +83,6 @@ After checking out the repo,
 
 ## Further Reading
 
-- [Project Design Conventions](CONVENTIONS.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [License](https://opensource.org/licenses/MIT)
 

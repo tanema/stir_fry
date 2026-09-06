@@ -59,6 +59,7 @@ module RBX
   autoload :SyntaxError, "rbx/syntax_error"
   autoload :Component, "rbx/component"
   autoload :OptionMarshaller, "rbx/option_marshaller"
+  autoload :Version, "rbx/version"
 
   # SafeString is a string wrapper that marks a string as having been escaped and
   # is safe for putting on a webpage.

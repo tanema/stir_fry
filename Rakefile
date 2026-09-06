@@ -21,6 +21,7 @@ RDoc::Task.new do |rdoc|
   rdoc.generator = "aliki"
   rdoc.rdoc_files.include(
     "lib/**/*.rb",
+    "rbx/lib/**/*.rb",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",
     "README.md",

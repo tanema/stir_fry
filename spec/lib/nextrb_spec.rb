@@ -64,6 +64,7 @@ RSpec.describe Nextrb do
   describe "#run!" do
     def stub_handler
       handler = double("rackup_handler") # rubocop:disable RSpec/VerifiedDoubles
+      allow(handler).to receive(:name).and_return("Webrick")
       allow(handler).to receive(:run) do |app_klass, &blk|
         blk.call(:fake_running_server)
         app_klass
@@ -107,6 +108,7 @@ RSpec.describe Nextrb do
 
     it "still calls quit! if the handler raises" do
       handler = double("rackup_handler") # rubocop:disable RSpec/VerifiedDoubles
+      allow(handler).to receive(:name).and_return("Webrick")
       allow(handler).to receive(:run).and_raise("boom")
       allow(Rackup::Handler).to receive(:default).and_return(handler)
 
@@ -117,6 +119,7 @@ RSpec.describe Nextrb do
     it "does nothing if a server is already running" do
       described_class.instance_variable_set(:@running_server, :already_running)
       handler = double("rackup_handler") # rubocop:disable RSpec/VerifiedDoubles
+      allow(handler).to receive(:name).and_return("Webrick")
       allow(handler).to receive(:run)
       allow(Rackup::Handler).to receive(:default).and_return(handler)
 

@@ -29,22 +29,6 @@ header h1 {
 	padding-bottom: 0.5rem;
 }
 
-footer.info {
-	color: var(--muted);
-	font-size: 0.875rem;
-	border-top: 1px solid #e0e0e0;
-	padding-top: 1rem;
-}
-
-footer.info a {
-	color: var(--ruby-green);
-	text-decoration: none;
-}
-
-footer.info a:hover {
-	text-decoration: underline;
-}
-
 .error-page {
 	text-align: center;
 	padding: 4rem 1.5rem;
@@ -55,10 +39,6 @@ footer.info a:hover {
 	color: var(--ruby-red);
 	font-size: 4rem;
 	font-weight: 700;
-}
-
-.error-page__title {
-	margin: 0.5rem 0 1rem;
 }
 
 .error-page__path {
@@ -75,4 +55,10 @@ footer.info a:hover {
 
 .error-page__message {
 	color: var(--muted);
+}
+
+ul.error-page__backtrace {
+	color: var(--muted);
+	text-align: left;
+	list-style-type: none;
 }

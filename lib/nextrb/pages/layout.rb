@@ -10,16 +10,6 @@ end
 __END__
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="stylesheet" href="/nextrb/error_page.css" />
-  </head>
-  <body>
-    <section>
-      <header><h1>Nextrb</h1></header>
-      { yield }
-      <footer class="info">
-        <p>If there is an issue with the framework please <a href="https://github.com/tanema/nextrb/issues">open an issue.</a></p>
-      </footer>
-    </section>
-  </body>
+  <head><link rel="stylesheet" href="/nextrb/nextrb.css" /></head>
+  <body>{ yield }</body>
 </html>

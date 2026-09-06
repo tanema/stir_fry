@@ -132,8 +132,8 @@ RSpec.describe Nextrb::Response do
   describe "headers, status, and content helpers" do
     it "merges extra headers without dropping existing ones" do
       resp = build_response
-      resp.headers("X-One" => "1")
-      resp.headers("X-Two" => "2")
+      resp.headers["X-One"] = "1"
+      resp.headers["X-Two"] = "2"
       expect(resp.headers).to include("X-One" => "1", "X-Two" => "2")
     end
 
@@ -162,7 +162,7 @@ RSpec.describe Nextrb::Response do
 
     it "reads and writes body" do
       resp = build_response
-      resp.body("hello")
+      resp.text("hello")
       expect(resp.body).to eq(["hello"])
     end
   end

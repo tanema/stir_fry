@@ -8,7 +8,7 @@ module AppSpecFixtures
   end
 
   class Ping
-    def self.get(request:, response:)
+    def self.get(request:, response:, **)
       AppSpecFixtures.handler_calls << request.path_info
       response.text("pong")
     end
@@ -61,7 +61,7 @@ class AppSpecApp < Nextrb::App
   use(AppSpecFixtures::TraceMiddleware, trace, "global")
 
   static(File.expand_path("../../fixtures/static", __dir__))
-  static(File.expand_path("../../fixtures/static_prefixed", __dir__), prefix: "/assets")
+  static(File.expand_path("../../fixtures/static_prefixed", __dir__), path: "/assets")
 
   get("/plain") { |response:, **| response.text("plain-ok") }
 

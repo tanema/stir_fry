@@ -39,16 +39,8 @@ module Nextrb
 
   SIGNALS = %i[INT TERM].freeze # :nodoc:
 
-  @app_env = (ENV["APP_ENV"] || ENV["RACK_ENV"] || ENV["ENV"] || :development).to_sym
-  @logger = ::Logger.new($stdout)
-
   class << self
     attr_reader :running_server # :nodoc:
-    # Is the set environment setting evaluated from environment variables APP_ENV,
-    # RACK_ENV or ENV. It defaults to :development.
-    attr_reader :app_env
-    # Logger is the app wide logger for any app messages.
-    attr_reader :logger
 
     ##
     # Start the application server for an App.
@@ -84,11 +76,11 @@ module Nextrb
     def run!(app_klass, **options)
       return unless running_server.nil?
 
-      options = extract_options(app_klass, **options)
-      Rackup::Handler.default.run(app_klass, **options) do |server|
+      Rackup::Handler.default.run(app_klass, **extract_options(app_klass, **options)) do |server|
         at_exit { quit! }
         SIGNALS.each { |signal| chain_trap(signal) { quit! } }
-        @logger.info("Server started", port: @port, host: @host, app_env: @app_env)
+        @logger.info("Server started", **server_info(server))
+        server.threaded = true if server.respond_to? :threaded=
         @running_server = server
       end
     ensure
@@ -100,6 +92,10 @@ module Nextrb
     # then this will return false.
     def running? = !running_server.nil?
 
+    # Is the set environment setting evaluated from environment variables APP_ENV,
+    # RACK_ENV or ENV. It defaults to :development.
+    def app_env = @app_env ||= (ENV["APP_ENV"] || ENV["RACK_ENV"] || ENV["ENV"] || :development).to_sym
+
     # is the app running in development.
     def development? = app_env == :development
 
@@ -108,6 +104,9 @@ module Nextrb
 
     # is the app running in production
     def production? = app_end == :production
+
+    # Logger is the app wide logger for any app messages.
+    def logger = @logger ||= default_logger(App)
 
     ##
     # Stops the running server if it is running. If it is not running then this is
@@ -132,17 +131,27 @@ module Nextrb
         # Disable Rack logging
         Logger: dev_null,
         AccessLog: dev_null
+      }.merge(options)
+    end
+
+    def server_info(server)
+      {
+        port: @port,
+        host: @host,
+        app_env: @app_env,
+        threaded: server.respond_to?(:threaded=),
+        server: Rackup::Handler.default.name
       }
     end
 
-    def default_logger(klass, options)
+    def default_logger(klass, options = {})
       log_format = options.fetch(:log_format, :color) || :color
       log_stdout = options.fetch(:log_silence, false)
       log_file = options.fetch(:log_file, nil)
 
+      SemanticLogger.add_signal_handler
       SemanticLogger.application = klass.name.to_s
       SemanticLogger.environment = @app_env
-      SemanticLogger.host        = @host
       SemanticLogger.default_level = options.fetch(:log_level, default_log_level) || default_log_level
       SemanticLogger.add_appender(io: $stdout, formatter: log_format) unless log_stdout
       SemanticLogger.add_appender(filename: log_file, formatter: log_format) unless log_file.nil?

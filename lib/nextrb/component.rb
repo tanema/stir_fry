@@ -39,6 +39,10 @@ module Nextrb
   class Component
     include RBX::Component
 
+    # application is root application where all the routes are defined and maybe
+    # where you might keep config or database references.
+    # This is only defined on the root component that is defined on the route.
+    attr_accessor :application
     # request is the request that called this component. This is only defined on the root
     # component that is defined on the route.
     attr_accessor :request
@@ -53,12 +57,13 @@ module Nextrb
     # first, and the arguments to initialize the component will be appended to the
     # end. It will set the request, and response on the component and call render
     # on the component.
-    def self.call(request: nil, response: nil, **args)
-      new(request: request, response: response, **args).call
+    def self.call(application: nil, request: nil, response: nil, **args)
+      new(application: application, request: request, response: response, **args).call
     end
 
     # create a new component with a request and response
-    def initialize(request: nil, response: nil, **_args)
+    def initialize(application: nil, request: nil, response: nil, **_args)
+      self.application = application
       self.request = request
       self.response = response
     end

@@ -207,6 +207,15 @@ RSpec.describe RBX::Parser do
     expect(parse("<link>")).to eq [node(:html, name: "link", void: true)]
   end
 
+  it "consumes script tag contents raw" do
+    expect(parse(%(<script>if(true) { console.log("this is javascript") }</script>))).to eq [
+      node(:html,
+           name: "script",
+           void: false,
+           content: [node(:raw, content: "if(true) { console.log(\"this is javascript\") }")])
+    ]
+  end
+
   it "parses text inside a tag" do
     expected = [node(:html, name: "div", void: false, content: [node(:raw, content: "Hello world")])]
     expect(parse(%(<div>Hello world</div>))).to eq expected

@@ -37,8 +37,3 @@ task :console do
   ARGV.clear
   IRB.start
 end
-
-desc "Run the example server"
-task :run do
-  require_relative "example/app"
-end

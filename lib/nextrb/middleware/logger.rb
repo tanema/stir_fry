@@ -47,7 +47,7 @@ module Nextrb
           user: client_log(req),
           request: req_log(req),
           response: resp_log(resp, elapsed)
-        }
+        }.compact
       end
 
       def client_log(req)
@@ -70,11 +70,18 @@ module Nextrb
       end
 
       def resp_log(resp, elapsed)
-        {
+        line = {
           content_type: resp.headers["Content-Type"],
           content_length: resp.headers["Content-Length"],
           elapsed: elapsed % 60
-        }.compact
+        }
+
+        if resp.respond_to?(:request_error)
+          line[:error] = resp.request_error&.message&.to_s
+          line[:error_stacktrace] = resp.request_error&.backtrace
+        end
+
+        line.compact
       end
     end
   end

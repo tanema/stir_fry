@@ -14,14 +14,10 @@ I have not yet figured out how to add syntax highlighting for it but it is a sta
 ### layout.rb
 
 ```ruby
-class Layout < Nextrb::Component
-end
-
+class Layout < Nextrb::Component; end
 __END__
 <html>
-  <body>
-    { yield }
-  </body>
+  <body>{ yield }</body>
 </html>
 ```
 
@@ -58,15 +54,15 @@ end
 Nextrb.run!(App)
 ```
 
+See the [examples](/examples) directory for more in-depth examples.
+
 ### Multiple Inline templates
 Multiple templates can be defined in the same file as well with an addition of 
 an `@@` label. This idea was taken from [Sinatra](#acknowledgment).
 
 ```ruby
-class Layout < Nextrb::Component
-end
-class Home < Nextrb::Component
-end
+class Layout < Nextrb::Component; end
+class Home < Nextrb::Component; end
 
 __END__
 @@Layout
@@ -83,8 +79,9 @@ __END__
 After checking out the repo, 
 
 - run `bundle install` to install dependencies. 
-- run `rake` to run the specs and rubocop. 
-- run `rake run` to run the example todos app. 
+- run `./example/todos_app/app.rb` to run the example todo app.
+- run `./example/chat_app/app.rb` to run the example chat app.
+- run `rake` to run the specs, rubocop and rdoc. 
 
 ## Further Reading
 

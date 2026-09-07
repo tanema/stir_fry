@@ -19,7 +19,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
-        with: { ruby-version: "${{ matrix.ruby }}" }
+        with:
+          ruby-version: ${{ matrix.ruby }}
       - name: Install gems
         run: bundle install
       - name: Generate RDoc Documentation
@@ -28,7 +29,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
-        with: { path: 'doc' }
+        with: { path: "doc" }
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

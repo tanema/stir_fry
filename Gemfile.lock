@@ -1,12 +1,15 @@
 PATH
   remote: .
   specs:
-    nextrb (0.1.0)
+    rbxrb (0.1.0)
+      rack (>= 3.0.0, < 4)
+    stir_fry (0.1.0)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
       rack-protection (>= 3.1)
       rack-session (>= 2.0.0, < 3)
       rackup (>= 2.1)
+      rbxrb (>= 0.1)
       semantic_logger (>= 5.1)
 
 GEM
@@ -121,7 +124,6 @@ PLATFORMS
 
 DEPENDENCIES
   irb
-  nextrb!
   pstore
   puma
   rake (~> 13.0)
@@ -131,6 +133,7 @@ DEPENDENCIES
   rubocop (~> 1.21)
   rubocop-rake (>= 0.7.1)
   rubocop-rspec (~> 3.10)
+  stir_fry!
 
 BUNDLED WITH
    2.6.7

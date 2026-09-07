@@ -1,9 +1,9 @@
-# Nextrb
+# StirFry
 A small, simple web framework that lets you enjoy ruby with a JSX type flavour. 
 
 ## Installation
 
-`gem install 'nextrb'`
+`gem install 'stir_fry'`
 
 ## Usage
 An example project could look like this. The templating leverages a weird feature 
@@ -14,7 +14,7 @@ I have not yet figured out how to add syntax highlighting for it but it is a sta
 ### layout.rb
 
 ```ruby
-class Layout < Nextrb::Component; end
+class Layout < StirFry::Component; end
 __END__
 <html>
   <body>{ yield }</body>
@@ -24,7 +24,7 @@ __END__
 ### home.rb
 
 ```ruby
-class Home < Nextrb::Component
+class Home < StirFry::Component
   def name = "Bobby"
 end
 
@@ -40,7 +40,7 @@ __END__
 require "layout"
 require "home"
 
-class App < Nextrb::App 
+class App < StirFry::App 
   # Render the components
   get "/", Home
   # Raw API call
@@ -49,7 +49,7 @@ class App < Nextrb::App
   end
 end
 
-Nextrb.run!(App)
+StirFry.run!(App)
 ```
 
 See the `/examples` directory for more in-depth examples.
@@ -59,8 +59,8 @@ Multiple templates can be defined in the same file as well with an addition of
 an `@@` label. This idea was taken from [Sinatra](#acknowledgment).
 
 ```ruby
-class Layout < Nextrb::Component; end
-class Home < Nextrb::Component; end
+class Layout < StirFry::Component; end
+class Home < StirFry::Component; end
 
 __END__
 @@Layout

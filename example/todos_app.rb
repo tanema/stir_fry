@@ -4,7 +4,7 @@
 $LOAD_PATH << File.expand_path(__dir__)
 
 require "bundler/setup"
-require "nextrb"
+require "stir_fry"
 
 # namespace for this app
 module TodosApp
@@ -20,7 +20,7 @@ module TodosApp
   # This is the root of the application, It maps out the routes and in your application
   # it would handle setup, data connections, configurations, and any other app-wide
   # concerns.
-  class App < Nextrb::App
+  class App < StirFry::App
     static File.join(__dir__, "todos_app/public")
     get "/", Root
     # Resource path scope so every path inside `scope` will have the /todo prefix on it.
@@ -36,4 +36,4 @@ module TodosApp
 end
 
 # Run The app
-Nextrb.run!(TodosApp::App)
+StirFry.run!(TodosApp::App)

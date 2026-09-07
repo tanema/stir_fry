@@ -6,7 +6,7 @@
 
 $LOAD_PATH << File.expand_path(__dir__)
 require "bundler/setup"
-require "nextrb"
+require "stir_fry"
 
 # namespace for the whole app
 module ChatApp
@@ -20,7 +20,7 @@ module ChatApp
   # This is the root of the application, It maps out the routes and in your application
   # it would handle setup, data connections, configurations, and any other app-wide
   # concerns.
-  class App < Nextrb::App
+  class App < StirFry::App
     use_session secret: "_super_super_secret_secret_secure_secure_secret_secret_which_is_secure_"
     static File.join(__dir__, "chat_app/public")
     get "/", Chat
@@ -32,4 +32,4 @@ module ChatApp
 end
 
 ChatApp::ConnectionManager.listen_for_messages!
-Nextrb.run!(ChatApp::App)
+StirFry.run!(ChatApp::App)

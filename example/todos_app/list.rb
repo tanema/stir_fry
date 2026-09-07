@@ -2,7 +2,7 @@
 
 module TodosApp
   # The component for listing todo items.
-  class List < Nextrb::Component
+  class List < StirFry::Component
     attr_reader :todos
 
     # POST /todo

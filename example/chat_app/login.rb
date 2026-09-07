@@ -2,7 +2,7 @@
 
 module ChatApp
   # Chat is the root of the application, the home page.
-  class Login < Nextrb::Component
+  class Login < StirFry::Component
     def self.post(request:, response:, **)
       request.session[:user] = request.params["user"]&.gsub(/\W/, "")
       response.redirect("/")

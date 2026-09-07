@@ -4,7 +4,7 @@ require "json"
 
 module ChatApp
   # Chat is the root of the application, the home page.
-  class Chat < Nextrb::Component
+  class Chat < StirFry::Component
     def self.get(request:, response:, **)
       user = request.session[:user]
       return response.redirect("/login") if user.nil?

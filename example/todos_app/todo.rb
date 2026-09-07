@@ -3,7 +3,7 @@
 module TodosApp
   # a single todo element to display in the list. It also handles toggling and
   # deleteing todos
-  class Todo < Nextrb::Component
+  class Todo < StirFry::Component
     attr_reader :todo
 
     class << self

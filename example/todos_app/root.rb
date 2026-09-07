@@ -2,7 +2,7 @@
 
 module TodosApp
   # Root is the root of the application, the home page.
-  class Root < Nextrb::Component
+  class Root < StirFry::Component
     def todos = DB.all
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "nextrb"
+require "stir_fry"
 require_relative "fixtures/button"
 
 RSpec.configure do |config|

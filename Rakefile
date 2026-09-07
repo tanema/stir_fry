@@ -21,7 +21,7 @@ RDoc::Task.new do |rdoc|
   rdoc.generator = "aliki"
   rdoc.rdoc_files.include(
     "lib/**/*.rb",
-    "rbx/lib/**/*.rb",
+    "rbxrb/lib/**/*.rb",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",
     "README.md",
@@ -33,7 +33,7 @@ end
 
 desc "Run an irb console with the library loaded"
 task :console do
-  require "nextrb"
+  require "stir_fry"
   require "irb"
   ARGV.clear
   IRB.start

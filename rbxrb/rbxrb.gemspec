@@ -13,16 +13,16 @@ Gem::Specification.new do |spec|
     It allows for defining that function on a class that can then define variables
     and methods that can be used in the template.
   DOC
-  spec.homepage = "https://github.com/tanema/nextrb"
+  spec.homepage = "https://github.com/tanema/stir_fry"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1"
   spec.require_paths = ["lib"]
   spec.metadata = {
-    "source_code_uri" => "https://github.com/tanema/nextrb",
-    "changelog_uri" => "https://github.com/tanema/nextrb/blob/main/rbx/CHANGELOG.md",
+    "source_code_uri" => "https://github.com/tanema/stir_fry",
+    "changelog_uri" => "https://github.com/tanema/stir_fry/blob/main/rbx/CHANGELOG.md",
     "homepage_uri" => spec.homepage,
-    "bug_tracker_uri" => "https://github.com/tanema/nextrb/issues",
-    "documentation_uri" => "https://github.com/tanema/nextrb",
+    "bug_tracker_uri" => "https://github.com/tanema/stir_fry/issues",
+    "documentation_uri" => "https://github.com/tanema/stir_fry",
     "rubygems_mfa_required" => "true"
   }
   spec.files = Dir["lib/**/*"] + [

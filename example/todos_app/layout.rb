@@ -2,7 +2,7 @@
 
 module TodosApp
   # Layout is the default layout for the todos app pages.
-  class Layout < Nextrb::Component
+  class Layout < StirFry::Component
     def htmx
       {
         src: "https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js",

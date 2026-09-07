@@ -2,7 +2,7 @@
 
 module TodosApp
   # Input is the form to create new todos
-  class Input < Nextrb::Component; end
+  class Input < StirFry::Component; end
 end
 
 __END__

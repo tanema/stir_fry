@@ -36,7 +36,7 @@ __END__
 
 ### app.rb
 
-```
+```ruby
 require "layout"
 require "home"
 

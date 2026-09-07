@@ -1,6 +1,10 @@
 ## [Unreleased]
 
-## [0.1.0] - 2026-08-10
+## [0.1.1] - 2026-09-07
+
+- Added a `stirfry` cli command for easy development running.
+
+## [0.1.0] - 2026-09-06
 
 Initial release of the whole framework including:
 

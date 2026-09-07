@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH << File.expand_path(File.join(__dir__, "..", "lib"))
+
+require "bundler/setup"
+require "stir_fry"
+require "stir_fry/cli/options"
+require "rerun"
+require "rackup"
+require "yaml"
+
+options = StirFry::CLI::Options.parse!
+
+return unless options.key?(:config) # indicates early return from parse
+
+config_path = options.fetch(:config)
+yaml_options = File.exist?(config_path) ? YAML.load_file(config_path) : {}
+options = yaml_options.merge(options)
+
+rackup_options = []
+rackup_options << "--host #{options.dig(:rackup, :host)}"
+rackup_options << "--port #{options.dig(:rackup, :port)}"
+rackup_options << "--quiet" if options.key?(:quiet)
+rackup_options << "--warn" if options.key?(:warn)
+command = "rackup #{rackup_options.join(" ")} #{options[:rackup_file]}"
+
+Rerun::Runner.keep_running(command, options[:rerun])

@@ -82,8 +82,8 @@ __END__
 After checking out the repo, 
 
 - run `bundle install` to install dependencies. 
-- run `bundle exec puma ./example/todos/config.ru` to run the example todo app.
-- run `bundle exec puma ./example/chat/config.ru` to run the example chat app.
+- run `bundle exec stirfry ./example/todos` to run the example todo app.
+- run `bundle exec stirfry ./example/chat` to run the example chat app.
 - run `rake` to run the specs, rubocop and rdoc. 
 
 ## Further Reading

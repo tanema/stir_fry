@@ -17,8 +17,6 @@ module StirFry
   #   end
   #   get "/todo", Todos::List
   # end
-  #
-  # StirFry.run!(App)
   # ```
   class App
     DEFAULT_ERROR_HANDLERS = { # :nodoc: disable in production
@@ -35,7 +33,7 @@ module StirFry
 
     class << self
       def routes = @routes ||= {} # :nodoc:
-      def all_routes = @all_routes ||= [] # :nodoc:
+      def route_table = @route_table ||= [] # :nodoc:
       def error_handlers = @error_handlers ||= DEFAULT_ERROR_HANDLERS.dup # :nodoc:
       def call(env) = root_app.call(env) # :nodoc:
 
@@ -167,7 +165,7 @@ module StirFry
       # `route("GET", "/")`
       def route(verb, pattern, klass, &block)
         path_pattern = Mustermann.new(route_prefix + pattern)
-        all_routes << path_pattern.to_s unless path_pattern.to_s.start_with?("/stir_fry")
+        route_table << [verb, path_pattern.to_s] unless path_pattern.to_s.start_with?("/stir_fry")
         (routes[verb] ||= []) << [path_pattern, route_handler(klass || block)]
       end
 
@@ -259,8 +257,8 @@ module StirFry
       handle_error(e)
     end
 
-    def all_routes # :nodoc:
-      self.class.all_routes
+    def route_table # :nodoc:
+      self.class.route_table
     end
 
     private

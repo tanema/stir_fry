@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-module ChatApp
-  # Layout is the default layout for the chat app.
-  class Layout < StirFry::Component; end
-end
+# Layout is the default layout for the chat app.
+class Layout < StirFry::Component; end
 
 __END__
 <!DOCTYPE html>

@@ -5,17 +5,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>class StirFry::Error - RDoc Documentation</title>
+<title>class RBX::Parser - RDoc Documentation</title>
 
 
   <meta
     name="keywords"
-    content="ruby,class,StirFry::Error"
+    content="ruby,class,RBX::Parser"
   >
 
     <meta
       name="description"
-      content="class StirFry::Error: Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea"
+      content="class RBX::Parser: Parser breaks down templates into a tree like data structure"
     >
 
 
@@ -24,11 +24,11 @@
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="class StirFry::Error - RDoc Documentation">
+<meta property="og:title" content="class RBX::Parser - RDoc Documentation">
 
 
 
-    <meta property="og:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta property="og:description" content="Parser breaks down templates into a tree like data structure">
 
 
 
@@ -36,11 +36,11 @@
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="class StirFry::Error - RDoc Documentation">
+<meta name="twitter:title" content="class RBX::Parser - RDoc Documentation">
 
 
 
-    <meta name="twitter:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta name="twitter:description" content="Parser breaks down templates into a tree like data structure">
 
 
 
@@ -442,7 +442,7 @@
         <svg><use href="#icon-chevron"></use></svg>
       </span>
     </summary>
-    <ul><li>StandardError</li></ul>
+    <ul><li>Object</li></ul>
   </details>
 </div>
 
@@ -452,6 +452,25 @@
   
 
   
+  <div class="nav-section">
+    <details class="nav-section-collapsible" open>
+      <summary class="nav-section-header">
+        <span class="nav-section-icon">
+          <svg><use href="#icon-class-methods"></use></svg>
+        </span>
+        <span class="nav-section-title">Class Methods</span>
+        <span class="nav-section-chevron">
+          <svg><use href="#icon-chevron"></use></svg>
+        </span>
+      </summary>
+      <ul class="nav-list" role="directory">
+
+        <li ><a href="#method-c-parse">parse</a></li>
+
+      </ul>
+    </details>
+  </div>
+
 
 
 
@@ -473,35 +492,35 @@
 
 </nav>
 
-<main role="main" aria-labelledby="class-stirfry-error">
+<main role="main" aria-labelledby="class-rbx-parser">
   
   
     <ol role="navigation" aria-label="Breadcrumb navigation" class="breadcrumb">
       
       <li>
         
-        <a href="../StirFry.html">StirFry</a><span class="separator">::</span>
+        <a href="../RBX.html">RBX</a><span class="separator">::</span>
         
       </li>
       
       <li>
         
-        <span>Error</span>
+        <span>Parser</span>
         
       </li>
       
     </ol>
   
 
-  <span id="class-StirFry::Error" class="legacy-anchor"></span>
-  <h1 id="class-stirfry-error" class="anchor-link class page-title">
+  <span id="class-RBX::Parser" class="legacy-anchor"></span>
+  <h1 id="class-rbx-parser" class="anchor-link class page-title">
     <span class="page-title-kind">class</span>
-    <span class="page-title-name">StirFry::Error</span>
+    <span class="page-title-name">RBX::Parser</span>
   </h1>
 
   <section class="description">
     
-<p><a href="Error.html"><code>Error</code></a> is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return early.</p>
+<p><a href="Parser.html"><code>Parser</code></a> breaks down templates into a tree like data structure</p>
 
   </section>
 
@@ -513,12 +532,97 @@
 
 
 
+    <section class="constants-list">
+      <header>
+        <h3 id="untitled-constants"><a href="#untitled-constants">Constants</a></h3>
+      </header>
+      <dl>
+
+        <dt id="Node">Node</dt>
+
+        <dd>
+
+          <p>Is a struct for a single node in an AST type structure returned from the parser. This struct consists of:</p>
+<ul><li>
+<p><code>kind</code>: raw, attribute, expression, expr_group, html, component</p>
+</li><li>
+<p><code>name</code>: If it is a component or html element this will be the tag name and the name of an element attribute if the node is an attribute.</p>
+</li><li>
+<p><code>attributes</code>: For tag, or components these are the attributes and their values.</p>
+</li><li>
+<p><code>content</code>: For tag, or components this will be any nested child nodes, for raw or expressions, this will be a string of raw output.</p>
+</li><li>
+<p><code>void</code>: marks if an element has nested content or expects nested content.</p>
+</li></ul>
+        </dd>
+
+
+      </dl>
+    </section>
 
 
 
 
 
 
+
+
+     <section id="public-class-untitled-method-details" class="method-section anchor-link">
+       <header>
+         <h3 id="public-class-untitled-methods"><a href="#public-class-untitled-methods">Public Class Methods</a></h3>
+       </header>
+
+
+      <div id="method-c-parse" class="method-detail anchor-link ">
+        <div class="method-header">
+          <div class="method-heading-group">
+
+              <div class="method-heading">
+                <a href="#method-c-parse" title="Link to this method">
+                  <span class="method-name">parse</span>
+                  <span class="method-args">(filename, template)</span>
+                </a>
+              </div>
+
+
+
+          </div>
+
+
+            <div class="method-controls">
+              <details class="method-source-toggle">
+                <summary><span class="method-source-icon" aria-hidden="true">{}</span> Source</summary>
+              </details>
+            </div>
+
+        </div>
+
+
+          <div class="method-source-code" id="parse-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx/parser.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">filename</span>, <span class="ruby-identifier">template</span>)
+  <span class="ruby-identifier">new</span>(<span class="ruby-identifier">filename</span>, <span class="ruby-identifier">template</span>).<span class="ruby-identifier">parse</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+
+
+
+        <div class="method-description">
+
+
+          <p>Reads a template, lexes tokens, and builds an AST from the tokens.</p>
+
+
+        </div>
+
+
+
+
+
+      </div>
+
+
+    </section>
 
 
 

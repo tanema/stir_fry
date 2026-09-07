@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-module TodosApp
-  # Input is the form to create new todos
-  class Input < StirFry::Component; end
-end
+# Input is the form to create new todos
+class Input < StirFry::Component; end
 
 __END__
 <form hx-post="/todo" 

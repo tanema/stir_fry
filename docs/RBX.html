@@ -5,17 +5,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>module StirFry - RDoc Documentation</title>
+<title>module RBX - RDoc Documentation</title>
 
 
   <meta
     name="keywords"
-    content="ruby,module,StirFry"
+    content="ruby,module,RBX"
   >
 
     <meta
       name="description"
-      content="module StirFry: StirFry as a module provides an entrypoint to starting your app. It is also the namespace that contains the server library that will render the rbx te"
+      content="module RBX: RBX is a module for handling enriched html parsing in a same manner that jsx does allowing for class resolution for tag names and dynamic content take"
     >
 
 
@@ -24,11 +24,11 @@
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="module StirFry - RDoc Documentation">
+<meta property="og:title" content="module RBX - RDoc Documentation">
 
 
 
-    <meta property="og:description" content="StirFry as a module provides an entrypoint to starting your app. It is also the namespace that contains the server library that will render the rbx te">
+    <meta property="og:description" content="RBX is a module for handling enriched html parsing in a same manner that jsx does allowing for class resolution for tag names and dynamic content take">
 
 
 
@@ -36,11 +36,11 @@
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="module StirFry - RDoc Documentation">
+<meta name="twitter:title" content="module RBX - RDoc Documentation">
 
 
 
-    <meta name="twitter:description" content="StirFry as a module provides an entrypoint to starting your app. It is also the namespace that contains the server library that will render the rbx te">
+    <meta name="twitter:description" content="RBX is a module for handling enriched html parsing in a same manner that jsx does allowing for class resolution for tag names and dynamic content take">
 
 
 
@@ -450,15 +450,17 @@
       </summary>
       <ul class="nav-list" role="directory">
 
-        <li ><a href="#method-c-app_env">app_env</a></li>
+        <li ><a href="#method-c-compile">compile</a></li>
 
-        <li ><a href="#method-c-development-3F">development?</a></li>
+        <li ><a href="#method-c-escape">escape</a></li>
 
-        <li ><a href="#method-c-logger">logger</a></li>
+        <li ><a href="#method-c-extract_template">extract_template</a></li>
 
-        <li ><a href="#method-c-production-3F">production?</a></li>
+        <li ><a href="#method-c-resolve_template">resolve_template</a></li>
 
-        <li ><a href="#method-c-test-3F">test?</a></li>
+        <li ><a href="#method-c-safe">safe</a></li>
+
+        <li ><a href="#method-c-tag_kwargs">tag_kwargs</a></li>
 
       </ul>
     </details>
@@ -485,19 +487,66 @@
 
 </nav>
 
-<main role="main" aria-labelledby="module-stirfry">
+<main role="main" aria-labelledby="module-rbx">
   
   
 
-  <span id="module-StirFry" class="legacy-anchor"></span>
-  <h1 id="module-stirfry" class="anchor-link module page-title">
+  <span id="module-RBX" class="legacy-anchor"></span>
+  <h1 id="module-rbx" class="anchor-link module page-title">
     <span class="page-title-kind">module</span>
-    <span class="page-title-name">StirFry</span>
+    <span class="page-title-name">RBX</span>
   </h1>
 
   <section class="description">
     
-<p><a href="StirFry.html"><code>StirFry</code></a> as a module provides an entrypoint to starting your app. It is also the namespace that contains the server library that will render the rbx templates.</p>
+<p><a href="RBX.html"><code>RBX</code></a> is a module for handling enriched html parsing in a same manner that jsx does allowing for class resolution for tag names and dynamic content taken from those ruby classes.</p>
+
+<p>Example:</p>
+
+<pre class="ruby"><span class="ruby-keyword">module</span> <span class="ruby-constant">Todos</span>
+  <span class="ruby-keyword">class</span> <span class="ruby-constant">List</span>
+    <span class="ruby-identifier">include</span> <span class="ruby-constant">RBX</span><span class="ruby-operator">::</span><span class="ruby-constant">Component</span>
+
+    <span class="ruby-identifier">attr_reader</span> <span class="ruby-value">:</span><span class="ruby-value">todos</span>
+
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-value">todos:</span>)
+      <span class="ruby-keyword">super</span>()
+      <span class="ruby-ivar">@todos</span> = <span class="ruby-identifier">todos</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">class</span> <span class="ruby-constant">Todo</span>
+    <span class="ruby-identifier">include</span> <span class="ruby-constant">RBX</span><span class="ruby-operator">::</span><span class="ruby-constant">Component</span>
+    <span class="ruby-identifier">attr_reader</span> <span class="ruby-value">:</span><span class="ruby-value">todo</span>
+
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-value">todo:</span>)
+      <span class="ruby-keyword">super</span>()
+      <span class="ruby-ivar">@todo</span> = <span class="ruby-identifier">todo</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+
+<span class="ruby-identifier">view</span> = <span class="ruby-constant">Todos</span><span class="ruby-operator">::</span><span class="ruby-constant">List</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">todos</span><span class="ruby-value">:</span> [{<span class="ruby-string">&quot;</span><span class="ruby-string">text</span><span class="ruby-string">&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&quot;</span><span class="ruby-string">work</span><span class="ruby-string">&quot;</span>}])
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">view</span>.<span class="ruby-identifier">render</span> <span class="ruby-comment"># =&gt; &lt;ul&gt;&lt;li&gt;work&lt;/li&gt; &lt;/ul&gt;</span>
+
+__END__
+@@Todos.List
+&lt;ul&gt;{todos.map { |todo| &lt;Todos.Todo todo={todo} /&gt; }.join}&lt;/ul&gt;
+
+@@Todos.Todo
+&lt;li&gt;{ todo[&quot;text&quot;] }&lt;/li&gt;
+</pre>
+
+<p><a href="RBX/Component.html"><code>Component</code></a> templates can be defined in several ways.</p>
+<ul><li>
+<p>With the entirety of the <code>__END__</code> section if it does not contain any labels.</p>
+</li><li>
+<p>Several templates defined for several classes in the same file (like the example above). To do this the templates need a <code>@@&lt;klass-name&gt;</code> label to identify them.</p>
+</li><li>
+<p>Use the component class method <code>template_file</code> to define where to look for the template file.</p>
+</li><li>
+<p>Use the component class method <code>template_source</code> to provide a raw string as a template for the component.</p>
+</li></ul>
 
   </section>
 
@@ -519,7 +568,7 @@
 
         <dd>
 
-          <p><a href="StirFry.html#VERSION"><code>VERSION</code></a> is the release library version</p>
+          <p>Version number for <a href="RBX.html"><code>RBX</code></a></p>
         </dd>
 
 
@@ -539,14 +588,14 @@
        </header>
 
 
-      <div id="method-c-app_env" class="method-detail anchor-link ">
+      <div id="method-c-compile" class="method-detail anchor-link ">
         <div class="method-header">
           <div class="method-heading-group">
 
               <div class="method-heading">
-                <a href="#method-c-app_env" title="Link to this method">
-                  <span class="method-name">app_env</span>
-                  <span class="method-args">()</span>
+                <a href="#method-c-compile" title="Link to this method">
+                  <span class="method-name">compile</span>
+                  <span class="method-args">(template_name, template)</span>
                 </a>
               </div>
 
@@ -564,9 +613,11 @@
         </div>
 
 
-          <div class="method-source-code" id="app_env-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 45</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">app_env</span> = <span class="ruby-ivar">@app_env</span> ||= (<span class="ruby-constant">ENV</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">APP_ENV</span><span class="ruby-string">&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">ENV</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">RACK_ENV</span><span class="ruby-string">&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">ENV</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">ENV</span><span class="ruby-string">&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-value">:</span><span class="ruby-value">development</span>).<span class="ruby-identifier">to_sym</span></pre>
+          <div class="method-source-code" id="compile-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx.rb, line 75</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">compile</span>(<span class="ruby-identifier">template_name</span>, <span class="ruby-identifier">template</span>)
+  <span class="ruby-constant">Compiler</span>.<span class="ruby-identifier">compile</span>(<span class="ruby-constant">Parser</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">template_name</span>, <span class="ruby-identifier">template</span>))
+<span class="ruby-keyword">end</span></pre>
           </div>
 
 
@@ -574,7 +625,7 @@
         <div class="method-description">
 
 
-          <p>Is the set environment setting evaluated from environment variables APP_ENV, RACK_ENV or ENV. It defaults to :development.</p>
+          <p>parse and then compile the template which will return a string of ruby to be evaluated. This can then be passed to <code>instance_eval</code> to make it execute in context of your class. Include <a href="RBX/Component.html"><code>RBX::Component</code></a> in your class to do this for you. It will lazily compile the template and cache it afterwards.</p>
 
 
         </div>
@@ -586,14 +637,14 @@
       </div>
 
 
-      <div id="method-c-development-3F" class="method-detail anchor-link ">
+      <div id="method-c-escape" class="method-detail anchor-link ">
         <div class="method-header">
           <div class="method-heading-group">
 
               <div class="method-heading">
-                <a href="#method-c-development-3F" title="Link to this method">
-                  <span class="method-name">development?</span>
-                  <span class="method-args">()</span>
+                <a href="#method-c-escape" title="Link to this method">
+                  <span class="method-name">escape</span>
+                  <span class="method-args">(value)</span>
                 </a>
               </div>
 
@@ -611,9 +662,11 @@
         </div>
 
 
-          <div class="method-source-code" id="development-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 48</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">development?</span> = <span class="ruby-identifier">app_env</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">development</span></pre>
+          <div class="method-source-code" id="escape-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx.rb, line 83</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">escape</span>(<span class="ruby-identifier">value</span>)
+  <span class="ruby-identifier">value</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">SafeString</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">:</span> ::<span class="ruby-constant">Rack</span><span class="ruby-operator">::</span><span class="ruby-constant">Utils</span>.<span class="ruby-identifier">escape_html</span>(<span class="ruby-identifier">value</span>.<span class="ruby-identifier">to_s</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
 
 
@@ -621,7 +674,7 @@
         <div class="method-description">
 
 
-          <p>is the app running in development.</p>
+          <p>escape any non-safe text for html. This is used to ensure that text that you are using in your templates will not cause security issues. This will be outputted by the compiler so it is here also for easy access by the compiled ruby.</p>
 
 
         </div>
@@ -633,14 +686,14 @@
       </div>
 
 
-      <div id="method-c-logger" class="method-detail anchor-link ">
+      <div id="method-c-extract_template" class="method-detail anchor-link ">
         <div class="method-header">
           <div class="method-heading-group">
 
               <div class="method-heading">
-                <a href="#method-c-logger" title="Link to this method">
-                  <span class="method-name">logger</span>
-                  <span class="method-args">()</span>
+                <a href="#method-c-extract_template" title="Link to this method">
+                  <span class="method-name">extract_template</span>
+                  <span class="method-args">(filepath, klass, inline: true)</span>
                 </a>
               </div>
 
@@ -658,9 +711,17 @@
         </div>
 
 
-          <div class="method-source-code" id="logger-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 57</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">logger</span> = <span class="ruby-ivar">@logger</span> ||= <span class="ruby-identifier">default_logger</span></pre>
+          <div class="method-source-code" id="extract_template-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx.rb, line 117</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">extract_template</span>(<span class="ruby-identifier">filepath</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-value">inline:</span> <span class="ruby-keyword">true</span>)
+  <span class="ruby-identifier">name</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">::</span><span class="ruby-string">&quot;</span>).<span class="ruby-identifier">last</span>
+  <span class="ruby-identifier">fullname</span> = <span class="ruby-identifier">template_name</span>(<span class="ruby-identifier">filepath</span>, <span class="ruby-identifier">name</span>)
+  <span class="ruby-identifier">parse_templates</span>(<span class="ruby-identifier">filepath</span>, <span class="ruby-identifier">name</span>, <span class="ruby-identifier">inline</span>) <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@template_cache</span>[<span class="ruby-identifier">fullname</span>]
+  <span class="ruby-identifier">tmpl</span> = <span class="ruby-ivar">@template_cache</span>.<span class="ruby-identifier">fetch</span>(<span class="ruby-identifier">fullname</span>, <span class="ruby-keyword">nil</span>)
+  <span class="ruby-identifier">validate_uniq_templates</span>(<span class="ruby-identifier">filepath</span>, <span class="ruby-identifier">tmpl</span>[<span class="ruby-value">:</span><span class="ruby-value">content</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tmpl</span>
+
+  [<span class="ruby-identifier">fullname</span>, <span class="ruby-identifier">tmpl</span>&amp;.<span class="ruby-identifier">dig</span>(<span class="ruby-value">:</span><span class="ruby-value">content</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&quot;</span><span class="ruby-string">&quot;</span>]
+<span class="ruby-keyword">end</span></pre>
           </div>
 
 
@@ -668,7 +729,9 @@
         <div class="method-description">
 
 
-          <p>Logger is the app wide logger for any app messages.</p>
+          <p>depending on how the template is defined, <a href="RBX.html#method-c-extract_template"><code>extract_template</code></a> will look in the <code>__END__</code> section, determine if there are several templates, and pick out the template for the specific class passed as a parameter. It will return an empty string if no content was found.</p>
+
+<p>This will also ensure that templates were not reused just incase labels were not added.</p>
 
 
         </div>
@@ -680,14 +743,14 @@
       </div>
 
 
-      <div id="method-c-production-3F" class="method-detail anchor-link ">
+      <div id="method-c-resolve_template" class="method-detail anchor-link ">
         <div class="method-header">
           <div class="method-heading-group">
 
               <div class="method-heading">
-                <a href="#method-c-production-3F" title="Link to this method">
-                  <span class="method-name">production?</span>
-                  <span class="method-args">()</span>
+                <a href="#method-c-resolve_template" title="Link to this method">
+                  <span class="method-name">resolve_template</span>
+                  <span class="method-args">(klass)</span>
                 </a>
               </div>
 
@@ -705,9 +768,12 @@
         </div>
 
 
-          <div class="method-source-code" id="production-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 54</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">production?</span> = <span class="ruby-identifier">app_end</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">production</span></pre>
+          <div class="method-source-code" id="resolve_template-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx.rb, line 105</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">resolve_template</span>(<span class="ruby-identifier">klass</span>)
+  <span class="ruby-identifier">location</span> = <span class="ruby-constant">Object</span>.<span class="ruby-identifier">const_source_location</span>(<span class="ruby-identifier">klass</span>.<span class="ruby-identifier">name</span>).<span class="ruby-identifier">first</span>
+  <span class="ruby-identifier">extract_template</span>(<span class="ruby-identifier">location</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-value">inline</span><span class="ruby-value">:</span> <span class="ruby-keyword">true</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
 
 
@@ -715,7 +781,9 @@
         <div class="method-description">
 
 
-          <p>is the app running in production</p>
+          <p>resolve an inline template for a klass. It will look at the klass’s source location, and check if there is an <code>__END__</code> section on the file. If there is, it will extract that template data.</p>
+
+<p>A template can be the whole <code>__END__</code> section if there are no labels found or several templates can be defined in the <code>__END__</code> section by labeling them with an <code>@@&lt;name&gt;</code> label on the line before the template. See the example above.</p>
 
 
         </div>
@@ -727,14 +795,14 @@
       </div>
 
 
-      <div id="method-c-test-3F" class="method-detail anchor-link ">
+      <div id="method-c-safe" class="method-detail anchor-link ">
         <div class="method-header">
           <div class="method-heading-group">
 
               <div class="method-heading">
-                <a href="#method-c-test-3F" title="Link to this method">
-                  <span class="method-name">test?</span>
-                  <span class="method-args">()</span>
+                <a href="#method-c-safe" title="Link to this method">
+                  <span class="method-name">safe</span>
+                  <span class="method-args">(value)</span>
                 </a>
               </div>
 
@@ -752,9 +820,11 @@
         </div>
 
 
-          <div class="method-source-code" id="test-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 51</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">test?</span> = <span class="ruby-identifier">app_env</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">test</span></pre>
+          <div class="method-source-code" id="safe-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx.rb, line 89</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">safe</span>(<span class="ruby-identifier">value</span>)
+  <span class="ruby-constant">SafeString</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">value</span>.<span class="ruby-identifier">to_s</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
 
 
@@ -762,7 +832,56 @@
         <div class="method-description">
 
 
-          <p>is the app running in test.</p>
+          <p>mark a string as safe, not needing any further escaping. This can be done to skip escaping if you’re sure it needs to be raw.</p>
+
+
+        </div>
+
+
+
+
+
+      </div>
+
+
+      <div id="method-c-tag_kwargs" class="method-detail anchor-link ">
+        <div class="method-header">
+          <div class="method-heading-group">
+
+              <div class="method-heading">
+                <a href="#method-c-tag_kwargs" title="Link to this method">
+                  <span class="method-name">tag_kwargs</span>
+                  <span class="method-args">(options)</span>
+                </a>
+              </div>
+
+
+
+          </div>
+
+
+            <div class="method-controls">
+              <details class="method-source-toggle">
+                <summary><span class="method-source-icon" aria-hidden="true">{}</span> Source</summary>
+              </details>
+            </div>
+
+        </div>
+
+
+          <div class="method-source-code" id="tag_kwargs-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx.rb, line 94</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_kwargs</span>(<span class="ruby-identifier">options</span>)
+  <span class="ruby-string">&quot;</span><span class="ruby-string"> </span><span class="ruby-string">#{</span><span class="ruby-constant">OptionMarshaller</span>.<span class="ruby-identifier">tag_kwargs</span>(<span class="ruby-identifier">options</span>)<span class="ruby-string">}</span><span class="ruby-string">&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+
+
+
+        <div class="method-description">
+
+
+          <p>marshal a hash into html tag attributes. See <a href="RBX/OptionMarshaller.html"><code>OptionMarshaller</code></a>.</p>
 
 
         </div>

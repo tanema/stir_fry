@@ -5,17 +5,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>class StirFry::Error - RDoc Documentation</title>
+<title>class RBX::Compiler - RDoc Documentation</title>
 
 
   <meta
     name="keywords"
-    content="ruby,class,StirFry::Error"
+    content="ruby,class,RBX::Compiler"
   >
 
     <meta
       name="description"
-      content="class StirFry::Error: Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea"
+      content="class RBX::Compiler: Compiler takes in the parsed AST and outputs generated code."
     >
 
 
@@ -24,11 +24,11 @@
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="class StirFry::Error - RDoc Documentation">
+<meta property="og:title" content="class RBX::Compiler - RDoc Documentation">
 
 
 
-    <meta property="og:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta property="og:description" content="Compiler takes in the parsed AST and outputs generated code.">
 
 
 
@@ -36,11 +36,11 @@
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="class StirFry::Error - RDoc Documentation">
+<meta name="twitter:title" content="class RBX::Compiler - RDoc Documentation">
 
 
 
-    <meta name="twitter:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta name="twitter:description" content="Compiler takes in the parsed AST and outputs generated code.">
 
 
 
@@ -442,7 +442,7 @@
         <svg><use href="#icon-chevron"></use></svg>
       </span>
     </summary>
-    <ul><li>StandardError</li></ul>
+    <ul><li>Object</li></ul>
   </details>
 </div>
 
@@ -452,6 +452,25 @@
   
 
   
+  <div class="nav-section">
+    <details class="nav-section-collapsible" open>
+      <summary class="nav-section-header">
+        <span class="nav-section-icon">
+          <svg><use href="#icon-class-methods"></use></svg>
+        </span>
+        <span class="nav-section-title">Class Methods</span>
+        <span class="nav-section-chevron">
+          <svg><use href="#icon-chevron"></use></svg>
+        </span>
+      </summary>
+      <ul class="nav-list" role="directory">
+
+        <li ><a href="#method-c-compile">compile</a></li>
+
+      </ul>
+    </details>
+  </div>
+
 
 
 
@@ -473,35 +492,35 @@
 
 </nav>
 
-<main role="main" aria-labelledby="class-stirfry-error">
+<main role="main" aria-labelledby="class-rbx-compiler">
   
   
     <ol role="navigation" aria-label="Breadcrumb navigation" class="breadcrumb">
       
       <li>
         
-        <a href="../StirFry.html">StirFry</a><span class="separator">::</span>
+        <a href="../RBX.html">RBX</a><span class="separator">::</span>
         
       </li>
       
       <li>
         
-        <span>Error</span>
+        <span>Compiler</span>
         
       </li>
       
     </ol>
   
 
-  <span id="class-StirFry::Error" class="legacy-anchor"></span>
-  <h1 id="class-stirfry-error" class="anchor-link class page-title">
+  <span id="class-RBX::Compiler" class="legacy-anchor"></span>
+  <h1 id="class-rbx-compiler" class="anchor-link class page-title">
     <span class="page-title-kind">class</span>
-    <span class="page-title-name">StirFry::Error</span>
+    <span class="page-title-name">RBX::Compiler</span>
   </h1>
 
   <section class="description">
     
-<p><a href="Error.html"><code>Error</code></a> is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return early.</p>
+<p><a href="Compiler.html"><code>Compiler</code></a> takes in the parsed AST and outputs generated code.</p>
 
   </section>
 
@@ -519,6 +538,63 @@
 
 
 
+
+     <section id="public-class-untitled-method-details" class="method-section anchor-link">
+       <header>
+         <h3 id="public-class-untitled-methods"><a href="#public-class-untitled-methods">Public Class Methods</a></h3>
+       </header>
+
+
+      <div id="method-c-compile" class="method-detail anchor-link ">
+        <div class="method-header">
+          <div class="method-heading-group">
+
+              <div class="method-heading">
+                <a href="#method-c-compile" title="Link to this method">
+                  <span class="method-name">compile</span>
+                  <span class="method-args">(nodes)</span>
+                </a>
+              </div>
+
+
+
+          </div>
+
+
+            <div class="method-controls">
+              <details class="method-source-toggle">
+                <summary><span class="method-source-icon" aria-hidden="true">{}</span> Source</summary>
+              </details>
+            </div>
+
+        </div>
+
+
+          <div class="method-source-code" id="compile-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx/compiler.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">compile</span>(<span class="ruby-identifier">nodes</span>)
+  <span class="ruby-identifier">new</span>.<span class="ruby-identifier">compile</span>(<span class="ruby-identifier">nodes</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+
+
+
+        <div class="method-description">
+
+
+          <p>Compile parsed nodes into ruby source code that will output html</p>
+
+
+        </div>
+
+
+
+
+
+      </div>
+
+
+    </section>
 
 
 

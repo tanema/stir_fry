@@ -3,7 +3,7 @@
 require_relative "lib/rbx/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "rbx"
+  spec.name = "rbxrb"
   spec.version = RBX::VERSION
   spec.authors = ["Tim Anema"]
   spec.email = ["timanema@gmail.com"]
@@ -18,11 +18,11 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 3.1"
   spec.require_paths = ["lib"]
   spec.metadata = {
-    "source_code_uri"       => "https://github.com/tanema/nextrb",
-    "changelog_uri"         => "https://github.com/tanema/nextrb/blob/main/rbx/CHANGELOG.md",
-    "homepage_uri"          => spec.homepage,
-    "bug_tracker_uri"       => "https://github.com/tanema/nextrb/issues",
-    "documentation_uri"     => "https://github.com/tanema/nextrb",
+    "source_code_uri" => "https://github.com/tanema/nextrb",
+    "changelog_uri" => "https://github.com/tanema/nextrb/blob/main/rbx/CHANGELOG.md",
+    "homepage_uri" => spec.homepage,
+    "bug_tracker_uri" => "https://github.com/tanema/nextrb/issues",
+    "documentation_uri" => "https://github.com/tanema/nextrb",
     "rubygems_mfa_required" => "true"
   }
   spec.files = Dir["lib/**/*"] + [
@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
     "CHANGELOG.md",
     "Gemfile",
     "Rakefile",
-    "rbx.gemspec"
+    "rbxrb.gemspec"
   ]
 
   spec.add_dependency "rack", ">= 3.0.0", "< 4"

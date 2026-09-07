@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbx (0.1.0)
+    rbxrb (0.1.0)
       rack (>= 3.0.0, < 4)
 
 GEM
@@ -84,7 +84,7 @@ PLATFORMS
 DEPENDENCIES
   irb
   rake (~> 13.0)
-  rbx!
+  rbxrb!
   rspec (~> 3.0)
   rubocop (~> 1.21)
 

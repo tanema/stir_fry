@@ -1,14 +1,13 @@
 PATH
   remote: .
   specs:
-    rbxrb (0.1.0)
+    rbxrb (0.1.1)
       rack (>= 3.0.0, < 4)
-    stir_fry (0.1.0)
+    stir_fry (0.1.1)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
       rack-protection (>= 3.1)
       rack-session (>= 2.0.0, < 3)
-      rackup (>= 2.1)
       rbxrb (>= 0.1)
       semantic_logger (>= 5.1)
 
@@ -114,6 +113,7 @@ GEM
     ruby-progressbar (1.13.0)
     semantic_logger (5.1.0)
       concurrent-ruby (~> 1.0)
+    terminal-notifier (3.1.0)
     tsort (0.2.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
@@ -126,6 +126,7 @@ DEPENDENCIES
   irb
   pstore
   puma
+  rackup
   rake (~> 13.0)
   rdoc
   rerun
@@ -134,6 +135,7 @@ DEPENDENCIES
   rubocop-rake (>= 0.7.1)
   rubocop-rspec (~> 3.10)
   stir_fry!
+  terminal-notifier
 
 BUNDLED WITH
    2.6.7

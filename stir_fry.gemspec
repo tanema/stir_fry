@@ -43,6 +43,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rack", ">= 3.0.0", "< 4"
   spec.add_dependency "rack-protection", ">= 3.1"
   spec.add_dependency "rack-session", ">= 2.0.0", "< 3"
+  spec.add_dependency "rackup", ">= 2.3"
   spec.add_dependency "rbxrb", ">= 0.1"
+  spec.add_dependency "rerun", ">= 0.14"
   spec.add_dependency "semantic_logger", ">= 5.1"
+  spec.add_dependency "terminal-notifier", ">= 3.1"
 end

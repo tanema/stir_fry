@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require "json"
 require "optparse"
 require "pathname"
 
 module StirFry
-  module CLI # :nodoc:
-    # A class that handled CLI options for the cli which contains flags for both
-    # rerun and rackup.
+  module CLI
     class Options # :nodoc:
       # rubocop:disable Metrics/MethodLength, Metrics/BlockLength, Metrics/AbcSize
       def self.parse!(args: ARGV)

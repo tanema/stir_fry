@@ -2,25 +2,24 @@
 A small, simple web framework that lets you enjoy ruby with a JSX type flavour. 
 Have a little fun! Mix it up! 
 
+- [Quickstart](https://github.com/tanema/stir_fry/wiki/Create-your-first-Stir-Fry!)
 - [Documentation](https://timanema.com/stir_fry/)
+- [Examples](https://github.com/tanema/stir_fry/tree/main/example)
 - [RubyGems](https://rubygems.org/gems/stir_fry)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [License](https://opensource.org/licenses/MIT)
 
 ## Installation
 
 `gem install 'stir_fry'`
 
 ## Usage
-An example project could look like this. The templating leverages a weird feature 
-of ruby with the `__END__` data sections [ref](https://til.hashrocket.com/posts/17787bf181-rubys-end)
-to inline templates in the same file and be able to parse them where they are. 
-I have not yet figured out how to add syntax highlighting for it but it is a start.
+Your app could look like the following: 
 
 ### layout.rb
 
 ```ruby
+# Layout shared across pages
 class Layout < StirFry::Component; end
+
 __END__
 <html>
   <body>{ yield }</body>
@@ -30,6 +29,7 @@ __END__
 ### home.rb
 
 ```ruby
+# A specific page to render, with the Layout wrapping it.
 class Home < StirFry::Component
   def name = "Bobby"
 end
@@ -43,6 +43,7 @@ __END__
 ### app.rb
 
 ```ruby
+# The central and starting point for the app, to define routes and any other setup.
 require "stir_fry"
 require "layout"
 require "home"
@@ -51,13 +52,16 @@ class App < StirFry::App
   # Render the components
   get "/", Home
   # Raw API call
-  get "/hello/:name" do|request:, response:, name:| 
+  get "/hello/:name" do |request:, response:, name:| 
     response.text("Hello #{req.args["name"]}") 
   end
 end
 ```
 
-See the `/examples` directory for more in-depth examples.
+The template definitions leverage a weird feature of ruby, the `__END__` data 
+sections [ref](https://til.hashrocket.com/posts/17787bf181-rubys-end). This enables 
+stir_fry to parse inline templates in the same file as the behaviour class. 
+I have not yet figured out how to add syntax highlighting for it but it is a start.
 
 ### Multiple Inline templates
 Multiple templates can be defined in the same file as well with an addition of 
@@ -85,11 +89,6 @@ After checking out the repo,
 - run `bundle exec stirfry ./example/todos` to run the example todo app.
 - run `bundle exec stirfry ./example/chat` to run the example chat app.
 - run `rake` to run the specs, rubocop and rdoc. 
-
-## Further Reading
-
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [License](https://opensource.org/licenses/MIT)
 
 ## Acknowledgment 
 These are the projects that I took both inspiration and code chunks from. Since I 

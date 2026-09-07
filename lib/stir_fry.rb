@@ -30,6 +30,7 @@ module StirFry
   class InternalError < Error; end
 
   autoload :App, "stir_fry/app"
+  autoload :CLI, "stir_fry/cli"
   autoload :Component, "stir_fry/component"
   autoload :Pages, "stir_fry/pages"
   autoload :Request, "stir_fry/request"

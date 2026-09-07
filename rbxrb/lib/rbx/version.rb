@@ -2,5 +2,5 @@
 
 module RBX
   # Version number for RBX
-  VERSION = "0.1.3"
+  VERSION = "0.1.4"
 end

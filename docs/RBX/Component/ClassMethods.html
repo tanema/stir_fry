@@ -5,17 +5,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>class StirFry::Error - RDoc Documentation</title>
+<title>module RBX::Component::ClassMethods - RDoc Documentation</title>
 
 
   <meta
     name="keywords"
-    content="ruby,class,StirFry::Error"
+    content="ruby,module,RBX::Component::ClassMethods"
   >
 
     <meta
       name="description"
-      content="class StirFry::Error: Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea"
+      content="module RBX::Component::ClassMethods: ClassMethods is extended onto any class that includes Component. It handles template resolution and compilation."
     >
 
 
@@ -24,11 +24,11 @@
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="class StirFry::Error - RDoc Documentation">
+<meta property="og:title" content="module RBX::Component::ClassMethods - RDoc Documentation">
 
 
 
-    <meta property="og:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta property="og:description" content="ClassMethods is extended onto any class that includes Component. It handles template resolution and compilation.">
 
 
 
@@ -36,67 +36,67 @@
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="class StirFry::Error - RDoc Documentation">
+<meta name="twitter:title" content="module RBX::Component::ClassMethods - RDoc Documentation">
 
 
 
-    <meta name="twitter:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta name="twitter:description" content="ClassMethods is extended onto any class that includes Component. It handles template resolution and compilation.">
 
 
 
 <script type="text/javascript">
-  var rdoc_rel_prefix = "../";
-  var index_rel_prefix = "../";
+  var rdoc_rel_prefix = "../../";
+  var index_rel_prefix = "../../";
 </script>
 
 <script
-  src="../js/theme-toggle.js?v=8.0.0"
+  src="../../js/theme-toggle.js?v=8.0.0"
 ></script>
 
 <script
-  src="../js/search_navigation.js?v=8.0.0"
+  src="../../js/search_navigation.js?v=8.0.0"
   defer
 ></script>
 
 <script
-  src="../js/search_data.js?v=8.0.0"
+  src="../../js/search_data.js?v=8.0.0"
   defer
 ></script>
 
 <script
-  src="../js/search_ranker.js?v=8.0.0"
+  src="../../js/search_ranker.js?v=8.0.0"
   defer
 ></script>
 
 <script
-  src="../js/search_controller.js?v=8.0.0"
+  src="../../js/search_controller.js?v=8.0.0"
   defer
 ></script>
 
 <script
-  src="../js/c_highlighter.js?v=8.0.0"
+  src="../../js/c_highlighter.js?v=8.0.0"
   defer
 ></script>
 
 <script
-  src="../js/bash_highlighter.js?v=8.0.0"
+  src="../../js/bash_highlighter.js?v=8.0.0"
   defer
 ></script>
 
 <script
-  src="../js/aliki.js?v=8.0.0"
+  src="../../js/aliki.js?v=8.0.0"
   defer
 ></script>
 
 <link
-  href="../css/rdoc.css?v=8.0.0"
+  href="../../css/rdoc.css?v=8.0.0"
   rel="stylesheet"
 >
 
 
 
 
-<body role="document" class="class has-toc">
+<body role="document" class="module has-toc">
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <!-- Chevron (right arrow) - used for expand/collapse -->
   <symbol
@@ -307,7 +307,7 @@
 </svg>
 
 <header class="top-navbar">
-  <a href="../index.html" class="navbar-brand">
+  <a href="../../index.html" class="navbar-brand">
     RDoc Documentation
   </a>
 
@@ -400,7 +400,7 @@
 
 
             <li>
-              <a href="../CHANGELOG_md.html">
+              <a href="../../CHANGELOG_md.html">
                 CHANGELOG
               </a>
             </li>
@@ -409,7 +409,7 @@
 
 
             <li>
-              <a href="../CODE_OF_CONDUCT_md.html">
+              <a href="../../CODE_OF_CONDUCT_md.html">
                 CODE_OF_CONDUCT
               </a>
             </li>
@@ -418,7 +418,7 @@
 
 
             <li>
-              <a href="../LICENSE.html">
+              <a href="../../LICENSE.html">
                 LICENSE
               </a>
             </li>
@@ -431,21 +431,6 @@
   
 
   
-<div id="parent-class-section" class="nav-section">
-  <details class="nav-section-collapsible" open>
-    <summary class="nav-section-header">
-      <span class="nav-section-icon">
-        <svg><use href="#icon-ancestors"></use></svg>
-      </span>
-      <span class="nav-section-title">Ancestors</span>
-      <span class="nav-section-chevron">
-        <svg><use href="#icon-chevron"></use></svg>
-      </span>
-    </summary>
-    <ul><li>StandardError</li></ul>
-  </details>
-</div>
-
 
   
 
@@ -453,6 +438,27 @@
 
   
 
+
+  <div class="nav-section">
+    <details class="nav-section-collapsible" open>
+      <summary class="nav-section-header">
+        <span class="nav-section-icon">
+          <svg><use href="#icon-instance-methods"></use></svg>
+        </span>
+        <span class="nav-section-title">Instance Methods</span>
+        <span class="nav-section-chevron">
+          <svg><use href="#icon-chevron"></use></svg>
+        </span>
+      </summary>
+      <ul class="nav-list" role="directory">
+
+        <li ><a href="#method-i-template_file">template_file</a></li>
+
+        <li ><a href="#method-i-template_source">template_source</a></li>
+
+      </ul>
+    </details>
+  </div>
 
 
   <div id="classindex-section" class="nav-section">
@@ -467,41 +473,47 @@
       </span>
     </summary>
 
-    <ul class="link-list nav-list"><li><details><summary><code><a href="../RBX.html">RBX</a></code></summary><ul class="link-list nav-list"><li><code><a href="../RBX/Compiler.html">Compiler</a></code></li><li><details><summary><code><a href="../RBX/Component.html">Component</a></code></summary><ul class="link-list nav-list"><li><code><a href="../RBX/Component/ClassMethods.html">ClassMethods</a></code></li></ul></details></li><li><code><a href="../RBX/OptionMarshaller.html">OptionMarshaller</a></code></li><li><code><a href="../RBX/Parser.html">Parser</a></code></li><li><code><a href="../RBX/SafeString.html">SafeString</a></code></li><li><code><a href="../RBX/SyntaxError.html">SyntaxError</a></code></li></ul></details></li><li><details><summary><code><a href="../StirFry.html">StirFry</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/App.html">App</a></code></li><li><code><a href="../StirFry/BadRequest.html">BadRequest</a></code></li><li><code><a href="../StirFry/Component.html">Component</a></code></li><li><code><a href="../StirFry/Error.html">Error</a></code></li><li><code><a href="../StirFry/Found.html">Found</a></code></li><li><code><a href="../StirFry/InternalError.html">InternalError</a></code></li><li><details><summary><code><a href="../StirFry/Middleware.html">Middleware</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/Middleware/Logger.html">Logger</a></code></li></ul></details></li><li><code><a href="../StirFry/NotFound.html">NotFound</a></code></li><li><code><a href="../StirFry/NotModified.html">NotModified</a></code></li><li><code><a href="../StirFry/OKAY.html">OKAY</a></code></li><li><details><summary><code><a href="../StirFry/Pages.html">Pages</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/Pages/ErrorPage.html">ErrorPage</a></code></li><li><code><a href="../StirFry/Pages/Layout.html">Layout</a></code></li><li><code><a href="../StirFry/Pages/NotFoundPage.html">NotFoundPage</a></code></li><li><code><a href="../StirFry/Pages/RoutesPage.html">RoutesPage</a></code></li></ul></details></li><li><code><a href="../StirFry/PreconditionFailed.html">PreconditionFailed</a></code></li><li><code><a href="../StirFry/Request.html">Request</a></code></li><li><code><a href="../StirFry/Response.html">Response</a></code></li><li><code><a href="../StirFry/Unauthorized.html">Unauthorized</a></code></li></ul></details></li></ul>
+    <ul class="link-list nav-list"><li><details><summary><code><a href="../../RBX.html">RBX</a></code></summary><ul class="link-list nav-list"><li><code><a href="../../RBX/Compiler.html">Compiler</a></code></li><li><details><summary><code><a href="../../RBX/Component.html">Component</a></code></summary><ul class="link-list nav-list"><li><code><a href="../../RBX/Component/ClassMethods.html">ClassMethods</a></code></li></ul></details></li><li><code><a href="../../RBX/OptionMarshaller.html">OptionMarshaller</a></code></li><li><code><a href="../../RBX/Parser.html">Parser</a></code></li><li><code><a href="../../RBX/SafeString.html">SafeString</a></code></li><li><code><a href="../../RBX/SyntaxError.html">SyntaxError</a></code></li></ul></details></li><li><details><summary><code><a href="../../StirFry.html">StirFry</a></code></summary><ul class="link-list nav-list"><li><code><a href="../../StirFry/App.html">App</a></code></li><li><code><a href="../../StirFry/BadRequest.html">BadRequest</a></code></li><li><code><a href="../../StirFry/Component.html">Component</a></code></li><li><code><a href="../../StirFry/Error.html">Error</a></code></li><li><code><a href="../../StirFry/Found.html">Found</a></code></li><li><code><a href="../../StirFry/InternalError.html">InternalError</a></code></li><li><details><summary><code><a href="../../StirFry/Middleware.html">Middleware</a></code></summary><ul class="link-list nav-list"><li><code><a href="../../StirFry/Middleware/Logger.html">Logger</a></code></li></ul></details></li><li><code><a href="../../StirFry/NotFound.html">NotFound</a></code></li><li><code><a href="../../StirFry/NotModified.html">NotModified</a></code></li><li><code><a href="../../StirFry/OKAY.html">OKAY</a></code></li><li><details><summary><code><a href="../../StirFry/Pages.html">Pages</a></code></summary><ul class="link-list nav-list"><li><code><a href="../../StirFry/Pages/ErrorPage.html">ErrorPage</a></code></li><li><code><a href="../../StirFry/Pages/Layout.html">Layout</a></code></li><li><code><a href="../../StirFry/Pages/NotFoundPage.html">NotFoundPage</a></code></li><li><code><a href="../../StirFry/Pages/RoutesPage.html">RoutesPage</a></code></li></ul></details></li><li><code><a href="../../StirFry/PreconditionFailed.html">PreconditionFailed</a></code></li><li><code><a href="../../StirFry/Request.html">Request</a></code></li><li><code><a href="../../StirFry/Response.html">Response</a></code></li><li><code><a href="../../StirFry/Unauthorized.html">Unauthorized</a></code></li></ul></details></li></ul>
   </details>
 </div>
 
 </nav>
 
-<main role="main" aria-labelledby="class-stirfry-error">
+<main role="main" aria-labelledby="module-rbx-component-classmethods">
   
   
     <ol role="navigation" aria-label="Breadcrumb navigation" class="breadcrumb">
       
       <li>
         
-        <a href="../StirFry.html">StirFry</a><span class="separator">::</span>
+        <a href="../../RBX.html">RBX</a><span class="separator">::</span>
         
       </li>
       
       <li>
         
-        <span>Error</span>
+        <a href="../../RBX/Component.html">Component</a><span class="separator">::</span>
+        
+      </li>
+      
+      <li>
+        
+        <span>ClassMethods</span>
         
       </li>
       
     </ol>
   
 
-  <span id="class-StirFry::Error" class="legacy-anchor"></span>
-  <h1 id="class-stirfry-error" class="anchor-link class page-title">
-    <span class="page-title-kind">class</span>
-    <span class="page-title-name">StirFry::Error</span>
+  <span id="module-RBX::Component::ClassMethods" class="legacy-anchor"></span>
+  <h1 id="module-rbx-component-classmethods" class="anchor-link module page-title">
+    <span class="page-title-kind">module</span>
+    <span class="page-title-name">RBX::Component::ClassMethods</span>
   </h1>
 
   <section class="description">
     
-<p><a href="Error.html"><code>Error</code></a> is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return early.</p>
+<p><a href="ClassMethods.html"><code>ClassMethods</code></a> is extended onto any class that includes <a href="../Component.html"><code>Component</code></a>. It handles template resolution and compilation.</p>
 
   </section>
 
@@ -525,6 +537,113 @@
 
 
 
+
+     <section id="public-instance-untitled-method-details" class="method-section anchor-link">
+       <header>
+         <h3 id="public-instance-untitled-methods"><a href="#public-instance-untitled-methods">Public Instance Methods</a></h3>
+       </header>
+
+
+      <div id="method-i-template_file" class="method-detail anchor-link ">
+        <div class="method-header">
+          <div class="method-heading-group">
+
+              <div class="method-heading">
+                <a href="#method-i-template_file" title="Link to this method">
+                  <span class="method-name">template_file</span>
+                  <span class="method-args">(filepath)</span>
+                </a>
+              </div>
+
+
+
+          </div>
+
+
+            <div class="method-controls">
+              <details class="method-source-toggle">
+                <summary><span class="method-source-icon" aria-hidden="true">{}</span> Source</summary>
+              </details>
+            </div>
+
+        </div>
+
+
+          <div class="method-source-code" id="template_file-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx/component.rb, line 24</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">template_file</span>(<span class="ruby-identifier">filepath</span>)
+  <span class="ruby-identifier">loc</span>, <span class="ruby-identifier">tmpl</span> = <span class="ruby-constant">RBX</span>.<span class="ruby-identifier">extract_template</span>(<span class="ruby-identifier">filepath</span>, <span class="ruby-keyword">self</span>, <span class="ruby-value">inline</span><span class="ruby-value">:</span> <span class="ruby-keyword">false</span>)
+  <span class="ruby-identifier">compile!</span>(<span class="ruby-identifier">loc</span>, <span class="ruby-identifier">tmpl</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+
+
+
+        <div class="method-description">
+
+
+          <p>Set the template for this class as the contents of a separate file</p>
+
+
+        </div>
+
+
+
+
+
+      </div>
+
+
+      <div id="method-i-template_source" class="method-detail anchor-link ">
+        <div class="method-header">
+          <div class="method-heading-group">
+
+              <div class="method-heading">
+                <a href="#method-i-template_source" title="Link to this method">
+                  <span class="method-name">template_source</span>
+                  <span class="method-args">(tmpl)</span>
+                </a>
+              </div>
+
+
+
+          </div>
+
+
+            <div class="method-controls">
+              <details class="method-source-toggle">
+                <summary><span class="method-source-icon" aria-hidden="true">{}</span> Source</summary>
+              </details>
+            </div>
+
+        </div>
+
+
+          <div class="method-source-code" id="template_source-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx/component.rb, line 19</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">template_source</span>(<span class="ruby-identifier">tmpl</span>)
+  <span class="ruby-identifier">compile!</span>(<span class="ruby-identifier">caller_locations</span>(<span class="ruby-value">1</span>, <span class="ruby-value">1</span>).<span class="ruby-identifier">first</span>.<span class="ruby-identifier">absolute_path</span>, <span class="ruby-identifier">tmpl</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+
+
+
+        <div class="method-description">
+
+
+          <p>Set the template for this class as a provided string. This method uses caller location to be able to provide better error messages.</p>
+
+
+        </div>
+
+
+
+
+
+      </div>
+
+
+    </section>
 
 
 

@@ -15,7 +15,7 @@
 
     <meta
       name="description"
-      content="class StirFry::App: response. List end StirFry."
+      content="class StirFry::App: response."
     >
 
 
@@ -28,7 +28,7 @@
 
 
 
-    <meta property="og:description" content="response. List end StirFry.">
+    <meta property="og:description" content="response.">
 
 
 
@@ -40,7 +40,7 @@
 
 
 
-    <meta name="twitter:description" content="response. List end StirFry.">
+    <meta name="twitter:description" content="response.">
 
 
 
@@ -549,7 +549,7 @@
       </span>
     </summary>
 
-    <ul class="link-list nav-list"><li><details open><summary><code><a href="../StirFry.html">StirFry</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/App.html">App</a></code></li><li><code><a href="../StirFry/BadRequest.html">BadRequest</a></code></li><li><code><a href="../StirFry/Component.html">Component</a></code></li><li><code><a href="../StirFry/Error.html">Error</a></code></li><li><code><a href="../StirFry/Found.html">Found</a></code></li><li><code><a href="../StirFry/InternalError.html">InternalError</a></code></li><li><details><summary><code><a href="../StirFry/Middleware.html">Middleware</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/Middleware/Logger.html">Logger</a></code></li></ul></details></li><li><code><a href="../StirFry/NotFound.html">NotFound</a></code></li><li><code><a href="../StirFry/NotModified.html">NotModified</a></code></li><li><code><a href="../StirFry/OKAY.html">OKAY</a></code></li><li><details><summary><code><a href="../StirFry/Pages.html">Pages</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/Pages/ErrorPage.html">ErrorPage</a></code></li><li><code><a href="../StirFry/Pages/Layout.html">Layout</a></code></li><li><code><a href="../StirFry/Pages/NotFoundPage.html">NotFoundPage</a></code></li><li><code><a href="../StirFry/Pages/RoutesPage.html">RoutesPage</a></code></li></ul></details></li><li><code><a href="../StirFry/PreconditionFailed.html">PreconditionFailed</a></code></li><li><code><a href="../StirFry/Request.html">Request</a></code></li><li><code><a href="../StirFry/Response.html">Response</a></code></li><li><code><a href="../StirFry/Unauthorized.html">Unauthorized</a></code></li></ul></details></li></ul>
+    <ul class="link-list nav-list"><li><details><summary><code><a href="../RBX.html">RBX</a></code></summary><ul class="link-list nav-list"><li><code><a href="../RBX/Compiler.html">Compiler</a></code></li><li><details><summary><code><a href="../RBX/Component.html">Component</a></code></summary><ul class="link-list nav-list"><li><code><a href="../RBX/Component/ClassMethods.html">ClassMethods</a></code></li></ul></details></li><li><code><a href="../RBX/OptionMarshaller.html">OptionMarshaller</a></code></li><li><code><a href="../RBX/Parser.html">Parser</a></code></li><li><code><a href="../RBX/SafeString.html">SafeString</a></code></li><li><code><a href="../RBX/SyntaxError.html">SyntaxError</a></code></li></ul></details></li><li><details><summary><code><a href="../StirFry.html">StirFry</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/App.html">App</a></code></li><li><code><a href="../StirFry/BadRequest.html">BadRequest</a></code></li><li><code><a href="../StirFry/Component.html">Component</a></code></li><li><code><a href="../StirFry/Error.html">Error</a></code></li><li><code><a href="../StirFry/Found.html">Found</a></code></li><li><code><a href="../StirFry/InternalError.html">InternalError</a></code></li><li><details><summary><code><a href="../StirFry/Middleware.html">Middleware</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/Middleware/Logger.html">Logger</a></code></li></ul></details></li><li><code><a href="../StirFry/NotFound.html">NotFound</a></code></li><li><code><a href="../StirFry/NotModified.html">NotModified</a></code></li><li><code><a href="../StirFry/OKAY.html">OKAY</a></code></li><li><details><summary><code><a href="../StirFry/Pages.html">Pages</a></code></summary><ul class="link-list nav-list"><li><code><a href="../StirFry/Pages/ErrorPage.html">ErrorPage</a></code></li><li><code><a href="../StirFry/Pages/Layout.html">Layout</a></code></li><li><code><a href="../StirFry/Pages/NotFoundPage.html">NotFoundPage</a></code></li><li><code><a href="../StirFry/Pages/RoutesPage.html">RoutesPage</a></code></li></ul></details></li><li><code><a href="../StirFry/PreconditionFailed.html">PreconditionFailed</a></code></li><li><code><a href="../StirFry/Request.html">Request</a></code></li><li><code><a href="../StirFry/Response.html">Response</a></code></li><li><code><a href="../StirFry/Unauthorized.html">Unauthorized</a></code></li></ul></details></li></ul>
   </details>
 </div>
 
@@ -593,8 +593,6 @@
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">get</span> <span class="ruby-string">&quot;</span><span class="ruby-string">/todo</span><span class="ruby-string">&quot;</span>, <span class="ruby-constant">Todos</span><span class="ruby-operator">::</span><span class="ruby-constant">List</span>
 <span class="ruby-keyword">end</span>
-
-<span class="ruby-constant">StirFry</span>.<span class="ruby-identifier">run!</span>(<span class="ruby-constant">App</span>)
 </pre>
 
   </section>
@@ -646,7 +644,7 @@
 
 
           <div class="method-source-code" id="app_env-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 83</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 81</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">app_env</span> = <span class="ruby-constant">StirFry</span>.<span class="ruby-identifier">app_env</span></pre>
           </div>
 
@@ -693,7 +691,7 @@
 
 
           <div class="method-source-code" id="delete-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 80</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 78</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">DELETE</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -740,7 +738,7 @@
 
 
           <div class="method-source-code" id="development-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 86</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 84</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">development?</span> = <span class="ruby-identifier">app_env</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">development</span></pre>
           </div>
 
@@ -787,7 +785,7 @@
 
 
           <div class="method-source-code" id="get-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 62</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">GET</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -834,7 +832,7 @@
 
 
           <div class="method-source-code" id="head-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 65</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 63</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">head</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">HEAD</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -881,7 +879,7 @@
 
 
           <div class="method-source-code" id="inherited-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 229</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 227</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">inherited</span>(<span class="ruby-identifier">subclass</span>)
   <span class="ruby-keyword">super</span>
   <span class="ruby-identifier">subclass</span>.<span class="ruby-identifier">class_eval</span> <span class="ruby-keyword">do</span>
@@ -939,7 +937,7 @@
 
 
           <div class="method-source-code" id="logger-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 95</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 93</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">logger</span> = <span class="ruby-constant">StirFry</span>.<span class="ruby-identifier">logger</span></pre>
           </div>
 
@@ -986,7 +984,7 @@
 
 
           <div class="method-source-code" id="options-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 68</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 66</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">options</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">OPTIONS</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -1033,7 +1031,7 @@
 
 
           <div class="method-source-code" id="patch-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 77</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 75</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">patch</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">PATCH</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -1080,7 +1078,7 @@
 
 
           <div class="method-source-code" id="post-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 71</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 69</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">post</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">POST</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -1127,7 +1125,7 @@
 
 
           <div class="method-source-code" id="production-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 92</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 90</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">production?</span> = <span class="ruby-identifier">app_end</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">production</span></pre>
           </div>
 
@@ -1174,7 +1172,7 @@
 
 
           <div class="method-source-code" id="put-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 74</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 72</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">put</span>(<span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span>) = <span class="ruby-identifier">route</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">PUT</span><span class="ruby-string">&quot;</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span>)</pre>
           </div>
 
@@ -1221,7 +1219,7 @@
 
 
           <div class="method-source-code" id="rescue_from-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 113</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 111</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">rescue_from</span>(<span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>) = <span class="ruby-identifier">error_handlers</span>[<span class="ruby-identifier">klass</span>] = <span class="ruby-identifier">block</span></pre>
           </div>
 
@@ -1277,10 +1275,10 @@
 
 
           <div class="method-source-code" id="route-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 168</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 166</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">route</span>(<span class="ruby-identifier">verb</span>, <span class="ruby-identifier">pattern</span>, <span class="ruby-identifier">klass</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">path_pattern</span> = <span class="ruby-constant">Mustermann</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">route_prefix</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">pattern</span>)
-  <span class="ruby-identifier">all_routes</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">path_pattern</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">path_pattern</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">start_with?</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">/stir_fry</span><span class="ruby-string">&quot;</span>)
+  <span class="ruby-identifier">route_table</span> <span class="ruby-operator">&lt;&lt;</span> [<span class="ruby-identifier">verb</span>, <span class="ruby-identifier">path_pattern</span>.<span class="ruby-identifier">to_s</span>] <span class="ruby-keyword">unless</span> <span class="ruby-identifier">path_pattern</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">start_with?</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">/stir_fry</span><span class="ruby-string">&quot;</span>)
   (<span class="ruby-identifier">routes</span>[<span class="ruby-identifier">verb</span>] ||= []) <span class="ruby-operator">&lt;&lt;</span> [<span class="ruby-identifier">path_pattern</span>, <span class="ruby-identifier">route_handler</span>(<span class="ruby-identifier">klass</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">block</span>)]
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1328,7 +1326,7 @@
 
 
           <div class="method-source-code" id="scope-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 158</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 156</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">scope</span>(<span class="ruby-identifier">prefix</span> = <span class="ruby-string">&quot;</span><span class="ruby-string">&quot;</span>, <span class="ruby-operator">&amp;</span>)
   <span class="ruby-identifier">context</span>.<span class="ruby-identifier">push</span>([<span class="ruby-identifier">prefix</span>, []])
   <span class="ruby-keyword">yield</span>
@@ -1393,7 +1391,7 @@
 
 
           <div class="method-source-code" id="static-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 135</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 133</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">static</span>(<span class="ruby-identifier">dirname</span>, <span class="ruby-value">path:</span> <span class="ruby-string">&quot;</span><span class="ruby-string">/</span><span class="ruby-string">&quot;</span>)
   <span class="ruby-identifier">files</span> = <span class="ruby-constant">Rack</span><span class="ruby-operator">::</span><span class="ruby-constant">Files</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">expand_path</span>(<span class="ruby-identifier">dirname</span>))
   <span class="ruby-identifier">path</span> = <span class="ruby-identifier">route_prefix</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">path</span>
@@ -1451,7 +1449,7 @@
 
 
           <div class="method-source-code" id="test-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 89</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 87</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">test?</span> = <span class="ruby-identifier">app_env</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">test</span></pre>
           </div>
 
@@ -1498,7 +1496,7 @@
 
 
           <div class="method-source-code" id="use-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 120</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 118</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">use</span>(<span class="ruby-identifier">middleware_class</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>) = <span class="ruby-identifier">context</span>.<span class="ruby-identifier">last</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">&lt;&lt;</span> [<span class="ruby-identifier">middleware_class</span>, <span class="ruby-identifier">args</span>, <span class="ruby-identifier">block</span>]</pre>
           </div>
 
@@ -1545,7 +1543,7 @@
 
 
           <div class="method-source-code" id="use_session-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 50</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">use_session</span>(<span class="ruby-operator">**</span><span class="ruby-identifier">config</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;</span><span class="ruby-string">cannot enable sessions without a :secret set.</span><span class="ruby-string">&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>[<span class="ruby-value">:</span><span class="ruby-value">secret</span>].<span class="ruby-identifier">nil?</span>
 
@@ -1615,7 +1613,7 @@
 
 
           <div class="method-source-code" id="app_env-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 246</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 244</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">app_env</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">app_env</span></pre>
           </div>
 
@@ -1662,7 +1660,7 @@
 
 
           <div class="method-source-code" id="development-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 248</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 246</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">development?</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">development?</span></pre>
           </div>
 
@@ -1709,7 +1707,7 @@
 
 
           <div class="method-source-code" id="logger-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 254</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 252</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">logger</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">logger</span></pre>
           </div>
 
@@ -1756,7 +1754,7 @@
 
 
           <div class="method-source-code" id="production-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 252</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 250</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">production?</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">production?</span></pre>
           </div>
 
@@ -1803,7 +1801,7 @@
 
 
           <div class="method-source-code" id="test-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 250</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry/app.rb, line 248</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">test?</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">test?</span></pre>
           </div>
 

@@ -5,17 +5,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>class StirFry::Error - RDoc Documentation</title>
+<title>module RBX::Component - RDoc Documentation</title>
 
 
   <meta
     name="keywords"
-    content="ruby,class,StirFry::Error"
+    content="ruby,module,RBX::Component"
   >
 
     <meta
       name="description"
-      content="class StirFry::Error: Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea"
+      content="module RBX::Component: Component is a mixin that lazily resolves and compiles a template into a `_render_template` instance method on the first render, then calls that compi"
     >
 
 
@@ -24,11 +24,11 @@
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="class StirFry::Error - RDoc Documentation">
+<meta property="og:title" content="module RBX::Component - RDoc Documentation">
 
 
 
-    <meta property="og:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta property="og:description" content="Component is a mixin that lazily resolves and compiles a template into a `_render_template` instance method on the first render, then calls that compi">
 
 
 
@@ -36,11 +36,11 @@
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="class StirFry::Error - RDoc Documentation">
+<meta name="twitter:title" content="module RBX::Component - RDoc Documentation">
 
 
 
-    <meta name="twitter:description" content="Error is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return ea">
+    <meta name="twitter:description" content="Component is a mixin that lazily resolves and compiles a template into a `_render_template` instance method on the first render, then calls that compi">
 
 
 
@@ -96,7 +96,7 @@
 
 
 
-<body role="document" class="class has-toc">
+<body role="document" class="module has-toc">
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <!-- Chevron (right arrow) - used for expand/collapse -->
   <symbol
@@ -431,21 +431,6 @@
   
 
   
-<div id="parent-class-section" class="nav-section">
-  <details class="nav-section-collapsible" open>
-    <summary class="nav-section-header">
-      <span class="nav-section-icon">
-        <svg><use href="#icon-ancestors"></use></svg>
-      </span>
-      <span class="nav-section-title">Ancestors</span>
-      <span class="nav-section-chevron">
-        <svg><use href="#icon-chevron"></use></svg>
-      </span>
-    </summary>
-    <ul><li>StandardError</li></ul>
-  </details>
-</div>
-
 
   
 
@@ -453,6 +438,25 @@
 
   
 
+
+  <div class="nav-section">
+    <details class="nav-section-collapsible" open>
+      <summary class="nav-section-header">
+        <span class="nav-section-icon">
+          <svg><use href="#icon-instance-methods"></use></svg>
+        </span>
+        <span class="nav-section-title">Instance Methods</span>
+        <span class="nav-section-chevron">
+          <svg><use href="#icon-chevron"></use></svg>
+        </span>
+      </summary>
+      <ul class="nav-list" role="directory">
+
+        <li ><a href="#method-i-render">render</a></li>
+
+      </ul>
+    </details>
+  </div>
 
 
   <div id="classindex-section" class="nav-section">
@@ -473,35 +477,35 @@
 
 </nav>
 
-<main role="main" aria-labelledby="class-stirfry-error">
+<main role="main" aria-labelledby="module-rbx-component">
   
   
     <ol role="navigation" aria-label="Breadcrumb navigation" class="breadcrumb">
       
       <li>
         
-        <a href="../StirFry.html">StirFry</a><span class="separator">::</span>
+        <a href="../RBX.html">RBX</a><span class="separator">::</span>
         
       </li>
       
       <li>
         
-        <span>Error</span>
+        <span>Component</span>
         
       </li>
       
     </ol>
   
 
-  <span id="class-StirFry::Error" class="legacy-anchor"></span>
-  <h1 id="class-stirfry-error" class="anchor-link class page-title">
-    <span class="page-title-kind">class</span>
-    <span class="page-title-name">StirFry::Error</span>
+  <span id="module-RBX::Component" class="legacy-anchor"></span>
+  <h1 id="module-rbx-component" class="anchor-link module page-title">
+    <span class="page-title-kind">module</span>
+    <span class="page-title-name">RBX::Component</span>
   </h1>
 
   <section class="description">
     
-<p><a href="Error.html"><code>Error</code></a> is the main root error for most errors raised by the library. Most of these errors are raised to bail out of a request cycle early and return early.</p>
+<p><a href="Component.html"><code>Component</code></a> is a mixin that lazily resolves and compiles a template into a <code>_render_template</code> instance method on the first render, then calls that compiled method directly on every render after that. It also provides the supporting capture/option marshalling behavior compiled templates rely on.</p>
 
   </section>
 
@@ -525,6 +529,66 @@
 
 
 
+
+     <section id="public-instance-untitled-method-details" class="method-section anchor-link">
+       <header>
+         <h3 id="public-instance-untitled-methods"><a href="#public-instance-untitled-methods">Public Instance Methods</a></h3>
+       </header>
+
+
+      <div id="method-i-render" class="method-detail anchor-link ">
+        <div class="method-header">
+          <div class="method-heading-group">
+
+              <div class="method-heading">
+                <a href="#method-i-render" title="Link to this method">
+                  <span class="method-name">render</span>
+                  <span class="method-args">()</span>
+                </a>
+              </div>
+
+
+
+          </div>
+
+
+            <div class="method-controls">
+              <details class="method-source-toggle">
+                <summary><span class="method-source-icon" aria-hidden="true">{}</span> Source</summary>
+              </details>
+            </div>
+
+        </div>
+
+
+          <div class="method-source-code" id="render-source">
+            <pre class="ruby"><span class="ruby-comment"># File rbxrb/lib/rbx/component.rb, line 45</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render</span>
+  <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">send</span>(<span class="ruby-value">:</span><span class="ruby-value">compile!</span>, <span class="ruby-operator">*</span><span class="ruby-constant">RBX</span>.<span class="ruby-identifier">resolve_template</span>(<span class="ruby-identifier">klass</span>)) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:</span><span class="ruby-value">_render_template</span>)
+
+  <span class="ruby-identifier">_render_template</span> { <span class="ruby-constant">RBX</span>.<span class="ruby-identifier">safe</span>(<span class="ruby-ivar">@child_buffer</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-operator">?</span> <span class="ruby-string">&quot;</span><span class="ruby-string">&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@child_buffer</span>) }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+
+
+
+        <div class="method-description">
+
+
+          <p>render will lazily compile the template for this class and then render it using the class as context as the compilation will define a _render_template method on the instance.</p>
+
+
+        </div>
+
+
+
+
+
+      </div>
+
+
+    </section>
 
 
 

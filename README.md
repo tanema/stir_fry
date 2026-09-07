@@ -55,8 +55,6 @@ class App < StirFry::App
     response.text("Hello #{req.args["name"]}") 
   end
 end
-
-StirFry.run!(App)
 ```
 
 See the `/examples` directory for more in-depth examples.
@@ -84,8 +82,8 @@ __END__
 After checking out the repo, 
 
 - run `bundle install` to install dependencies. 
-- run `./example/todos_app/app.rb` to run the example todo app.
-- run `./example/chat_app/app.rb` to run the example chat app.
+- run `bundle exec puma ./example/todos/config.ru` to run the example todo app.
+- run `bundle exec puma ./example/chat/config.ru` to run the example chat app.
 - run `rake` to run the specs, rubocop and rdoc. 
 
 ## Further Reading

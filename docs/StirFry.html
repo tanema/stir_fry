@@ -565,7 +565,7 @@
 
 
           <div class="method-source-code" id="app_env-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 45</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 46</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">app_env</span> = <span class="ruby-ivar">@app_env</span> ||= (<span class="ruby-constant">ENV</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">APP_ENV</span><span class="ruby-string">&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">ENV</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">RACK_ENV</span><span class="ruby-string">&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">ENV</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">ENV</span><span class="ruby-string">&quot;</span>] <span class="ruby-operator">||</span> <span class="ruby-value">:</span><span class="ruby-value">development</span>).<span class="ruby-identifier">to_sym</span></pre>
           </div>
 
@@ -612,7 +612,7 @@
 
 
           <div class="method-source-code" id="development-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 48</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">development?</span> = <span class="ruby-identifier">app_env</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">development</span></pre>
           </div>
 
@@ -659,7 +659,7 @@
 
 
           <div class="method-source-code" id="logger-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 57</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 58</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">logger</span> = <span class="ruby-ivar">@logger</span> ||= <span class="ruby-identifier">default_logger</span></pre>
           </div>
 
@@ -706,7 +706,7 @@
 
 
           <div class="method-source-code" id="production-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 54</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 55</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">production?</span> = <span class="ruby-identifier">app_end</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">production</span></pre>
           </div>
 
@@ -753,7 +753,7 @@
 
 
           <div class="method-source-code" id="test-3F-source">
-            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 51</span>
+            <pre class="ruby"><span class="ruby-comment"># File lib/stir_fry.rb, line 52</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">test?</span> = <span class="ruby-identifier">app_env</span> <span class="ruby-operator">==</span> <span class="ruby-value">:</span><span class="ruby-value">test</span></pre>
           </div>
 

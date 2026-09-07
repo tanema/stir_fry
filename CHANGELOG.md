@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-07
+
+- Added a `stirfry` cli command to gemspec files so it is usable
+
 ## [0.1.1] - 2026-09-07
 
 - Added a `stirfry` cli command for easy development running.

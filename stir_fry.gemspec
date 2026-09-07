@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
     "rubygems_mfa_required" => "true"
   }
   spec.files = Dir["lib/**/*"] + [
+    "bin/stirfry",
     "README.md",
     "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",

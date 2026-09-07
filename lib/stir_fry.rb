@@ -36,7 +36,7 @@ module StirFry
   autoload :Request, "stir_fry/request"
   autoload :Response, "stir_fry/response"
   autoload :Middleware, "stir_fry/middleware"
-  autoload :Version, "stir_fry/version"
+  autoload :VERSION, "stir_fry/version"
 
   SIGNALS = %i[INT TERM].freeze # :nodoc:
 

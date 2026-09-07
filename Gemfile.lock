@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    rbxrb (0.1.4)
+    rbxrb (0.1.5)
       rack (>= 3.0.0, < 4)
-    stir_fry (0.1.4)
+    stir_fry (0.1.5)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
       rack-protection (>= 3.1)

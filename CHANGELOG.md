@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.1.5] - 2026-09-07
+
+- Fixed an autoload issue on VERSION constants.
+
 ## [0.1.4] - 2026-09-07
 
 - Still just trying to get the bin working

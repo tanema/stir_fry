@@ -12,7 +12,7 @@
 
     <meta
       name="description"
-      content="RDoc Documentation: StirFry 🥡 A small, simple web framework that lets you enjoy ruby with a JSX type flavour. timanema."
+      content="RDoc Documentation: StirFry 🥡 A small, simple web framework that lets you enjoy ruby with a JSX type flavour. github."
     >
 
 
@@ -455,13 +455,13 @@
 
 <p>A small, simple web framework that lets you enjoy ruby with a JSX type flavour. Have a little fun! Mix it up!</p>
 <ul><li>
+<p><a href="https://github.com/tanema/stir_fry/wiki/Create-your-first-Stir-Fry!">Quickstart</a></p>
+</li><li>
 <p><a href="https://timanema.com/stir_fry/">Documentation</a></p>
 </li><li>
+<p><a href="https://github.com/tanema/stir_fry/tree/main/example">Examples</a></p>
+</li><li>
 <p><a href="https://rubygems.org/gems/stir_fry">RubyGems</a></p>
-</li><li>
-<p><a href="CODE_OF_CONDUCT_md.html">Code of Conduct</a></p>
-</li><li>
-<p><a href="https://opensource.org/licenses/MIT">License</a></p>
 </li></ul>
 
 <span id="label-Installation" class="legacy-anchor"></span>
@@ -472,12 +472,14 @@
 <span id="label-Usage" class="legacy-anchor"></span>
 <h2 id="usage"><a href="#usage">Usage</a></h2>
 
-<p>An example project could look like this. The templating leverages a weird feature of ruby with the <code>__END__</code> data sections <a href="https://til.hashrocket.com/posts/17787bf181-rubys-end">ref</a> to inline templates in the same file and be able to parse them where they are. I have not yet figured out how to add syntax highlighting for it but it is a start.</p>
+<p>Your app could look like the following:</p>
 
 <span id="label-layout.rb" class="legacy-anchor"></span>
 <h3 id="layoutrb"><a href="#layoutrb">layout.rb</a></h3>
 
-<pre class="ruby"><span class="ruby-keyword">class</span> <span class="ruby-constant">Layout</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">StirFry</span><span class="ruby-operator">::</span><span class="ruby-constant">Component</span>; <span class="ruby-keyword">end</span>
+<pre class="ruby"><span class="ruby-comment"># Layout shared across pages</span>
+<span class="ruby-keyword">class</span> <span class="ruby-constant">Layout</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">StirFry</span><span class="ruby-operator">::</span><span class="ruby-constant">Component</span>; <span class="ruby-keyword">end</span>
+
 __END__
 &lt;html&gt;
   &lt;body&gt;{ yield }&lt;/body&gt;
@@ -487,7 +489,8 @@ __END__
 <span id="label-home.rb" class="legacy-anchor"></span>
 <h3 id="homerb"><a href="#homerb">home.rb</a></h3>
 
-<pre class="ruby"><span class="ruby-keyword">class</span> <span class="ruby-constant">Home</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">StirFry</span><span class="ruby-operator">::</span><span class="ruby-constant">Component</span>
+<pre class="ruby"><span class="ruby-comment"># A specific page to render, with the Layout wrapping it.</span>
+<span class="ruby-keyword">class</span> <span class="ruby-constant">Home</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">StirFry</span><span class="ruby-operator">::</span><span class="ruby-constant">Component</span>
   <span class="ruby-keyword">def</span> <span class="ruby-identifier">name</span> = <span class="ruby-string">&quot;</span><span class="ruby-string">Bobby</span><span class="ruby-string">&quot;</span>
 <span class="ruby-keyword">end</span>
 
@@ -500,7 +503,8 @@ __END__
 <span id="label-app.rb" class="legacy-anchor"></span>
 <h3 id="apprb"><a href="#apprb">app.rb</a></h3>
 
-<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&quot;</span><span class="ruby-string">stir_fry</span><span class="ruby-string">&quot;</span>
+<pre class="ruby"><span class="ruby-comment"># The central and starting point for the app, to define routes and any other setup.</span>
+<span class="ruby-identifier">require</span> <span class="ruby-string">&quot;</span><span class="ruby-string">stir_fry</span><span class="ruby-string">&quot;</span>
 <span class="ruby-identifier">require</span> <span class="ruby-string">&quot;</span><span class="ruby-string">layout</span><span class="ruby-string">&quot;</span>
 <span class="ruby-identifier">require</span> <span class="ruby-string">&quot;</span><span class="ruby-string">home</span><span class="ruby-string">&quot;</span>
 
@@ -508,13 +512,13 @@ __END__
   <span class="ruby-comment"># Render the components</span>
   <span class="ruby-identifier">get</span> <span class="ruby-string">&quot;</span><span class="ruby-string">/</span><span class="ruby-string">&quot;</span>, <span class="ruby-constant">Home</span>
   <span class="ruby-comment"># Raw API call</span>
-  <span class="ruby-identifier">get</span> <span class="ruby-string">&quot;</span><span class="ruby-string">/hello/:name</span><span class="ruby-string">&quot;</span> <span class="ruby-keyword">do</span><span class="ruby-operator">|</span><span class="ruby-value">request:</span>, <span class="ruby-value">response:</span>, <span class="ruby-value">name:</span><span class="ruby-operator">|</span> 
+  <span class="ruby-identifier">get</span> <span class="ruby-string">&quot;</span><span class="ruby-string">/hello/:name</span><span class="ruby-string">&quot;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-value">request:</span>, <span class="ruby-value">response:</span>, <span class="ruby-value">name:</span><span class="ruby-operator">|</span> 
     <span class="ruby-identifier">response</span>.<span class="ruby-identifier">text</span>(<span class="ruby-string">&quot;</span><span class="ruby-string">Hello </span><span class="ruby-string">#{</span><span class="ruby-identifier">req</span>.<span class="ruby-identifier">args</span>[<span class="ruby-string">&quot;</span><span class="ruby-string">name</span><span class="ruby-string">&quot;</span>]<span class="ruby-string">}</span><span class="ruby-string">&quot;</span>) 
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span>
 </pre>
 
-<p>See the <code>/examples</code> directory for more in-depth examples.</p>
+<p>The template definitions leverage a weird feature of ruby, the <code>__END__</code> data sections <a href="https://til.hashrocket.com/posts/17787bf181-rubys-end">ref</a>. This enables stir_fry to parse inline templates in the same file as the behaviour class. I have not yet figured out how to add syntax highlighting for it but it is a start.</p>
 
 <span id="label-Multiple+Inline+templates" class="legacy-anchor"></span>
 <h3 id="multiple-inline-templates"><a href="#multiple-inline-templates">Multiple Inline templates</a></h3>
@@ -541,19 +545,11 @@ __END__
 <ul><li>
 <p>run <code>bundle install</code> to install dependencies.</p>
 </li><li>
-<p>run <code>./example/todos_app/app.rb</code> to run the example todo app.</p>
+<p>run <code>bundle exec stirfry ./example/todos</code> to run the example todo app.</p>
 </li><li>
-<p>run <code>./example/chat_app/app.rb</code> to run the example chat app.</p>
+<p>run <code>bundle exec stirfry ./example/chat</code> to run the example chat app.</p>
 </li><li>
 <p>run <code>rake</code> to run the specs, rubocop and rdoc.</p>
-</li></ul>
-
-<span id="label-Further+Reading" class="legacy-anchor"></span>
-<h2 id="further-reading"><a href="#further-reading">Further Reading</a></h2>
-<ul><li>
-<p><a href="CODE_OF_CONDUCT_md.html">Code of Conduct</a></p>
-</li><li>
-<p><a href="https://opensource.org/licenses/MIT">License</a></p>
 </li></ul>
 
 <span id="label-Acknowledgment" class="legacy-anchor"></span>

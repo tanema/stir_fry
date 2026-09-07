@@ -1,5 +1,11 @@
-# StirFry
+# StirFry 🥡
 A small, simple web framework that lets you enjoy ruby with a JSX type flavour. 
+Have a little fun! Mix it up! 
+
+- [Documentation](https://timanema.com/stir_fry/)
+- [RubyGems](https://rubygems.org/gems/stir_fry)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [License](https://opensource.org/licenses/MIT)
 
 ## Installation
 
@@ -37,6 +43,7 @@ __END__
 ### app.rb
 
 ```ruby
+require "stir_fry"
 require "layout"
 require "home"
 

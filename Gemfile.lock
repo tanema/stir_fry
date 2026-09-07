@@ -8,8 +8,11 @@ PATH
       rack (>= 3.0.0, < 4)
       rack-protection (>= 3.1)
       rack-session (>= 2.0.0, < 3)
+      rackup (>= 2.3)
       rbxrb (>= 0.1)
+      rerun (>= 0.14)
       semantic_logger (>= 5.1)
+      terminal-notifier (>= 3.1)
 
 GEM
   remote: https://rubygems.org/
@@ -126,16 +129,13 @@ DEPENDENCIES
   irb
   pstore
   puma
-  rackup
   rake (~> 13.0)
   rdoc
-  rerun
   rspec (~> 3.13)
   rubocop (~> 1.21)
   rubocop-rake (>= 0.7.1)
   rubocop-rspec (~> 3.10)
   stir_fry!
-  terminal-notifier
 
 BUNDLED WITH
    2.6.7

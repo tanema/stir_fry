@@ -5,7 +5,8 @@ Have a little fun! Mix it up!
 - [Quickstart](https://github.com/tanema/stir_fry/wiki/Create-your-first-Stir-Fry!)
 - [Documentation](https://timanema.com/stir_fry/)
 - [Examples](https://github.com/tanema/stir_fry/tree/main/example)
-- [RubyGems](https://rubygems.org/gems/stir_fry)
+- [RubyGems(StirFry)](https://rubygems.org/gems/stir_fry)
+- [RubyGems(RBX)](https://rubygems.org/gems/rbxrb)
 
 ## Installation
 

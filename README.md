@@ -1,19 +1,20 @@
 # StirFry 🥡
-A small, simple web framework that lets you enjoy ruby with a JSX type flavour. 
-Have a little fun! Mix it up! 
 
-- [Quickstart](https://github.com/tanema/stir_fry/wiki/Create-your-first-Stir-Fry!)
-- [Documentation](https://timanema.com/stir_fry/)
-- [Examples](https://github.com/tanema/stir_fry/tree/main/example)
-- [RubyGems(StirFry)](https://rubygems.org/gems/stir_fry)
-- [RubyGems(RBX)](https://rubygems.org/gems/rbxrb)
+A small, simple web framework that lets you enjoy ruby with a JSX type flavour. Develop on the backend with view components that can access your data directly!
+Have a little fun! Go ahead mix all of your concerns into one delicious dish!
+
+- [🏗️ Quickstart](https://github.com/tanema/stir_fry/wiki/Create-your-first-Stir-Fry!)
+- [📄 Documentation](https://timanema.com/stir_fry/)
+- [🔎 Examples](https://github.com/tanema/stir_fry/tree/main/example)
+- `stir_fry` gem: [![stir_fry](https://badge.fury.io/rb/stir_fry.svg?icon=si%3Arubygems)](https://badge.fury.io/rb/stir_fry)
+- `rbxrb` gem: [![rbxrb](https://badge.fury.io/rb/rbxrb.svg)](https://badge.fury.io/rb/rbxrb)
 
 ## Installation
 
 `gem install 'stir_fry'`
 
 ## Usage
-Your app could look like the following: 
+Your app could look like the following (gemfile and other small things omitted): 
 
 ### layout.rb
 
@@ -23,20 +24,22 @@ class Layout < StirFry::Component; end
 
 __END__
 <html>
-  <body>{ yield }</body>
+  <!-- Yield allows for having child content inside this component. -->
+  <body>{ yield }</body> 
 </html>
 ```
 
-### home.rb
+### home_page.rb 
 
 ```ruby
 # A specific page to render, with the Layout wrapping it.
-class Home < StirFry::Component
+class HomePage < StirFry::Component
   def name = "Bobby"
 end
 
 __END__
-<Layout>
+<!-- Loads the Layout component and the child content is yielded in the layout template -->
+<Layout> 
     <h1>Hello {name}</h1>
 </Layout>
 ```
@@ -47,18 +50,26 @@ __END__
 # The central and starting point for the app, to define routes and any other setup.
 require "stir_fry"
 require "layout"
-require "home"
+require "home_page"
 
-class App < StirFry::App 
-  # Render the components
-  get "/", Home
-  # Raw API call
-  get "/hello/:name" do |request:, response:, name:| 
-    response.text("Hello #{req.args["name"]}") 
-  end
+class App < StirFry::App
+  # declare a public directory that serves static assets.
+  static File.join(__dir__, "public")
+  # Render the HomePage component
+  get "/", HomePage
+  # Test response
+  get "/hello/:name" { |response:, name:, **| response.text("Hello #{ name }") }
+  # JSON response
+  get "/api/hello/:name" { |response:, name:, **| response.json({message: "Hello #{ name }"}) }
 end
 ```
 
+### Run the App
+
+Once you have the app ready, run `bundle install` and `bundle exec stirfry .` to start the development server
+with whatever webserver you have added to your gemfile such as puma.
+
+## Templates
 The template definitions leverage a weird feature of ruby, the `__END__` data 
 sections [ref](https://til.hashrocket.com/posts/17787bf181-rubys-end). This enables 
 stir_fry to parse inline templates in the same file as the behaviour class. 

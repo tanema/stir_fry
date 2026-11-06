@@ -32,8 +32,7 @@ require "rack"
 #   end
 # end
 #
-# view = Todos::List.new(todos: [{"text" => "work"}])
-# puts view.render # => <ul><li>work</li> </ul>
+# puts RBX.render(Todos::List, todos: [{"text" => "work"}]) # => <ul><li>work</li> </ul>
 #
 # __END__
 # @@Todos.List
@@ -68,32 +67,27 @@ module RBX
   @template_cache = {}
 
   class << self
+    # helper to call render on a new class in a single call
+    def render(klass, **args) = klass.new(**args).render
+
     # parse and then compile the template which will return a string of ruby to
     # be evaluated. This can then be passed to `instance_eval` to make it execute
     # in context of your class. Include `RBX::Component` in your class to do this
     # for you. It will lazily compile the template and cache it afterwards.
-    def compile(template_name, template)
-      Compiler.compile(Parser.parse(template_name, template))
-    end
+    def compile(template_name, template) = Compiler.compile(Parser.parse(template_name, template))
 
     # escape any non-safe text for html. This is used to ensure that text that
     # you are using in your templates will not cause security issues. This will
     # be outputted by the compiler so it is here also for easy access by the compiled
     # ruby.
-    def escape(value)
-      value.is_a?(SafeString) ? value.to_s : ::Rack::Utils.escape_html(value.to_s)
-    end
+    def escape(value) = value.is_a?(SafeString) ? value : safe(::Rack::Utils.escape_html(value.to_s))
 
     # mark a string as safe, not needing any further escaping. This can be done to
     # skip escaping if you're sure it needs to be raw.
-    def safe(value)
-      SafeString.new(value.to_s)
-    end
+    def safe(value) = value.is_a?(SafeString) ? value : SafeString.new(value.to_s)
 
     # marshal a hash into html tag attributes. See OptionMarshaller.
-    def tag_kwargs(options)
-      " #{OptionMarshaller.tag_kwargs(options)}"
-    end
+    def tag_kwargs(options) = " #{OptionMarshaller.tag_kwargs(options)}"
 
     # resolve an inline template for a klass. It will look at the klass's source
     # location, and check if there is an `__END__` section on the file. If there

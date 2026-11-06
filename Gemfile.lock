@@ -1,16 +1,16 @@
 PATH
   remote: .
   specs:
-    rbxrb (0.1.5)
+    rbxrb (0.1.6)
       rack (>= 3.0.0, < 4)
-    stir_fry (0.1.5)
+    stir_fry (0.1.6)
+      listen (>= 3.10)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
       rack-protection (>= 3.1)
       rack-session (>= 2.0.0, < 3)
       rackup (>= 2.3)
       rbxrb (>= 0.1)
-      rerun (>= 0.14)
       semantic_logger (>= 5.1)
       terminal-notifier (>= 3.1)
 
@@ -32,7 +32,8 @@ GEM
     json (2.21.2)
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
-    listen (3.9.0)
+    listen (3.10.1)
+      logger
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.7.0)
@@ -77,8 +78,6 @@ GEM
     regexp_parser (2.12.0)
     reline (0.7.0)
       io-console (~> 0.5)
-    rerun (0.14.0)
-      listen (~> 3.0)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -124,6 +123,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-25
+  arm64-darwin-27
 
 DEPENDENCIES
   irb

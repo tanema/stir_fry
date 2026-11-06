@@ -32,15 +32,28 @@ module StirFry
   autoload :App, "stir_fry/app"
   autoload :CLI, "stir_fry/cli"
   autoload :Component, "stir_fry/component"
-  autoload :Pages, "stir_fry/pages"
   autoload :Request, "stir_fry/request"
   autoload :Response, "stir_fry/response"
-  autoload :Middleware, "stir_fry/middleware"
   autoload :VERSION, "stir_fry/version"
 
-  SIGNALS = %i[INT TERM].freeze # :nodoc:
+  # Module containing middleware that makes this framework nicer to use.
+  module Middleware
+    autoload :Logger, "stir_fry/middleware/logger"
+  end
+
+  module Pages # :nodoc:
+    autoload :ErrorPage, "stir_fry/pages/error_page"
+    autoload :Layout, "stir_fry/pages/layout"
+    autoload :NotFoundPage, "stir_fry/pages/not_found_page"
+    autoload :RoutesPage, "stir_fry/pages/routes_page"
+    autoload :RouteList, "stir_fry/pages/route_list"
+    autoload :Welcome, "stir_fry/pages/welcome"
+  end
 
   class << self
+    # StirFry.logger= allows for setting a custom logger for the application.
+    attr_writer :logger
+
     # Is the set environment setting evaluated from environment variables APP_ENV,
     # RACK_ENV or ENV. It defaults to :development.
     def app_env = @app_env ||= (ENV["APP_ENV"] || ENV["RACK_ENV"] || ENV["ENV"] || :development).to_sym

@@ -10,6 +10,9 @@ end
 __END__
 <!DOCTYPE html>
 <html>
-  <head><link rel="stylesheet" href="/stir_fry/stir_fry.css" /></head>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/stir_fry/stir_fry.css" />
+  </head>
   <body>{ yield }</body>
 </html>

@@ -24,11 +24,6 @@ __END__
       <p class="error-page__code">404</p>
       <p class="error-page__message">Request path did not match any registered routes.</p>
     </section>
-    <nav class="route-list">
-      <p class="route-list__caption">Registered routes</p>
-      <ul class="route-list__items">
-        {application.route_table.map { |verb, path| <li class="route-list__item"><span class="route-list__verb" data-verb={verb}>{verb}</span><code class="route-list__path">{path}</code></li> }.join }
-      </ul>
-    </nav>
+    <StirFry.Pages.RouteList application={application}/>
   </section>
 </StirFry.Pages.Layout>

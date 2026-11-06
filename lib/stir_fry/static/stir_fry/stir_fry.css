@@ -57,6 +57,111 @@ header h1 {
 	color: var(--muted);
 }
 
+.welcome {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 100vh;
+	padding: 4rem 1.5rem 2rem;
+	background:
+		radial-gradient(circle at 15% 0%, rgba(204, 52, 45, 0.12), transparent 45%),
+		radial-gradient(circle at 85% 100%, rgba(46, 139, 87, 0.12), transparent 45%),
+		#fafafa;
+	text-align: center;
+}
+
+.welcome__hero {
+	margin-bottom: 2rem;
+}
+
+.welcome__logo {
+	margin: 0;
+	font-size: 7rem;
+	line-height: 1;
+	filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+}
+
+.welcome__title {
+	margin: 1.5rem 0 0.5rem;
+	color: var(--ruby-red);
+	font-size: clamp(2rem, 6vw, 3rem);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+}
+
+.welcome__tagline {
+	margin: 0;
+	color: var(--muted);
+	font-size: 1.15rem;
+}
+
+.welcome__links {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.75rem;
+	margin: 0 0 3rem;
+	padding: 0;
+	list-style: none;
+}
+
+.welcome__link {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	border: 1px solid #e6e6e6;
+	border-radius: 999px;
+	background: #fff;
+	color: var(--ink);
+	text-decoration: none;
+	font-weight: 600;
+	transition: border-color 0.15s, color 0.15s;
+}
+
+.welcome__link:hover {
+	border-color: var(--ruby-green);
+	color: var(--ruby-green);
+}
+
+.welcome__subtitle {
+	margin: 0;
+	color: var(--ink);
+	font-size: 1.1rem;
+}
+
+.welcome__code {
+	width: 100%;
+	max-width: 640px;
+	text-align: left;
+	margin: 1rem 0;
+	padding: 1rem 1.25rem;
+	border: 1px solid #e6e6e6;
+	border-left: 3px solid var(--ruby-green);
+	border-radius: 6px;
+	background: #fff;
+	color: var(--ink);
+	font-family: Menlo, Consolas, "Liberation Mono", monospace;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	overflow-x: auto;
+}
+
+.welcome__versions {
+	margin-top: auto;
+	padding-top: 3rem;
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+
+.welcome__versions img {
+	margin: 0 0.25rem;
+	vertical-align: middle;
+}
+
+.welcome__versions strong {
+	margin: 0 0.25rem 0 0.75rem;
+	color: var(--ink);
+}
+
 ul.error-page__backtrace {
 	color: var(--muted);
 	text-align: left;
@@ -126,4 +231,11 @@ ul.error-page__backtrace {
 	font-size: 0.9rem;
 	color: var(--ink);
 	word-break: break-all;
+}
+
+.route-list__description {
+	margin-left: auto;
+	color: var(--muted);
+	font-size: 0.85rem;
+	text-align: right;
 }

@@ -1,4 +1,14 @@
 ## [Unreleased]
+- Fixed / paths inside a scope so scope "/todo" => post "/" ends up being simply "/todo"
+- Shared RoutesList component to show routes on the routes page and not_found page.
+- Display all routes instead of just user routes.
+- Added a welcome page for when the app has no defined routes.
+- Allow to set custom logger
+- Added a default favicon.ico
+- Added ability to add description to routes.
+- Added mvp app example, all in a single config.ru
+- Added a new command to the cli to generate a new project 
+- Simplified the run command
 
 ## [0.1.5] - 2026-09-07
 

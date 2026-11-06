@@ -1,4 +1,8 @@
 ## [Unreleased]
+- Added `RBX.render` helper method.
+- Fixes for more robust tag parsing that allows for less than signs to be used in expressions and plain text.
+- More flexible tag option marshaller.
+- Simplified script tag skipping.
 
 ## [0.1.5] - 2026-09-07
 ## [0.1.4] - 2026-09-07

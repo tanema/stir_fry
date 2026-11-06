@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "strscan"
+
 module RBX
   # Parser breaks down templates into a tree like data structure
   class Parser
@@ -22,14 +24,14 @@ module RBX
 
     HTML_VOID_ELEMENTS = %w[area base br col embed hr img input link meta source track wbr].freeze
     DECLR_OR_COMMENT = /\s*<![^>]*>/
-    TAG_START = %r{\s*<(?!/)}
-    TAG_END = %r{\s*/?>}
+    # rubocop:disable Layout/LineLength
+    TAG_START = %r{\s*<(?<tagname>[A-Za-z][A-Za-z0-9\-_.]*)(?<tag_attr>(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|(?<attr_expr>\{(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\{\}"']|\g<attr_expr>)*\})|[^"'\{/>]|/(?!>))*)(?<close>/?>)}
+    # rubocop:enable Layout/LineLength
     EXPR_START = /\s*{/
     QUOTED_STRING = /["'](?<str>(?:[^"'\\]|\\.)*)["']/
     QUOTES = /["']/
     QUOTED_EXPRESSION_STRING = /(?<q>["'])(?:\\.|(?!\k<q>).)*\k<q>/m
-    PLAIN_TEXT = /(?<text>(?:[^<{\\]|\\.)*)/
-    TAGNAME = /[A-Za-z0-9\-_.]+/
+    PLAIN_TEXT = %r{(?<text>(?:[^<\{\\]|\\.|<(?![A-Za-z/!]))+)}
     DO_BLOCK_PREFIX = /do\s+(\|[^|]+\|)?/
     BLOCK_PREFIX = /{\s*(\|[^|]+\|)?/
     AND = /&&/
@@ -38,11 +40,13 @@ module RBX
     TAG_PREFIX = Regexp.union(DO_BLOCK_PREFIX, BLOCK_PREFIX, AND, OR, TERNARY)
     NESTED_TAG_PREFIX = /(\s+#{TAG_PREFIX.source}\s*\z|\A\s*\z)/
     WORD = /\w+/
+    SCRIPT_TAG_CONTENTS = %r{(?<str>.*)</\s*script\s*>}
 
     private_constant :KNOWN_HTML_ELEMENTS, :HTML_VOID_ELEMENTS, :DECLR_OR_COMMENT,
-                     :TAG_START, :TAG_END, :EXPR_START, :QUOTED_STRING, :QUOTES,
-                     :QUOTED_EXPRESSION_STRING, :PLAIN_TEXT, :TAGNAME, :DO_BLOCK_PREFIX,
-                     :BLOCK_PREFIX, :AND, :OR, :TERNARY, :TAG_PREFIX, :NESTED_TAG_PREFIX, :WORD
+                     :TAG_START, :EXPR_START, :QUOTED_STRING, :QUOTES,
+                     :QUOTED_EXPRESSION_STRING, :PLAIN_TEXT, :DO_BLOCK_PREFIX,
+                     :BLOCK_PREFIX, :AND, :OR, :TERNARY, :TAG_PREFIX, :NESTED_TAG_PREFIX,
+                     :WORD, :SCRIPT_TAG_CONTENTS
 
     attr_reader :filename, :template, :scanner # :nodoc:
 
@@ -69,9 +73,7 @@ module RBX
       @scanner = StringScanner.new(template)
     end
 
-    def parse # :nodoc:
-      parse_children
-    end
+    def parse = parse_children # :nodoc:
 
     private
 
@@ -91,20 +93,18 @@ module RBX
     end
 
     def parse_tag
-      tagname = scanner.scan(TAGNAME) # tagname
-      attributes = parse_tag_attributes
-      raise SyntaxError.new(self, "unclosed tag <#{tagname} found") unless scanner.scan(TAG_END)
-
-      is_void = scanner.matched.strip == "/>" || HTML_VOID_ELEMENTS.include?(tagname)
+      tagname = scanner[:tagname]
+      is_void = scanner[:close] == "/>" || HTML_VOID_ELEMENTS.include?(tagname)
+      attributes = parse_tag_attributes(scanner[:tag_attr])
       children = is_void ? nil : parse_tag_contents(tagname, is_void)
       Node.new(kind: resolve_kind(tagname), name: tagname, void: is_void, attributes: attributes, content: children)
     end
 
     def parse_tag_contents(tagname, is_void)
-      return consume_script_tag_raw(tagname) if tagname == "script" && !is_void
+      return consume_script_tag_raw if tagname == "script" && !is_void
 
       children = parse_children
-      if !is_void && !scanner.scan(%r{\s*</#{tagname}>})
+      if !is_void && !scanner.scan(%r{\s*</\s*#{tagname}\s*>})
         raise SyntaxError.new(self, "Closing tag for non-void <#{tagname}> not found")
       end
 
@@ -114,12 +114,10 @@ module RBX
     # We consume script tag contents simply as a raw node because we cannot interpolate
     # anything in javascript. We cannot tell what {} are javascript and which are
     # interpolation so it is safer to just leave script contents alone.
-    def consume_script_tag_raw(tagname)
-      warn "WARN found a <script> tag in #{filename}, be aware contents are consumed raw and will not be interpolated."
-
-      scanner.scan(%r{(?<str>.*)</#{tagname}>})
+    def consume_script_tag_raw
+      scanner.scan(SCRIPT_TAG_CONTENTS)
       val = scanner[:str]
-      raise SyntaxError.new(self, "unterminated tag #{tagname}") if val.nil?
+      raise SyntaxError.new(self, "unterminated script tag") if val.nil?
 
       [Node.new(kind: :raw, content: val)]
     end
@@ -129,35 +127,43 @@ module RBX
 
       klass_name = "::#{tagname.split(".").join("::")}"
       klass = Object.const_get(klass_name)
-      # TODO: allow duck typing, i.e responds_to
       !klass.nil? && klass.include?(RBX::Component) ? :component : :html
     end
 
-    def parse_tag_attributes
+    def parse_tag_attributes(tag_attrs)
       attrs = []
-      while scanner.check(/\s+[A-Za-z0-9\-_.:]+/) || scanner.check(EXPR_START)
-        attrs << (scanner.scan(EXPR_START) ? parse_expression : parse_tag_attribute)
+      attr_scanner = StringScanner.new(tag_attrs.strip)
+      until attr_scanner.eos?
+        attrs << if attr_scanner.scan(EXPR_START)
+                   parse_expression(scanner: attr_scanner)
+                 else
+                   parse_tag_attribute(attr_scanner)
+                 end
       end
       attrs.empty? ? nil : attrs
     end
 
-    def parse_tag_attribute
-      name = scanner.scan(/\s+[A-Za-z0-9\-_.:]+/).strip
-      value = parse_tag_attribute_value if scanner.scan(/\s*=\s*/)
-      Node.new(kind: :attribute, name: name, content: value)
+    def parse_tag_attribute(attr_scanner)
+      Node.new(
+        kind: :attribute,
+        name: attr_scanner.scan(/\s*[A-Za-z0-9\-_.:]+/).strip,
+        content: parse_tag_attribute_value(attr_scanner)
+      )
     end
 
-    def parse_tag_attribute_value
-      if scanner.check(QUOTES) then Node.new(kind: :raw, content: chomp_quoted)
-      elsif scanner.scan(WORD) then Node.new(kind: :raw, content: scanner.matched)
-      elsif scanner.scan(EXPR_START) then parse_expression
+    def parse_tag_attribute_value(attr_scanner)
+      return nil unless attr_scanner.scan(/\s*=\s*/)
+
+      if attr_scanner.check(QUOTES) then Node.new(kind: :raw, content: chomp_quoted(attr_scanner))
+      elsif attr_scanner.scan(WORD) then Node.new(kind: :raw, content: attr_scanner.matched)
+      elsif attr_scanner.scan(EXPR_START) then parse_expression(scanner: attr_scanner)
       else raise SyntaxError.new(self, "unexpected tag attribute formatting.")
       end
     end
 
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-    def parse_expression
+    def parse_expression(scanner: self.scanner)
       exprs = []
 
       depth = 0
@@ -193,10 +199,10 @@ module RBX
 
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-    def chomp_quoted
-      scanner.scan(QUOTED_STRING)
-      val = scanner[:str]
-      raise SyntaxError.new(self, "unterminated string") if val.nil?
+    def chomp_quoted(attr_scanner)
+      attr_scanner.scan(QUOTED_STRING)
+      val = attr_scanner[:str]
+      raise SyntaxError.new(self, "unterminated quoted string") if val.nil?
 
       %("#{val}")
     end

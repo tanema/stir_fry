@@ -163,6 +163,48 @@ RSpec.describe RBX::Parser do
     ]
   end
 
+  it "parses expression attributes containing > and /" do
+    expect(parse(%(<div class={a > b ? "x/y" : "z"}></div>))).to eq [
+      node(:html, name: "div", void: false, attributes: [
+             node(:attribute, name: "class", content: node(:expr_group, content: [
+                                                             node(:expression, content: %(a > b ? "x/y" : "z"))
+                                                           ]))
+           ])
+    ]
+  end
+
+  it "parses expression attributes with nested braces" do
+    expect(parse(%(<div data={{ a: { b: 1 } }} />))).to eq [
+      node(:html, name: "div", void: true, attributes: [
+             node(:attribute, name: "data", content: node(:expr_group, content: [
+                                                            node(:expression, content: "{ a: { b: 1 } }")
+                                                          ]))
+           ])
+    ]
+  end
+
+  it "treats < followed by whitespace as plain text" do
+    expect(parse(%(<code>class App < StirFry::App</code>))).to eq [
+      node(:html, name: "code", void: false, content: [
+             node(:raw, content: "class App < StirFry::App")
+           ])
+    ]
+  end
+
+  it "treats < followed by a digit as plain text" do
+    expect(parse("<p>1 <2</p>")).to eq [
+      node(:html, name: "p", void: false, content: [node(:raw, content: "1 <2")])
+    ]
+  end
+
+  it "raises a syntax error for a tag that is never closed" do
+    expect { parse(%(<div class="a")) }.to raise_error(RBX::SyntaxError)
+  end
+
+  it "raises a syntax error for an unbalanced expression attribute" do
+    expect { parse(%(<div class={a > b></div>)) }.to raise_error(RBX::SyntaxError)
+  end
+
   it "treats escaped \\\" as part of the attribute value" do
     expect(parse('<input value="Some \"value\"">')).to eq [
       node(:html, name: "input", void: true, attributes: [

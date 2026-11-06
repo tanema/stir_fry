@@ -30,51 +30,34 @@ module RBX
       def tag_kwargs(options)
         options.reject { |k, _v| k.empty? }.map do |key, value|
           case key.to_s
-          when "aria" then aria_attribute(value)
-          when "data" then data_attribute(value)
-          when "class" then class_attribute(value)
-          when "hx" then hx_attribute(value)
-          else boolean_or_option(key, value)
+          when "aria", "data", "hx" then value.map { |k, v| tag_option("#{key}-#{k}", v) }
+          when "class" then tag_option("class", class_value(value))
+          else tag_option(key, value)
           end
         end.flatten.compact.join(" ")
       end
 
       private
 
-      def boolean_or_option(key, value)
-        BOOLEAN_ATTRIBUTES.include?(key) ? (key if value) : tag_option(key, value)
-      end
-
-      def aria_attribute(value)
-        value.map { |k, v| %(aria-#{k}="#{Rack::Utils.escape_html(v.to_s)}") }
-      end
-
-      def data_attribute(value)
-        value.map do |k, v|
-          tag_option("data-#{k}", v.is_a?(String) || v.is_a?(Symbol) ? v : JSON.dump(v))
-        end
-      end
-
-      def hx_attribute(value)
-        value.map { |k, v| tag_option("hx-#{k}", v.to_s) }
-      end
-
-      def class_attribute(value)
-        classes = if value.is_a?(Hash)
-                    value.each_with_object([]) { |(key, value), final| final << key if value }.join(" ")
-                  else
-                    value.is_a?(Array) ? value.join(" ") : value.to_s
-                  end
-        %(class="#{Rack::Utils.escape_html(classes)}")
+      def class_value(value)
+        case value
+        when Hash then value.select { |_k, v| v }.keys
+        when Array then value
+        else [value.to_s]
+        end.join(" ")
       end
 
       def tag_option(key, value)
-        value = case value
-                when Array then value.join(" ")
-                when Hash then value.map { |k, v| "#{k}=#{v}" }.join(" ")
-                else value.to_s
-                end
-        %(#{key.to_s.tr("_", "-")}="#{Rack::Utils.escape_html(value)}")
+        key = key.to_s.tr("_", "-")
+        return value ? key : "" if BOOLEAN_ATTRIBUTES.include?(key)
+
+        case value
+        when Array, Hash then %(#{key}="#{Rack::Utils.escape_html(JSON.dump(value))}")
+        when TrueClass then key
+        when FalseClass then ""
+        when Integer then %(#{key}=#{value})
+        else %(#{key}="#{Rack::Utils.escape_html(value.to_s)}")
+        end
       end
     end
   end

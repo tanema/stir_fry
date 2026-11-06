@@ -2,11 +2,27 @@
 
 RSpec.describe RBX::OptionMarshaller do
   it "sets regular tag arguments" do
-    expect(described_class.tag_kwargs({ width: 10 })).to eq 'width="10"'
+    expect(described_class.tag_kwargs({ width: 10 })).to eq "width=10"
   end
 
   it "sets boolean values" do
     expect(described_class.tag_kwargs({ allowfullscreen: true })).to eq "allowfullscreen"
+  end
+
+  it "doesnt add false boolean values" do
+    expect(described_class.tag_kwargs({ allowfullscreen: false })).to eq ""
+  end
+
+  it "sets custom boolean values" do
+    expect(described_class.tag_kwargs({ nope: true })).to eq "nope"
+  end
+
+  it "doesnt add false custom boolean values" do
+    expect(described_class.tag_kwargs({ nope: false })).to eq ""
+  end
+
+  it "can handle array values" do
+    expect(described_class.tag_kwargs({ class: %w[button large] })).to eq 'class="button large"'
   end
 
   context "with aria labels" do
@@ -19,7 +35,8 @@ RSpec.describe RBX::OptionMarshaller do
     end
 
     it "handles aria attributes that are not expected" do
-      expect(described_class.tag_kwargs({ aria: { label: { name: true } } })).to eq 'aria-label="{name: true}"'
+      kwargs = described_class.tag_kwargs({ aria: { label: { name: true } } })
+      expect(kwargs).to eq "aria-label=\"{&quot;name&quot;:true}\""
     end
   end
 

@@ -29,11 +29,17 @@ module StirFry
     REQUEST_ENV_KEY = "stir_fry.request" # :nodoc:
     RESPONSE_ENV_KEY = "stir_fry.response" # :nodoc:
 
+    # Route definition struct to define the structure of data needed for a route.
+    Route = Struct.new(:verb, :path, :pattern, :handler, :description, :cooked)
+
     attr_accessor :request, :response, :env # :nodoc:
 
     class << self
       def routes = @routes ||= {} # :nodoc:
       def route_table = @route_table ||= [] # :nodoc:
+      def user_routes = route_table.reject(&:cooked) # :nodoc:
+      def framework_routes = route_table.select(&:cooked) # :nodoc:
+      def root_route = (routes["GET"] ||= []).find { |route| route.path == "/" } # :nodoc:
       def error_handlers = @error_handlers ||= DEFAULT_ERROR_HANDLERS.dup # :nodoc:
       def call(env) = root_app.call(env) # :nodoc:
 
@@ -57,25 +63,25 @@ module StirFry
       end
 
       # Add a GET request route to the application
-      def get(pattern, klass = nil, &) = route("GET", pattern, klass, &)
+      def get(pattern, klass = nil, ...) = route("GET", pattern, klass, ...)
 
       # Add a HEAD request route to the application
-      def head(pattern, klass = nil, &) = route("HEAD", pattern, klass, &)
+      def head(pattern, klass = nil, ...) = route("HEAD", pattern, klass, ...)
 
       # Add a OPTIONS request route to the application
-      def options(pattern, klass = nil, &) = route("OPTIONS", pattern, klass, &)
+      def options(pattern, klass = nil, ...) = route("OPTIONS", pattern, klass, ...)
 
       # Add a POST request route to the application
-      def post(pattern, klass = nil, &) = route("POST", pattern, klass, &)
+      def post(pattern, klass = nil, ...) = route("POST", pattern, klass, ...)
 
       # Add a PUT request route to the application
-      def put(pattern, klass = nil, &) = route("PUT", pattern, klass, &)
+      def put(pattern, klass = nil, ...) = route("PUT", pattern, klass, ...)
 
       # Add a PATCH request route to the application
-      def patch(pattern, klass = nil, &) = route("PATCH", pattern, klass, &)
+      def patch(pattern, klass = nil, ...) = route("PATCH", pattern, klass, ...)
 
       # Add a DELETE request route to the application
-      def delete(pattern, klass = nil, &) = route("DELETE", pattern, klass, &)
+      def delete(pattern, klass = nil, ...) = route("DELETE", pattern, klass, ...)
 
       # running environment for this app.
       def app_env = StirFry.app_env
@@ -130,9 +136,15 @@ module StirFry
       #   static File.join(__dir__, "public")
       # end
       # ```
-      def static(dirname, path: "/")
+      def static(dirname, path: "/", **options)
+        options ||= {}
         files = Rack::Files.new(File.expand_path(dirname))
         path = route_prefix + path
+        route_table << Route.new(
+          verb: "STATIC",
+          path: "#{path}:asset_path",
+          **options.slice(:cooked, :description)
+        )
         static_apps << (path == "/" ? files : Rack::URLMap.new(path => files))
       end
 
@@ -163,10 +175,16 @@ module StirFry
       ##
       # Raw route builder, used by the other helper models so `get("/")` becomes
       # `route("GET", "/")`
-      def route(verb, pattern, klass, &block)
-        path_pattern = Mustermann.new(route_prefix + pattern)
-        route_table << [verb, path_pattern.to_s] unless path_pattern.to_s.start_with?("/stir_fry")
-        (routes[verb] ||= []) << [path_pattern, route_handler(klass || block)]
+      def route(verb, pattern, klass, **options, &block)
+        path = (route_prefix + pattern).sub(%r{(^.+)/$}, "\\1")
+        options ||= {}
+        route_table << Route.new(
+          verb:, path:,
+          pattern: Mustermann.new(path),
+          handler: route_handler(klass || block),
+          **options.slice(:cooked, :description)
+        )
+        (routes[verb] ||= []) << route_table.last
       end
 
       protected
@@ -180,9 +198,22 @@ module StirFry
       end
 
       def setup_framework_routes # :nodoc:
+        return unless development?
+
+        static File.join(__dir__, "static"), description: "StirFry static assets.", cooked: true
         scope "/stir_fry" do
-          static File.join(__dir__, "static")
-          get "/routes", Pages::RoutesPage
+          get "/", Pages::Welcome, description: "Default landing page for StirFry.", cooked: true
+          get "/routes", Pages::RoutesPage, description: "List of all registered routes.", cooked: true
+        end
+        default_root_route
+      end
+
+      def default_root_route # :nodoc:
+        return unless root_route.nil?
+
+        get "/", description: "Redirect to welcome if you haven't defined a root route yet.",
+                 cooked: true do |response:, **|
+          response.redirect("/stir_fry")
         end
       end
 
@@ -195,6 +226,8 @@ module StirFry
 
       def root_app
         @root_app ||= begin
+          setup_default_middleware
+          setup_framework_routes
           builder = Rack::Builder.new
           context[0][1].each { |c, a, b| builder.use(c, *a, &b) }
           builder.run(Rack::Cascade.new(static_apps + [->(env) { new(env).call }]))
@@ -223,15 +256,6 @@ module StirFry
       end
     end
 
-    # Hook into the app to define development routes and default middleware
-    def self.inherited(subclass)
-      super
-      subclass.class_eval do
-        subclass.setup_default_middleware
-        subclass.setup_framework_routes if subclass.development?
-      end
-    end
-
     def initialize(env) # :nodoc:
       @env = env
       @request = Request.new(env)
@@ -257,9 +281,9 @@ module StirFry
       handle_error(e)
     end
 
-    def route_table # :nodoc:
-      self.class.route_table
-    end
+    def route_table = self.class.route_table # :nodoc:
+    def user_routes = self.class.user_routes # :nodoc:
+    def framework_routes = self.class.framework_routes # :nodoc:
 
     private
 
@@ -278,9 +302,9 @@ module StirFry
 
     def find_route
       self.class.routes[request.request_method]&.each do |route|
-        params = route[0].params(request.path_info)
+        params = route.pattern.params(request.path_info)
         request.args = params if params
-        return route[1] if params
+        return route.handler if params
       end
       raise NotFound
     end

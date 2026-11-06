@@ -16,9 +16,10 @@ RSpec.describe StirFry::Pages::NotFoundPage do
   end
 
   it "lists the registered routes with verb badges below the error" do
-    expect(html).to include('<p class="route-list__caption">Registered routes</p>')
+    expect(html).to include('<p class="route-list__caption">2 registered routes</p>')
     expect(html).to include('<span class="route-list__verb" data-verb="GET">GET</span>')
+    expect(html).to include('<code class="route-list__path">/</code>')
     expect(html).to include('<code class="route-list__path">/widgets/:id</code>')
-    expect(html.scan('class="route-list__item"').length).to eq(2)
+    expect(html).to match(%r{<p class="route-list__caption">\d+ framework routes, only in development</p>})
   end
 end

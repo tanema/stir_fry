@@ -5,15 +5,15 @@ require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 require "rubocop/rake_task"
 require "rdoc/task"
-require "rerun"
+
+ENV["RUBYOPT"] = "-W0" # Silence warnings
 
 task default: %i[spec rubocop rdoc:coverage]
 
 RuboCop::RakeTask.new
-
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = ["--require spec_helper"]
-  t.verbose = ENV.fetch("VERBOSE", nil)
+  t.pattern = "{spec,rbxrb/spec}/**/*_spec.rb"
+  t.verbose = ENV.fetch("VERBOSE", false)
 end
 
 RDoc::Task.new do |rdoc|
@@ -27,6 +27,7 @@ RDoc::Task.new do |rdoc|
     "README.md",
     "LICENSE"
   )
+  rdoc.rdoc_files.exclude("lib/stir_fry/cli/template/**/*")
   rdoc.rdoc_dir = "docs"
   rdoc.markup = "markdown"
 end

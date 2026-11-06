@@ -4,9 +4,7 @@ module RBX
   # Compiler takes in the parsed AST and outputs generated code.
   class Compiler
     # Compile parsed nodes into ruby source code that will output html
-    def self.compile(nodes)
-      new.compile(nodes)
-    end
+    def self.compile(nodes) = new.compile(nodes)
 
     def compile(nodes) # :nodoc:
       <<~RBX
@@ -29,13 +27,7 @@ module RBX
     end
 
     def compile_text_expr_group(node)
-      return "(#{compile_expr_group(node)}).to_s" if contains_markup?(node)
-
-      "::RBX.escape((#{compile_expr_group(node)}))"
-    end
-
-    def contains_markup?(node)
-      node.content&.any? { |n| %i[html component].include?(n.kind) }
+      contains_markup?(node) ? "(#{compile_expr_group(node)}).to_s" : "::RBX.escape((#{compile_expr_group(node)}))"
     end
 
     def compile_html(node)
@@ -89,14 +81,10 @@ module RBX
       "::#{node.name.split(".").join("::")}.new(#{component_props(node)})#{component_block(node)}.render"
     end
 
-    def component_props(node)
-      node.attributes&.map { |attr| component_prop(attr) }&.join(", ")
-    end
+    def component_props(node) = node.attributes&.map { |attr| component_prop(attr) }&.join(", ")
 
     def component_prop(attr)
-      return "#{attr.name}: true" if attr.content.nil?
-
-      "#{attr.name}: #{component_prop_value(attr.content)}"
+      attr.content.nil? ? "#{attr.name}: true" : "#{attr.name}: #{component_prop_value(attr.content)}"
     end
 
     def component_prop_value(expr)
@@ -137,14 +125,6 @@ module RBX
       RBX
     end
 
-    def buf_out(content)
-      content.strip.empty? ? "" : %(buffer << #{content}\n)
-    end
-
-    def escape(str)
-      str.gsub("\\") { "\\\\" }.gsub("'") { "\\'" }
-    end
-
     def compact(parts)
       parts&.each_with_object([]) do |item, compacted|
         next if item.empty?
@@ -157,8 +137,9 @@ module RBX
       end
     end
 
-    def quoted_string?(item)
-      item =~ /^'.*'$/
-    end
+    def contains_markup?(node) = node.content&.any? { |n| %i[html component].include?(n.kind) }
+    def buf_out(content) = content.strip.empty? ? "" : %(buffer << #{content}\n)
+    def escape(str) = str.gsub("\\") { "\\\\" }.gsub("'") { "\\'" }
+    def quoted_string?(item) = item =~ /^'.*'$/
   end
 end

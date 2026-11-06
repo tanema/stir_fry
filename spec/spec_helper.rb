@@ -4,11 +4,7 @@ require "bundler/setup"
 require "stir_fry"
 require_relative "fixtures/button"
 
-module SilentLogger
-  def default_logger = SemanticLogger["StirFry"]
-end
-
-StirFry.singleton_class.prepend(SilentLogger)
+StirFry.logger = SemanticLogger["StirFry"]
 
 RSpec.configure do |config|
   config.disable_monkey_patching!

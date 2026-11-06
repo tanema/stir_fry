@@ -2,6 +2,9 @@
 A ruby templating language similar to JSX
 
 ```ruby
+require "bundler/setup"
+require "rbx"
+
 class Layout
   include RBX::Component
 end
@@ -11,12 +14,13 @@ class Home
 
   attr_reader :name
 
-  def initializer(name:)
+  def initialize(name:)
     @name = name
   end
 end
 
-puts Home.new(name: "Bobby").render()
+puts RBX.render(Home, name: "Bobby")
+# OR Home.new(name: "Bobby").render
 
 __END__
 @@Layout

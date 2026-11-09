@@ -237,14 +237,14 @@ module StirFry
 
       def wrap_handler(handler)
         lambda do |env|
-          req = env.fetch(REQUEST_ENV_KEY)
-          resp = env.fetch(RESPONSE_ENV_KEY)
-          verb = req.request_method.downcase.to_sym
+          request = env.fetch(REQUEST_ENV_KEY)
+          response = env.fetch(RESPONSE_ENV_KEY)
+          verb = request.request_method.downcase.to_sym
           handler = handler.method(verb) if handler.respond_to?(verb)
-          call_params = req.args.to_h { |k, v| [k.to_sym, v] }
-          default_handler_params = { application: self, request: req, response: resp }
+          call_params = request.args.to_h { |k, v| [k.to_sym, v] }
+          default_handler_params = { application: self, request: , response: , env: }
           handler.call(**call_params, **default_handler_params)
-          resp.finish
+          response.finish
         end
       end
 
@@ -274,16 +274,15 @@ module StirFry
     def production? = self.class.production?
     # configured logger for the application for easy access in the app
     def logger = self.class.logger
+    def route_table = self.class.route_table # :nodoc:
+    def user_routes = self.class.user_routes # :nodoc:
+    def framework_routes = self.class.framework_routes # :nodoc:
 
     def call # :nodoc:
       find_route.call(env)
     rescue StandardError => e
       handle_error(e)
     end
-
-    def route_table = self.class.route_table # :nodoc:
-    def user_routes = self.class.user_routes # :nodoc:
-    def framework_routes = self.class.framework_routes # :nodoc:
 
     private
 
